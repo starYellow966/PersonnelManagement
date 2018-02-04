@@ -5,12 +5,12 @@ testtests
 
 new a branch "dev"
 
-branch a 
-
-branch b
 
 <<<<<<< HEAD
 Creating a new branch is quick & simple.
 =======
 Creating a new branch is quick AND simple
 >>>>>>> feature1
+
+
+modify in branch dev
