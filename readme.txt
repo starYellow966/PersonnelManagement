@@ -8,3 +8,5 @@ new a branch "dev"
 branch a 
 
 branch b
+
+Creating a new branch is quick & simple.
