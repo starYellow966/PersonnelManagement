@@ -1,1 +1,8 @@
-# Empty CSS file for your own CSS
+.container{
+  position: absolute;
+  top: 0;
+  left: 15%;
+  height: 100%;
+  min-height: 100%;
+  background-color: #00FFFF;
+}
