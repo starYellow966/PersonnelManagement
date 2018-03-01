@@ -51,6 +51,7 @@ class Segment(db.Model):
 			results = Segment.query.all();
 		except Exception as e:
 			db.session.rollback();
+			db.session.close();
 			return [];
 		finally:
 			db.session.close();
@@ -67,15 +68,16 @@ class Segment(db.Model):
 	时间：2018/2/23
 	'''
 	def updateSegmentById(self):
+		flag = True;
 		try:
 			Segment.query.filter_by(id=self.id).update({"name": self.name, "stype": self.stype, "dep_name": self.dep_name, "seg_date": self.seg_date, "railway": self.railway});
 			db.session.commit()
 		except Exception as e:
 			db.session.rollback();
-			return False;
+			flag = False;
 		finally:
 			db.session.close();
-			return True;
+			return flag;
 
 	'''新增段信息
 
@@ -83,24 +85,26 @@ class Segment(db.Model):
 	时间：82018/2/23
 	'''
 	def insertSegment(self):
+		flag = True;
 		try:
 			db.session.add(self);
 			db.session.commit();
 		except Exception as e:
 			db.session.rollback();
-			return False;
+			flag = False;
 		finally:
 			db.session.close();
-			return True;
+			return flag;
 
 
 	'''删除段信息
 
-	数据是一个待删除的id的list
+	参数targets : 一个待删除的id的list
 	此处负责循环调用db.session去删除
 	'''
 	@classmethod
 	def deleteSegment(cls,targets):
+		flag = True;
 		try:
 			# print(targets);
 			for item in targets:
@@ -111,14 +115,7 @@ class Segment(db.Model):
 		except Exception as e:
 			print(e);
 			db.session.rollback();
-			return False;
+			flag = False;
 		finally:
 			db.session.close();
-			return True;
-
-	'''
-	测试
-	'''
-	@classmethod
-	def test(cls):
-		return;
+			return flag;

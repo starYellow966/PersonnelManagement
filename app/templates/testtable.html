@@ -4,8 +4,32 @@
 	<title>table test</title>
 	<link rel="stylesheet" href="../static/css/bootstrap.min.css">
     <link rel="stylesheet" href="../static/css/bootstrap-table.css">
+    <link rel="stylesheet" href="../static/css/bootstrap-select.css">
 </head>
 <body>
+
+	<div class="panel-body" style="padding-bottom:0px;">
+        <div class="panel panel-default">
+            <div class="panel-heading">查询条件</div>
+            <div class="panel-body">
+                <form id="formSearch" class="form-horizontal">
+                    <div class="form-group" style="margin-top:15px">
+                        <label class="control-label col-sm-1" for="txt_search_departmentname">部门名称</label>
+                        <div class="col-sm-3">
+                            <input type="text" class="form-control" id="txt_search_departmentname">
+                        </div>
+                        <label class="control-label col-sm-1" for="txt_search_statu">状态</label>
+                        <div class="col-sm-3">
+                            <input type="text" class="form-control" id="txt_search_statu">
+                        </div>
+                        <div class="col-sm-4" style="text-align:left;">
+                            <button type="button" style="margin-left:50px" id="btn_query" class="btn btn-primary">查询</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>     
+
 	<div id="toolbar"></div>
 	<div class="table-responsive">
 		<table id="table"></table>
@@ -15,23 +39,26 @@
 		<div class="modal fade" id="myModal" tabindex="-1" role="dialog"
 			aria-labelledby="myModalLabel" aria-hidden="true">
 			<div class="modal-dialog">
-				<div class="modal-content">
-					<div class="modal-header">
-						<button type="button" class="close" data-dismiss="modal"
-							aria-hidden="true">&times;</button>
-						<h4 class="modal-title" id="myModalLabel">修改信息</h4>
+				<form>
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal"
+								aria-hidden="true">&times;</button>
+							<h4 class="modal-title" id="myModalLabel">修改信息</h4>
+						</div>
+						<div class="modal-body">
+							学号：<input type="text" name="eid" id="eid" readonly="true" /><br/>
+							名字：<input type="text" name="ename" id="ename" required="required" /> <br />
+							价格：<input type="text" name="eprice" id="eprice" /> 
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+							<input type="submit" class="btn btn-primary" onclick="update()" value="提交更改"></button>
+						</div>
 					</div>
-					<div class="modal-body">
-						学号：<input type="text" name="eid" id="eid" readonly="true" /><br/>
-						名字：<input type="text" name="ename" id="ename" /> <br />
-						价格：<input type="text" name="eprice" id="eprice" /> 
-					</div>
-					<div class="modal-footer">
-						<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-						<button type="button" class="btn btn-primary" onclick="update()">提交更改</button>
-					</div>
-				</div>
-				<!-- /.modal-content -->
+					<!-- /.modal-content -->
+				</form>
+				
 			</div>
 			<!-- /.modal -->
 		</div>
@@ -39,6 +66,7 @@
 	<script src="../static/js/jquery-2.1.1.min.js"></script>
 	<script src="../static/js/bootstrap.min.js"></script>
 	<script src="../static/js/bootstrap-table.js"></script>
+	<script src="../static/js/bootstrap-select.js"></script>
 	<script type="text/javascript">
 		$("#table").bootstrapTable({
 			toolbar: '#toolbar',
@@ -130,6 +158,10 @@
 		        price: '$2'
 		    }]
 		});
+
+		function update(){
+			alert("message?: DOMString");
+		}
 
 		function editItem(id,name,price){
 			$("#eid").val(id);
