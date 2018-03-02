@@ -1,1 +1,5 @@
 models中的mysql url 从ip改成localhost
+
+尝试用WTF修改模态框的表单
+
+json的js使用

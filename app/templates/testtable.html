@@ -13,19 +13,27 @@
             <div class="panel-heading">查询条件</div>
             <div class="panel-body">
                 <form id="formSearch" class="form-horizontal">
-                    <div class="form-group" style="margin-top:15px">
-                        <label class="control-label col-sm-1" for="txt_search_departmentname">部门名称</label>
-                        <div class="col-sm-3">
-                            <input type="text" class="form-control" id="txt_search_departmentname">
-                        </div>
-                        <label class="control-label col-sm-1" for="txt_search_statu">状态</label>
-                        <div class="col-sm-3">
-                            <input type="text" class="form-control" id="txt_search_statu">
-                        </div>
-                        <div class="col-sm-4" style="text-align:left;">
-                            <button type="button" style="margin-left:50px" id="btn_query" class="btn btn-primary">查询</button>
-                        </div>
+                	<label class="control-label col-sm-3" style="text-align: center;">属性</label>
+                	<label class="control-label col-sm-3" style="text-align: center;">运算符</label>
+                	<label class="control-label col-sm-3" style="text-align: center;">值</label>
+                	<br>
+                	<br>
+                	<div class="col-sm-3" >
+                		<select class="selectpicker " id="proprity" onchange="change(this)">
+                			<option value="id">编号</option>
+                			<option value="name">名称</option>
+                		</select>
+                	</div>
+			        <div class="col-sm-3">
+			        	<select class="selectpicker " id="operator"></select>
+			        </div>                	
+                	<div class="col-sm-3">
+                            <input type="text" class="form-control" id="value">
                     </div>
+                	<div class="col-sm-3">
+                		<input type="button" class="btn btn-primary" name="insert" value="添加">
+                		<input type="submit" class="btn btn-primary" name="submit" value="查询">
+                	</div>
                 </form>
             </div>
         </div>     
@@ -68,101 +76,124 @@
 	<script src="../static/js/bootstrap-table.js"></script>
 	<script src="../static/js/bootstrap-select.js"></script>
 	<script type="text/javascript">
-		$("#table").bootstrapTable({
-			toolbar: '#toolbar',
-			search: true, //是否显示 搜索框
-			showRefresh: true,//是否显示 刷新按钮
-			showColumns: true, //是否显示 选择显示列按钮
-            pagination: true,  //设置分页
-            idField: "id",   //重要---可设置checkbox的值为指定字段
-            clickToSelect:true,//设置true 将在点击行时，自动选择checkbox
-            striped:true,//是否显示 表格条纹
-            //height: 1000,                        //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
-            pageList:[5,10,15,20],
-            pageSize:5,
-            selectItemName:"id",    //设置checkbox name属性，可用于遍历获取选中值
-            exportDataType:'all',
-            showExport: true,  //是否显示导出按钮
-            exportTypes:['excel'],  //导出文件类型  
-            //buttonsAlign:"left",  //按钮位置 
-            Icons:'glyphicon-export',  
-            exportOptions:{  
-                   fileName: 'CategoryList',  //设置导出文件名称  
-                   worksheetName: 'sheet1',  //表格工作区名称  
-                   tableName: 'CategoryList',
-                   excelstyles: ['background-color', 'color', 'font-size', 'font-weight']
-            }, 
-			columns:[{
-                checkbox: true,
-            },{
-				field : 'id',
-				title : 'Item id'
-			},{
-		        field: 'name',
-		        title: 'Item Name'
-		    }, {
-		        field: 'price',
-		        title: 'Item Price'
-		    }, {
-		    	field: 'operation',
-		    	title: '操作',
-		    	align: 'center',
-		    	valign: 'middle',
-		    	formatter: function(value,row,index){
-		    		return "<a href='#' data-toggle='modal' onclick='editItem(\""+row.id+"\",\""+row.name+"\",\""+row.price+"\")'>修改</a>"
-		    	}
-		    }],
-		    data: [{
-		        id: '1',
-		        name: 'Item 1',
-		        price: '$1'
-		    }, {
-		        id: '2',
-		        name: 'Item 2',
-		        price: '$2'
-		    }, {
-		        id: '2',
-		        name: 'Item 2',
-		        price: '$2'
-		    }, {
-		        id: '2',
-		        name: 'Item 2',
-		        price: '$2'
-		    }, {
-		        id: '2',
-		        name: 'Item 2',
-		        price: '$2'
-		    }, {
-		        id: '2',
-		        name: 'Item 2',
-		        price: '$2'
-		    }, {
-		        id: '2',
-		        name: 'Item 2',
-		        price: '$2'
-		    }, {
-		        id: '2',
-		        name: 'Item 2',
-		        price: '$2'
-		    }, {
-		        id: '2',
-		        name: 'Item 2',
-		        price: '$2'
-		    }, {
-		        id: '2',
-		        name: 'Item 2',
-		        price: '$2'
-		    }, {
-		        id: '2',
-		        name: 'Item 2',
-		        price: '$2'
-		    }]
+		$(document).ready(function(){
+			$("#table").bootstrapTable({
+				toolbar: '#toolbar',
+				search: true, //是否显示 搜索框
+				showRefresh: true,//是否显示 刷新按钮
+				showColumns: true, //是否显示 选择显示列按钮
+	            pagination: true,  //设置分页
+	            idField: "id",   //重要---可设置checkbox的值为指定字段
+	            clickToSelect:true,//设置true 将在点击行时，自动选择checkbox
+	            striped:true,//是否显示 表格条纹
+	            //height: 1000,                        //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+	            pageList:[5,10,15,20],
+	            pageSize:5,
+	            selectItemName:"id",    //设置checkbox name属性，可用于遍历获取选中值
+	            exportDataType:'all',
+	            showExport: true,  //是否显示导出按钮
+	            exportTypes:['excel'],  //导出文件类型  
+	            //buttonsAlign:"left",  //按钮位置 
+	            Icons:'glyphicon-export',  
+	            exportOptions:{  
+	                   fileName: 'CategoryList',  //设置导出文件名称  
+	                   worksheetName: 'sheet1',  //表格工作区名称  
+	                   tableName: 'CategoryList',
+	                   excelstyles: ['background-color', 'color', 'font-size', 'font-weight']
+	            }, 
+				columns:[{
+	                checkbox: true,
+	            },{
+					field : 'id',
+					title : 'Item id'
+				},{
+			        field: 'name',
+			        title: 'Item Name'
+			    }, {
+			        field: 'price',
+			        title: 'Item Price'
+			    }, {
+			    	field: 'operation',
+			    	title: '操作',
+			    	align: 'center',
+			    	valign: 'middle',
+			    	formatter: function(value,row,index){
+			    		return "<a href='#' data-toggle='modal' onclick='editItem(\""+row.id+"\",\""+row.name+"\",\""+row.price+"\")'>修改</a>"
+			    	}
+			    }],
+			    data: [{
+			        id: '1',
+			        name: 'Item 1',
+			        price: '$1'
+			    }, {
+			        id: '2',
+			        name: 'Item 2',
+			        price: '$2'
+			    }, {
+			        id: '2',
+			        name: 'Item 2',
+			        price: '$2'
+			    }, {
+			        id: '2',
+			        name: 'Item 2',
+			        price: '$2'
+			    }, {
+			        id: '2',
+			        name: 'Item 2',
+			        price: '$2'
+			    }, {
+			        id: '2',
+			        name: 'Item 2',
+			        price: '$2'
+			    }, {
+			        id: '2',
+			        name: 'Item 2',
+			        price: '$2'
+			    }, {
+			        id: '2',
+			        name: 'Item 2',
+			        price: '$2'
+			    }, {
+			        id: '2',
+			        name: 'Item 2',
+			        price: '$2'
+			    }, {
+			        id: '2',
+			        name: 'Item 2',
+			        price: '$2'
+			    }, {
+			        id: '2',
+			        name: 'Item 2',
+			        price: '$2'
+			    }]
+			});
 		});
 
 		function update(){
 			alert("message?: DOMString");
 		}
 
+		function change(obj){
+			var selectedValue = obj.selectedOptions[0].value; //选中值
+			console.log(typeof(selectedValue));
+			switch(selectedValue){
+				case 'id': setValues('operator',"[{id:'1',name:'1'},{id:'2',name:'2'}]");break;
+				case 'name': setValues('operator',"[{id:'3',name:'3'},{id:'4',name:'4'}]");break;
+
+			}
+		}
+
+		function setValues(elementid,jsonString){
+			var id = "#" + elementid;
+			$(id).html("");
+			var text = "";
+			var json = eval(jsonString);
+			for (var i = 0; i < json.length; i++) {
+				text += '<option value="' + json[i].id + '">' + json[i].name + '</option>';
+			}
+			$(id).html(text);
+			$(id).selectpicker('refresh');
+		}
 		function editItem(id,name,price){
 			$("#eid").val(id);
 			$("#ename").val(name);

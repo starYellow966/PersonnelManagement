@@ -6,12 +6,13 @@
   <title>客运段表</title>
   <link rel="stylesheet" type="text/css" href="../static/css/bootstrap.min.css" /> 
   <link rel="stylesheet" href="../static/css/bootstrap-table.css">
+  <link rel="stylesheet" href="../static/css/bootstrap-select.css">
   <link rel="stylesheet" type="text/css" href="../static/css/style.css" /> 
   <link rel="stylesheet" href="../static/css/sidebar-menu.css">
   <link rel="stylesheet" type="text/css" href="http://cdn.bootcss.com/font-awesome/4.6.0/css/font-awesome.min.css">
 </head> 
 <body>
-    <!-- 测导航 -->
+    <!-- 侧导航 -->
     <aside class="main-sidebar">
         <section  class="sidebar">
             <ul class="sidebar-menu">
@@ -74,7 +75,54 @@
               <li><a href="/org/team"><i class="fa fa-circle-o"></i>班组信息管理</a></li>                 
             </ul>
         </div> -->
-        <div >
+        <div>
+            <div class="panel panel-default">
+                <div class="panel-heading">查询条件</div>
+                <div class="panel-body">
+                    <form id="formSearch" class="form-horizontal">
+                        <label class="control-label col-sm-3" style="text-align: center;">属性</label>
+                        <label class="control-label col-sm-3" style="text-align: center;">运算符</label>
+                        <label class="control-label col-sm-3" style="text-align: center;">值</label>
+                        <label class="control-label col-sm-3" style="text-align: center;">连接符</label>
+                        <br>
+                        <br>
+                        <div class="col-sm-3" >
+                            <select class="selectpicker " id="proprity" onchange="proprityChange(this)">
+                                <option value="id" selected>编号</option>
+                                <option value="name">名称</option>
+                                <option value="type">类型</option>
+                                <option value="dep_name">部门名称</option>
+                                <option value="seg_date">成立时间</option>
+                                <option value="railway">所属路局</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-3">
+                            <select class="selectpicker " id="operator">
+                                <option value="like" selected>like</option>
+                                <option value="<"><</option>
+                                <option value=">">></option>
+                                <option value="=">=</option>
+                            </select>
+                        </div>                  
+                        <div class="col-sm-3">
+                            <input type="text" class="form-control" id="value">
+                        </div>
+                        <div class="col-sm-3">
+                            <select class="selectpicker" id="joinOperator">
+                                <option value="and" selected>and</option>
+                                <option value="or">or</option>
+                            </select>
+                        </div>
+                        <br>
+                        <br>
+                        <textarea id="search_sqltext" class="form-control col-sm-12" rows="5" style="overflow-x: hidden;overflow-y: auto;resize: none;"></textarea>
+                    </form>
+              </div>
+              <div class="panel panel-footer" align="right">
+                  <input type="button" class="btn btn-primary" name="insert" value="添加" onclick="insertSqlQuery()">
+                  <input type="submit" class="btn btn-success" name="submit" value="查询" onclick="queryRequest()">
+              </div>
+          </div>
             <!-- toolbar工具栏 -->
             <div id="toolbar" class="btn-group">
                 <button id="btn_add" type="button" class="btn btn-default" onclick="insertModalfunc()">
@@ -138,6 +186,7 @@
     <script src="../static/js/jquery-2.1.1.min.js"></script>
     <script src="../static/js/bootstrap.min.js"></script>
     <script src="../static/js/bootstrap-table.js"></script>
+    <script src="../static/js/bootstrap-select.js"></script>
     <script src="../static/js/sidebar-menu.js"></script>
     
     <script type="text/javascript">
@@ -198,7 +247,7 @@
                 }
             }, {
                 field: 'railway',
-                title: '所属铁路局',
+                title: '所属路局',
                 sortable: true
             },{
                 field: 'operation',
@@ -266,17 +315,23 @@
             var seg_date = $("#seg_date").val();
             var railway = $("#railway").val();
             //TODO 缺少内容审核
-            $.post("/org/seg/update",{
-                id: id,
-                name: name,
-                type: type,
-                dep_name: dep_name,
-                seg_date: seg_date,
-                railway: railway
-            },function(data,status){
-                //FIXME 用只刷新表格代替
-                window.location.reload();
-            });
+            $.ajax({
+                type:"post",
+                url:"/org/seg/update",
+                dataType:"json",
+                data:{
+                    id: id,
+                    name: name,
+                    type: type,
+                    dep_name: dep_name,
+                    seg_date: seg_date,
+                    railway: railway
+                },
+                success:function(data,status){
+                    $("#table").bootstrapTable('load',data);
+                    $("#detailModal").modal("hide");
+                }
+          });
         }
 
         /**
@@ -294,17 +349,57 @@
             var seg_date = $("#seg_date").val();
             var railway = $("#railway").val();
             //TODO 缺少内容审核
-            $.post("/org/seg/insert",{
-                id: id,
-                name: name,
-                type: type,
-                dep_name: dep_name,
-                seg_date: seg_date,
-                railway: railway
-            },function(data){
-                //FIXME 用只刷新表格代替
-                window.location.reload();
+            $.ajax({
+                type:"post",
+                url:"/org/seg/insert",
+                dataType:"json",
+                data:{
+                    id: id,
+                    name: name,
+                    type: type,
+                    dep_name: dep_name,
+                    seg_date: seg_date,
+                    railway: railway
+                },
+                success:function(data){
+                    $("#table").bootstrapTable('load',data);
+                    $("#detailModal").modal("hide");
+                }
             });
+        }
+
+        /**
+         * 发送查询请求
+         * 第一步，获取查询语句，将时间转换成时间戳
+         * 第二步，发送查询请求
+         * 第三步，成功后更新表格
+         */
+        function queryRequest(){
+            var query = $("#search_sqltext").val();
+            if(query != ""){
+                var reg = /\d{4}-\d{1,2}-\d{1,2}/g
+                var result=query.match(reg);
+                if ( result != null ){//说明有日期，需要转成时间戳
+                    var array = new Array();//时间戳数组
+                    for (var i = 0; i < result.length; i++) {
+                        // console.log(query.match(result[i]));
+                        var timeStamp = (Math.round(new Date(result[i]).getTime()/1000));//时间戳
+                        // console.log(timeStamp);
+                        query = query.replace(result[i],timeStamp);
+                    }
+                    // console.log(query);
+                }
+                $.ajax({
+                  type:"post",
+                  url:"/org/seg/query", 
+                  data:{query:query},
+                  dataType:"json",
+                  success:function(data,status){
+                    console.log(data);
+                    $("#table").bootstrapTable('load',data);
+                  }
+                });
+            }
         }
 
         /**
@@ -339,6 +434,78 @@
                 $("#table").bootstrapTable('remove', {field: 'id', values: target.split(',')});
                 
             });
+        }
+
+        /**
+         * 查询中属性下拉框值改变事件
+         * @param  {HTMLElement} obj [当前的控件]
+         * 第一步，获取选中值
+         * 第二步，根据选中值更新运算符下拉框的值
+         */
+        function proprityChange(obj){
+            var selectedValue = obj.selectedOptions[0].value;//获取选中value值,因为它被泛化了，不能用bootstrap-select方法
+            switch (selectedValue) {
+              case 'id':
+                  setOperatorOptions(['like','<','>','=']);
+                  break;
+              case 'name':
+                  setOperatorOptions(['like','=']);
+                  break;
+              case 'type':
+                  setOperatorOptions(['like','=']);
+                  break;
+              case 'dep_name':
+                  setOperatorOptions(['like','=']);
+                  break;
+              case 'seg_date':
+                  setOperatorOptions(['<','>','=']);
+                  break;
+              case 'railway':
+                  setOperatorOptions(['like','=']);
+                  break;
+              default:
+                // statements_def
+                break;
+            }
+        }
+
+        /**
+         * 设置运算符下拉框的选项
+         * @param {数组} array 包含所有选项的数组
+         */
+        function setOperatorOptions(array){
+            $("#operator").html("");
+            var text = "";
+            for (var i  = 0; i < array.length; i++) {
+                text += '<option value="' + array[i] + '">' + array[i] + '</option>';
+            }
+            $("#operator").html(text);
+            $("#operator").selectpicker('refresh');
+        }
+
+        /**
+         * 添加sql查询语句
+         *
+         * 第一步，读取查询条件中控件的值
+         * 第二步，输出到textarea中
+         * @return {[type]} [description]
+         */
+        function insertSqlQuery(){
+            var id = $("#proprity").selectpicker('val');//选中的属性值
+            var operator = $("#operator").selectpicker('val');//选中的运算符值
+            var value = $("#value").val();//值
+            //TODO value的非空判断
+            var joinOperator = $("#joinOperator").selectpicker('val');//选中的连接符
+            var text = id + " " + operator + " '";
+            if ( operator === 'like'){
+                text += "%" + value + "%'";
+            }
+            else
+                text += value + "'";
+            if( $("#search_sqltext").val() != "" ){
+                text += " " + joinOperator;
+            } 
+            $("#search_sqltext").val( text + " " + $("#search_sqltext").val() );
         }
 
         // /**

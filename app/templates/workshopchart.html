@@ -2,14 +2,14 @@
 <html>
 
 <head>
-	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-	<title>车间管理表</title>
-	<link rel="stylesheet" type="text/css" href="../static/css/bootstrap.min.css" /> 
-	<link rel="stylesheet" href="../static/css/bootstrap-table.css">
-	<link rel="stylesheet" href="../static/css/bootstrap-select.css">
-	<link rel="stylesheet" type="text/css" href="../static/css/style.css" /> 
-	<link rel="stylesheet" href="../static/css/sidebar-menu.css">
-	<link rel="stylesheet" type="text/css" href="http://cdn.bootcss.com/font-awesome/4.6.0/css/font-awesome.min.css">
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<title>车间管理表</title>
+		<link rel="stylesheet" type="text/css" href="../static/css/bootstrap.min.css" /> 
+		<link rel="stylesheet" href="../static/css/bootstrap-table.css">
+		<link rel="stylesheet" href="../static/css/bootstrap-select.css">
+		<link rel="stylesheet" type="text/css" href="../static/css/style.css" /> 
+		<link rel="stylesheet" href="../static/css/sidebar-menu.css">
+		<link rel="stylesheet" type="text/css" href="http://cdn.bootcss.com/font-awesome/4.6.0/css/font-awesome.min.css">
 </head> 
 <body>
 		<!-- 测导航 -->
@@ -86,7 +86,7 @@
 								</button>
 						</div><!-- toolbar工具栏.end -->
 
-						<table id="table"></table> 
+						<table id="table" style="overflow:scroll;"></table>
 				</div>
 								
 		</div>
@@ -145,67 +145,72 @@
 		<script src="../static/js/sidebar-menu.js"></script>
 		
 		<script type="text/javascript">
-				$("#table").bootstrapTable({
-						url: '/org/work/listAll',
-						toolbar: '#toolbar',
-						search: true, //是否显示 搜索框
-						// showRefresh: true,//是否显示 刷新按钮
-						showColumns: true, //是否显示 选择显示列按钮
-						pagination: true,  //设置分页
-						idField: "id",   //重要---可设置checkbox的值为指定字段
-						clickToSelect:true,//设置true 将在点击行时，自动选择checkbox
-						striped:true,//是否显示 表格条纹
-						//height: 1000,                        //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
-						pageList:[5,10,15,20],
-						pageSize:5,
-						selectItemName:"id",    //设置checkbox name属性，可用于遍历获取选中值
-						exportDataType:'all',
-						showExport: true,  //是否显示导出按钮
-						exportTypes:['excel'],  //导出文件类型  
-						//buttonsAlign:"left",  //按钮位置 
-						Icons:'glyphicon-export',  
-						exportOptions:{  
-									 fileName: 'CategoryList',  //设置导出文件名称  
-									 worksheetName: 'sheet1',  //表格工作区名称  
-									 tableName: 'CategoryList',
-									 excelstyles: ['background-color', 'color', 'font-size', 'font-weight']
-						}, 
-						columns:[{
-								checkbox: true,
-						}, {
-								field : 'id',
-								title : '编号',
-								sortable: true
-						}, {
-								field: 'name',
-								title: '名称',
-								sortable: true
-						}, {
-								field: 'wtype',
-								title: '类型',
-								sortable: true
-						}, {
-								field: 'dep_name',
-								title: '部门名称',
-								sortable: true
-						}, {
-								field: 'seg_name',
-								title: '所属客运段',
-								sortable: true,
-						}, {
-								field: 'num',
-								title: '序号',
-								sortable: true
-						},{
-								field: 'operation',
-								title: '操作',
-								align: 'center',
-								valign: 'middle',
-								formatter: function(value,row,index){
-										return "<a href='#' data-toggle='modal' onclick='editModalfunc(\""+row.id+"\",\""+row.name+"\",\""+row.wtype+"\",\""+row.dep_name+"\",\""+row.seg_name+"\",\""+row.num+"\")' >修改</a> <a href='#' onclick='deleteWorkshopRequest(\""+row.id+"\")' >删除</a>"
-								}
-						}],
+				$(document).ready(function(){
+						$("#table").bootstrapTable({
+								url: '/org/work/listAll',
+								toolbar: '#toolbar',
+								search: true, //是否显示 搜索框
+								// showRefresh: true,//是否显示 刷新按钮
+								showColumns: true, //是否显示 选择显示列按钮
+								pagination: false,  //设置分页
+								idField: "id",   //重要---可设置checkbox的值为指定字段
+								clickToSelect:true,//设置true 将在点击行时，自动选择checkbox
+								striped:true,//是否显示 表格条纹
+								//height: 1000,                        //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+								selectItemName:"id",    //设置checkbox name属性，可用于遍历获取选中值
+								exportDataType:'all',
+								showExport: true,  //是否显示导出按钮
+								exportTypes:['excel'],  //导出文件类型  
+								//buttonsAlign:"left",  //按钮位置 
+								Icons:'glyphicon-export',  
+								exportOptions:{  
+											 fileName: 'CategoryList',  //设置导出文件名称  
+											 worksheetName: 'sheet1',  //表格工作区名称  
+											 tableName: 'CategoryList',
+											 excelstyles: ['background-color', 'color', 'font-size', 'font-weight']
+								}, 
+								columns:[{
+										checkbox: true,
+								}, {
+										field : 'id',
+										title : '编号',
+										sortable: true
+								}, {
+										field: 'name',
+										title: '名称',
+										sortable: true
+								}, {
+										field: 'wtype',
+										title: '类型',
+										sortable: true
+								}, {
+										field: 'dep_name',
+										title: '部门名称',
+										sortable: true
+								}, {
+										field: 'seg_name',
+										title: '所属客运段',
+										sortable: true,
+								}, {
+										field: 'num',
+										title: '序号',
+										sortable: true
+								},{
+										field: 'operation',
+										title: '操作',
+										align: 'center',
+										valign: 'middle',
+										formatter: function(value,row,index){
+												total_name[total_name.length] = row.name;
+												total_id[total_id.length] = row.id;
+												return "<a href='#' data-toggle='modal' onclick='editModalfunc(\""+row.id+"\",\""+row.name+"\",\""+row.wtype+"\",\""+row.dep_name+"\",\""+row.seg_name+"\",\""+row.num+"\")' >修改</a> <a href='#' onclick='deleteWorkshopRequest(\""+row.id+"\")' >删除</a>"
+										}
+								}],
+						});
 				});
+				var total_name = new Array();
+				var total_id = new Array();
+				
 		</script>
 		<script>
 				$.sidebarMenu($('.sidebar-menu')) //侧导航
@@ -236,6 +241,7 @@
 				 * 第二步，显示更新段信息的模态框
 				 */
 				function editModalfunc(id,name,type,dep_name,seg_name,num){
+						alert(total_id.length);
 						initSelectpicker();
 						$("#id").val(id).attr("readonly",true);
 						$("#name").val(name);

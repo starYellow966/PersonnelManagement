@@ -62,6 +62,32 @@ class Segment(db.Model):
 			segmentlist.append(temp);
 		return segmentlist;
 
+	'''根据查询条件query查询Segment表，并返回一个结果集dict
+
+	第一步，根据query查询表格，得list
+	第二步，将结果集list转换成Segment对象的list
+	第三步，将Segment对象的list转换成Segment对象字典的list
+	'''
+	@classmethod
+	def querySegment(cls,query):
+		try:
+			#返回一个查询结果集list
+			results = db.session.execute('select * from Segment where ' + query).fetchall();
+			segmentlist = [];
+			#将每个查询结果封装成Segment对象
+			for x in results:
+				segmentlist.append(Segment(x[0],x[1],x[3],x[4],x[5],x[2]));
+			resultlist = [];
+			#将每个Segment对象转换成dict
+			for x in segmentlist:
+				temp = x.__dict__;
+				del temp['_sa_instance_state'];
+				resultlist.append(temp);
+			return resultlist;
+		except Exception as e:
+			print e;
+			return [];
+
 	'''根据id更新段信息
 
 	后端将数据封装在Segment对象中，此处只需调到db.session提交上去就可以
