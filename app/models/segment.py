@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-import sys
-
-reload(sys) 
-sys.setdefaultencoding('utf8') 
-
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
@@ -11,12 +6,16 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://hx:huangxin123456@120.79.147.151/gdesign?charset=utf8'
 db = SQLAlchemy(app)
 
+'''段信息类
+
+TODO：是否增加一个create方法，用于将数据封装Segment对象，同时进行编号查重
+'''
 class Segment(db.Model):
 	__tablename__ = 'Segment'
 	#编号
 	id = db.Column(db.String(10), primary_key=True)
 	#名字
-	name = db.Column(db.String(20), unique=True)
+	name = db.Column(db.String(20), nullable=False)
 	#类型，就是客运段
 	stype = db.Column(db.String(10), default='客运段')
 	#部门名称
@@ -145,3 +144,7 @@ class Segment(db.Model):
 		finally:
 			db.session.close();
 			return flag;
+
+	@classmethod
+	def getSession(cls):
+		return db.session;

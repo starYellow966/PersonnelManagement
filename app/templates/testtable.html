@@ -38,7 +38,15 @@
             </div>
         </div>     
 
-	<div id="toolbar"></div>
+	<div id="toolbar" class="btn-group">
+		<select class="form-control" onchange="exportDataTypeChange()">
+                <option value="basic">Export Basic</option>
+                <option value="all">Export All</option>
+                <option value="selected">Export Selected</option>
+        </select>
+    </ul>
+
+	</div>
 	<div class="table-responsive">
 		<table id="table"></table>
 	</div>
@@ -75,10 +83,14 @@
 	<script src="../static/js/bootstrap.min.js"></script>
 	<script src="../static/js/bootstrap-table.js"></script>
 	<script src="../static/js/bootstrap-select.js"></script>
+	<script src="../static/js/bootstrap-table-multiple-sort.js"></script>
+	<script src="../static/js/bootstrap-table-export.js"></script>
+	<script src="../static/js/tableExport.js"></script><!-- bootstrap table本身是没有实现表格的导出的，需要扩展插件tableExport，扩展的tableExport在导出csv，txt，sql，json等格式的时候能很好的支持中文 -->
 	<script type="text/javascript">
 		$(document).ready(function(){
 			$("#table").bootstrapTable({
 				toolbar: '#toolbar',
+				// buttonsAlign:"left",  //按钮位置 
 				search: true, //是否显示 搜索框
 				showRefresh: true,//是否显示 刷新按钮
 				showColumns: true, //是否显示 选择显示列按钮
@@ -90,17 +102,13 @@
 	            pageList:[5,10,15,20],
 	            pageSize:5,
 	            selectItemName:"id",    //设置checkbox name属性，可用于遍历获取选中值
-	            exportDataType:'all',
 	            showExport: true,  //是否显示导出按钮
-	            exportTypes:['excel'],  //导出文件类型  
-	            //buttonsAlign:"left",  //按钮位置 
-	            Icons:'glyphicon-export',  
-	            exportOptions:{  
-	                   fileName: 'CategoryList',  //设置导出文件名称  
-	                   worksheetName: 'sheet1',  //表格工作区名称  
-	                   tableName: 'CategoryList',
-	                   excelstyles: ['background-color', 'color', 'font-size', 'font-weight']
-	            }, 
+	            exportDataType:$('#toolbar').find('select').val(),//导出文件方式  支持: 'basic', 'all', 'selected'. basic：本页数据，all，获取服务器所有数据，selected,本页选择行数据 
+	            Icons:'glyphicon-export',
+	            exportOptions:{
+	            	ignoreColumn:[0,4],
+	            	fileName: '信息表'
+	            },
 				columns:[{
 	                checkbox: true,
 	            },{
@@ -167,7 +175,13 @@
 			        price: '$2'
 			    }]
 			});
+			
 		});
+
+		function exportDataTypeChange(){
+			console.log($('#toolbar').find('select').val());
+			$("#table").bootstrapTable('refreshOptions',{exportDataType:$('#toolbar').find('select').val()});
+		}
 
 		function update(){
 			alert("message?: DOMString");

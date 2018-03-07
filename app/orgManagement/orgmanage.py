@@ -1,16 +1,23 @@
 # -*- coding: utf-8 -*-
+import sys
+reload(sys) 
+sys.setdefaultencoding("utf-8")
+sys.path.append("..");#修改路径，为了引用models包
+
+
 from flask import Flask,Blueprint,render_template,request,redirect,url_for
-from flask_httpauth import HTTPBasicAuth
+# from flask_httpauth import HTTPBasicAuth
+import flask_excel as excel #excel操作工具包
+import pyexcel
 import json
 
-import sys
-sys.path.append("..");#修改路径，为了引用models包
+
 from models import segment,workshop;
 #from segment import Segment;
 
 #创建蓝图对象
 org_manage = Blueprint('org_manage',__name__,template_folder='../templates',static_folder='../static',url_prefix='/org')
-auth = HTTPBasicAuth()
+# auth = HTTPBasicAuth()
 
 '''将'/org/seg'路径绑定在segmentchart.html
 
@@ -166,3 +173,67 @@ def deleteWorkshop():
 		return "successfully",200;
 	else:
 		return "fail",200;
+
+'''返回一个excel文件，是批量导入时指定文件
+
+内含填写数据的格式，需要按照文件中的字段填写数据
+FIXME：目前sheet名需要手动修改为数据库表名
+'''
+@org_manage.route('/seg/download',methods=['GET'])
+def segmentDownload():
+	# response = excel.make_response_from_array([['id','name','stype','dep_name','seg_date','railway']], 
+	# 	"xls",file_name=u"段信息批量导入表",sheet_name='Segment');
+	response = excel.make_response_from_array([[u'编号',u'名称',u'类型',u'部门名称',u'成立时间(格式:2017/1/1)',u'所属路局']], 
+		"xls",file_name=u"段信息批量导入表",sheet_name='Segment');
+	print response;
+	return response;
+'''负责显示上传excel文件页面和接收上传的excel文件并将数据存入数据库中
+
+当method=GET时，显示页面；
+当method=POST时，接收上传的excel文件，
+并通过flask_excelRequest.save_book_to_database(...)将excel数据存入数据库。
+'''
+@org_manage.route("/seg/unload", methods=['GET', 'POST'])
+def doimport():
+    if request.method == 'POST':
+    	'''将excel中每行数据读取并封装成Segment对象
+    	
+    	第一步，时间转时间戳
+    	第二步，封装
+    	TODO：是否需要在此处为id进行查重
+    	'''
+        def segment_init_func(row):
+        	#将datetime时间转成时间戳存在seg_date
+        	import time,datetime
+        	t = row[u'成立时间(格式:2017/1/1)'].timetuple();#row['seg_date']是datetime类型
+        	seg_date = int(time.mktime(t));
+
+        	# 这里的字段编码可能是ascii，通过重设sys的默认编码解决此问题
+        	seg = segment.Segment(row[u'编号'], row[u'名称'],row[u'部门名称'], seg_date, row[u'所属路局'],row[u'类型']);
+        	# print seg;
+        	return seg
+        #Warning：注意导入的xls文件中只能有一个sheet，同时sheet名字为数据库表名
+        try:
+        	request.save_book_to_database(field_name='file',session=segment.Segment.getSession(),
+        		tables=[segment.Segment],initializers=[segment_init_func]);
+        	return "Saved",200;
+        except Exception as e:#注意导入的xls文件中只能有一个sheet，同时sheet名字为数据库表名
+        	print type(e);
+        	return "文件上传失败，请检查excel文件，其中不能修改sheet名，编号不能重复";
+    return '''
+    <!doctype html>
+    <title>Upload an excel file</title>
+    <h1>Excel file upload (xls, xlsx, ods please)</h1>
+    <form action="" method=post enctype=multipart/form-data><p>
+    <input type='file' name='file'><input type='submit' value='Upload'>
+    </form>
+    '''
+
+'''返回一个装有所有Segment表数据的excel文件
+
+通过flask_excel.make_response_from_tables
+'''
+#验证了db.session没错
+@org_manage.route("/seg/exportAll", methods=['GET'])
+def doexport():
+    return excel.make_response_from_tables(segment.Segment.getSession(), [segment.Segment], "xls")
