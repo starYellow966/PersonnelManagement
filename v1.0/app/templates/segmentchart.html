@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <title>客运段表</title>
+  <link rel="stylesheet" type="text/css" href="../static/css/bootstrap.min.css" /> 
+  <link rel="stylesheet" href="../static/css/bootstrap-table.css">
+  <link rel="stylesheet" href="../static/css/bootstrap-select.css">
+  <link rel="stylesheet" href="../static/css/bootstrap-datetimepicker.min.css" media="screen">
+  <link rel="stylesheet" type="text/css" href="../static/css/style.css" /> 
+  <link rel="stylesheet" href="../static/css/sidebar-menu.css">
+  <link rel="stylesheet" type="text/css" href="http://cdn.bootcss.com/font-awesome/4.6.0/css/font-awesome.min.css">
+</head> 
+<body>
+    <!-- 侧导航 -->
+    <aside class="main-sidebar">
+        <section  class="sidebar">
+            <ul class="sidebar-menu">
+              <li class="header" style="color: white;font-size: 180%"><strong>人事管理系统</strong></li>
+              <li class="treeview">
+                <a href="#">
+                  <i class="fa fa-dashboard"></i> <span>人员管理</span> <i class="fa fa-angle-left pull-right"></i>
+                </a>
+                <ul class="treeview-menu">
+                  <li><a href="#"><i class="fa fa-circle-o"></i> 人员信息管理</a></li>
+                  <li><a href="#"><i class="fa fa-circle-o"></i> 人员信息浏览</a></li>
+                  <li><a href="#"><i class="fa fa-circle-o"></i> 人员信息浏览</a></li>
+                  <li><a href="#"><i class="fa fa-circle-o"></i> 人员列表查询</a></li>
+                  <li><a href="#"><i class="fa fa-circle-o"></i> 人员信息统计</a></li>
+                  <li><a href="#"><i class="fa fa-circle-o"></i> 人员变动管理</a></li>
+                </ul>
+              </li>
+              <li class="treeview">
+                <a href="#">
+                  <i class="fa fa-laptop"></i>
+                  <span>数据标准管理</span>
+                  <i class="fa fa-angle-left pull-right"></i>
+                </a>
+                <ul class="treeview-menu">
+                  <li><a href="#"><i class="fa fa-circle-o"></i> 数据字典管理</a></li>
+                  <li><a href="#"><i class="fa fa-circle-o"></i> 组织机构管理</a></li>
+                </ul>
+              </li>
+              <li class="treeview">
+                <a href="#">
+                  <i class="fa fa-pie-chart"></i>
+                  <span>统计分析</span>
+                  <i class="fa fa-angle-left pull-right"></i>
+                </a>
+                <ul class="treeview-menu">
+                  <li><a href="#"><i class="fa fa-circle-o"></i> 人员变动统计</a></li>
+                </ul>
+              </li>
+              <li class="treeview">
+                <a href="#">
+                  <i class="fa fa-edit"></i> <span>系统管理</span>
+                  <i class="fa fa-angle-left pull-right"></i>
+                </a>
+                <ul class="treeview-menu">
+                  <li><a href="#"><i class="fa fa-circle-o"></i> 系统日志管理</a></li>
+                  <li><a href="#"><i class="fa fa-circle-o"></i> 登录用户管理</a></li>
+                </ul>
+              </li>
+            </ul>
+        </section>
+     </aside>
+    
+    <!-- 表格 -->
+    <div class="container" >
+        <ul id="titleTab" class="nav nav-tabs">
+            <li><a href="#" data-toggle='tab'>首页</a></li>
+            <li class="active"><a href="/org/seg/">客运段</a></li>
+            <li><a href="/org/work">车间</a></li>
+            <li><a href="/org/team">班组</a></li>
+        </ul>
+        <div>
+            <div class="panel panel-default">
+                <div class="panel-heading">查询条件</div>
+                <div class="panel-body">
+                    <div id="formSearch" class="form-horizontal">
+                        <label class="control-label col-sm-3" style="text-align: center;">属性</label>
+                        <label class="control-label col-sm-3" style="text-align: center;">运算符</label>
+                        <label class="control-label col-sm-3" style="text-align: center;">值</label>
+                        <label class="control-label col-sm-3" style="text-align: center;">连接符</label>
+                        <br>
+                        <br>
+                        <div class="col-sm-3" >
+                            <select class="selectpicker " id="proprity" onchange="proprityChange(this)">
+                                <option value="id" selected>编号</option>
+                                <option value="name">名称</option>
+                                <option value="type">类型</option>
+                                <option value="dep_name">部门名称</option>
+                                <option value="seg_date">成立时间</option>
+                                <option value="railway">所属路局</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-3">
+                            <select class="selectpicker " id="operator">
+                                <option value="like" selected>like</option>
+                                <option value="<"><</option>
+                                <option value=">">></option>
+                                <option value="=">=</option>
+                            </select>
+                        </div>                  
+                        <div class="col-sm-3">
+                            <input type="text" class="form-control" id="value">
+                        </div>
+                        <div class="col-sm-3">
+                            <select class="selectpicker" id="joinOperator">
+                                <option value="and" selected>and</option>
+                                <option value="or">or</option>
+                            </select>
+                        </div>
+                        <br>
+                        <br>
+                        <textarea id="search_sqltext" class="form-control col-sm-12" rows="5" style="overflow-x: hidden;overflow-y: auto;resize: none;"></textarea>
+                    </div>
+              </div>
+              <div class="panel panel-footer" align="right">
+                  <input type="button" class="btn btn-primary" name="insert" value="添加" onclick="insertSqlQuery()">
+                  <input type="submit" class="btn btn-success" name="submit" value="查询" onclick="queryRequest()">
+              </div>
+
+          </div>
+            <!-- toolbar工具栏 -->
+            <div id="toolbar" class="btn-group">
+                <button id="btn_add" type="button" class="btn btn-default" onclick="insertModalfunc()">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true" ></span>新增
+                </button>
+                <button id="btn_remove" type="button" class="btn btn-default" onclick="delSegfunc()">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>删除
+                </button>
+                <div class="btn-group">
+                    <button id="btn_batch" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                        <span class="glyphicon glyphicon-import" aria-hidden="true"></span>批处理
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li>
+                            <a href="/org/seg/download">下载格式文件</a>
+                        </li>
+                        <li>
+                            <a href="#UnloadModal" data-toggle="modal" >批量上传数据</a>
+                        </li>
+                    </ul>
+                </div>
+                <select class="form-control" onchange="exportDataTypeChange()">
+                    <option value="basic">Export Basic</option>
+                    <option value="all">Export All</option>
+                    <option value="selected">Export Selected</option>
+                </select>
+            </div><!-- toolbar工具栏.end -->
+
+            <table id="table"></table> 
+        </div>
+                
+    </div>
+
+    <!-- 段信息详情模态框（Modal） -->
+    <div class="modal fade" id="SegmentDetailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"
+                            aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="modalTitle" name="modalTitle"></h4>
+                </div> <!-- modal.header -->
+                <div class="modal-body">
+                    <ul>
+                        <li>
+                            <label>编号：</label>
+                            <input type="text" class="form-control" id="deatailmodal_id" name="deatailmodal_id" />
+                            <span id="id_tip"></span>
+                        </li>
+                        <li>
+                            <label>名称：</label>
+                            <input type="text" id="deatailmodal_name" name="deatailmodal_name" />
+                            <span id="name_tip"></span>
+                        </li>
+                        <li>
+                            <label>类型：</label>
+                            <input type="text" id="deatailmodal_type" name="deatailmodal_type" />
+                            <span id="type_tip"></span>
+                        </li>
+                        <li>
+                            <label>部门名称：</label>
+                            <input type="text" id="deatailmodal_dep_name" name="deatailmodal_dep_name" />
+                            <span id="dep_name_tip"></span>
+                        </li>
+                        <li>
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">成立时间：</label>
+                                <div class="input-group date form_date col-md-7" data-date="" data-date-format="yyyy-mm-dd" data-link-field="deatailmodal_seg_date" data-link-format="yyyy-mm-dd">
+                                    <input id="deatailmodal_seg_date" class="form-control" size="16" type="text" value="" readonly>
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                          <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <label>所属路局：</label>
+                            <input type="text" name="deatailmodal_railway" id="deatailmodal_railway" />
+                            <span id="railway_tip`"></span>
+                        </li>
+                    </ul>
+                </div><!-- modal-body -->
+                <div class="modal-footer">
+                    <button class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button id="submit_btn" class="btn btn-primary" >提交更改</button>
+                </div> <!-- modal-footer -->
+            </div><!-- /.modal.content -->
+        </div><!-- /.modal -->
+    </div><!-- 段信息详情模态框（Modal）end -->
+    <!--上传文件模态框-->
+    <div class="modal fade" id="UnloadModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"
+                            aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" >批量上传数据</h4>
+                </div> <!-- modal.header -->
+                <div class="modal-body">
+                    <h1>Excel file upload (xls, xlsx please)</h1>
+                    <form action="/org/seg/unload" method=post enctype=multipart/form-data>
+                        <input type='file' class="btn btn-default" name='file'>
+                        <div class="modal-footer">
+                            <button class="btn btn-default" data-dismiss="modal">取消</button>
+                            <input type="submit" class="btn btn-primary" name="submit" value="上传">
+                        </div>
+                    </form>
+                </div><!-- modal-body -->
+                
+            </div><!-- /.modal.content -->
+        </div><!-- /.modal -->
+    </div><!--上传文件模态框end-->
+    <script src="../static/js/jquery-2.1.1.min.js"></script>
+    <script src="../static/js/bootstrap.min.js"></script>
+    <script src="../static/js/bootstrap-table.js"></script>
+    <script src="../static/js/bootstrap-select.js"></script>
+    <script src="../static/js/bootstrap-datetimepicker.js" charset="UTF-8"></script>
+    <script src="../static/js/bootstrap-datetimepicker.zh-CN.js" charset="UTF-8"></script>
+    <script src="../static/js/sidebar-menu.js"></script>
+    <script src="../static/js/bootstrap-table-export.js"></script>
+    <script src="../static/js/tableExport.js"></script><!-- bootstrap table本身是没有实现表格的导出的，需要扩展插件tableExport，扩展的tableExport在导出csv，txt，sql，json等格式的时候能很好的支持中文 -->
+    
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $("#table").bootstrapTable({
+                url: '/org/seg/listAll',
+                toolbar: '#toolbar',
+                search: true, //是否显示 搜索框
+                // showRefresh: true,//是否显示 刷新按钮
+                showColumns: true, //是否显示 选择显示列按钮
+                pagination: true,  //设置分页
+                idField: "id",   //重要---可设置checkbox的值为指定字段
+                clickToSelect:true,//设置true 将在点击行时，自动选择checkbox
+                striped:true,//是否显示 表格条纹
+                //height: 1000,                        //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                pageList:[5,10,15,20],
+                pageSize:5,
+                selectItemName:"id",    //设置checkbox name属性，可用于遍历获取选中值
+                showExport: true,  //是否显示导出按钮
+                exportDataType:$('#toolbar').find('select').val(),//导出文件方式  支持: 'basic', 'all', 'selected'. basic：本页数据，all，获取服务器所有数据，selected,本页选择行数据 
+                Icons:'glyphicon-export',
+                exportOptions:{
+                    ignoreColumn:[0,7],
+                    fileName: '客运段信息表'+new Date().getFullYear() + (new Date().getMonth() + 1) + new Date().getDate()
+                },
+                columns:[{
+                    checkbox: true,
+                }, {
+                    field : 'id',
+                    title : '编号',
+                    sortable: true
+                }, {
+                    field: 'name',
+                    title: '名称',
+                    sortable: true
+                }, {
+                    field: 'stype',
+                    title: '类型',
+                    sortable: true
+                }, {
+                    field: 'dep_name',
+                    title: '部门名称',
+                    sortable: true
+                }, {
+                    field: 'seg_date',
+                    title: '成立时间',
+                    sortable: true,
+                    formatter: function(value,row,index){
+                        //实现时间戳转时间（%Y-%M-%d）
+                        //value 是时间戳
+                        //js中时间戳转时间时时间戳要乘以1000
+                        var date = new Date(value*1000);//将时间戳转成时间Date
+                        //格式化显示
+                        return date.getFullYear() + "-" + (date.getMonth()+1) + "-" + date.getDate();
+                    }
+                }, {
+                    field: 'railway',
+                    title: '所属路局',
+                    sortable: true
+                },{
+                    field: 'operation',
+                    title: '操作',
+                    align: 'center',
+                    valign: 'middle',
+                    formatter: function(value,row,index){
+                        return "<a href='#' data-toggle='modal' onclick='editModalfunc(\""+row.id+"\",\""+row.name+"\",\""+row.stype+"\",\""+row.dep_name+"\",\""+row.seg_date+"\",\""+row.railway+"\")' >修改</a> <a href='#' onclick='deleteSegmentRequest(\""+row.id+"\")' >删除</a>"
+                    }
+                }],
+            });
+
+            $(".form_date").datetimepicker({
+                weekStart: 1,
+                todayBtn:  1,
+                autoclose: 1,
+                todayHighlight: 1,
+                startView: 2,
+                minView: 2,
+                forceParse: 0,
+                language:'zh-CN'
+            });
+        });
+        
+    </script>
+    <script>
+        $.sidebarMenu($('.sidebar-menu')) //侧导航
+    </script>
+    <script type="text/javascript">
+        /**
+         * 显示插入段信息的模态框
+         *
+         * 第一步，设置插入段信息模态框中组件的属性，以及通过参数设置组件的值
+         * 第二步，显示插入段信息的模态框
+         */
+        function insertModalfunc(){
+            $("#deatailmodal_id").val("").attr("readonly",false);
+            $("#deatailmodal_name").val("");
+            $("#deatailmodal_type").val("客运段");
+            $("#deatailmodal_dep_name").val("");
+            var date = new Date();
+            $("#deatailmodal_seg_date").val(date.getFullYear() + "-" + (date.getMonth()+1) + "-" + date.getDate());
+            $("#deatailmodal_railway").val("");
+            $("#modalTitle").text("新增段信息");
+            $("#submit_btn").click(insertSegRequest); //将提交更改按钮绑定插入操作
+            $("#SegmentDetailModal").modal("show");
+        }
+
+        /**
+         * 显示更新段信息的模态框
+         *
+         * 第一步，设置更新段信息模态框中组件的属性，以及通过参数设置组件的值
+         * 第二步，显示更新段信息的模态框
+         */
+        function editModalfunc(id,name,type,dep_name,seg_date,railway){
+            $("#deatailmodal_id").val(id).attr("readonly",true);
+            $("#deatailmodal_name").val(name);
+            $("#deatailmodal_type").val(type);
+            $("#deatailmodal_dep_name").val(dep_name);
+            var date = new Date(seg_date*1000);//seg_date是时间戳 需要转换
+            $("#deatailmodal_seg_date").val(date.getFullYear() + "-" + (date.getMonth()+1) + "-" + date.getDate());
+            // $(".form_date").datetimepicker({initialDate:date});
+            $("#deatailmodal_railway").val(railway);
+            $("#modalTitle").text("修改段信息");
+            $("#submit_btn").click(updateSegRequest); //将提交更改按钮绑定修改操作
+            $("#SegmentDetailModal").modal("show");
+        }
+        /**
+         * 发送更新段信息请求
+         * 
+         * 第一步，获取模态框中的值
+         * 第二步，判断模态框值的合法性（TODO）
+         * 第三步，用post方式，当请求成功后重新加载页面
+         */
+        var updateSegRequest = function updateSegmentRequest(){
+            var id = $("#deatailmodal_id").val();
+            var name = $("#deatailmodal_name").val();
+            var type = $("#deatailmodal_type").val();
+            var dep_name = $("#deatailmodal_dep_name").val();
+            var seg_date = $("#deatailmodal_seg_date").val();
+            var railway = $("#deatailmodal_railway").val();
+            //TODO 缺少内容审核
+            $.ajax({
+                type:"post",
+                url:"/org/seg/update",
+                dataType:"json",
+                data:{
+                    id: id,
+                    name: name,
+                    type: type,
+                    dep_name: dep_name,
+                    seg_date: seg_date,
+                    railway: railway
+                },
+                success:function(data,status){
+                    $("#table").bootstrapTable('load',data);
+                    $("#SegmentDetailModal").modal("hide");
+                }
+          });
+        }
+
+        /**
+         * 发送插入段信息请求
+         * 
+         * 第一步，获取模态框中的值
+         * 第二步，判断模态框值的合法性（TODO）
+         * 第三步，用post方式，当请求成功后重新加载页面
+         */
+        var insertSegRequest = function insertSegmentRequest(){
+            var id = $("#deatailmodal_id").val();
+            var name = $("#deatailmodal_name").val();
+            var type = $("#deatailmodal_type").val();
+            var dep_name = $("#deatailmodal_dep_name").val();
+            var seg_date = $("#deatailmodal_seg_date").val();
+            var railway = $("#deatailmodal_railway").val();
+            // alert(seg_date);
+            //TODO 缺少内容审核
+            $.ajax({
+                type:"post",
+                url:"/org/seg/insert",
+                dataType:"json",
+                data:{
+                    id: id,
+                    name: name,
+                    type: type,
+                    dep_name: dep_name,
+                    seg_date: seg_date,
+                    railway: railway
+                },
+                success:function(data){
+                    $("#table").bootstrapTable('load',data);
+                    $("#SegmentDetailModal").modal("hide");
+                }
+            });
+        }
+
+        /**
+         * 发送查询请求
+         * 第一步，获取查询语句，将时间转换成时间戳
+         * 第二步，发送查询请求
+         * 第三步，成功后更新表格
+         */
+        function queryRequest(){
+            var query = $("#search_sqltext").val();
+            if(query != ""){
+                var reg = /\d{4}-\d{1,2}-\d{1,2}/g
+                var result=query.match(reg);
+                if ( result != null ){//说明有日期，需要转成时间戳
+                    var array = new Array();//时间戳数组
+                    for (var i = 0; i < result.length; i++) {
+                        // console.log(query.match(result[i]));
+                        var timeStamp = (Math.round(new Date(result[i]).getTime()/1000));//时间戳
+                        // console.log(timeStamp);
+                        query = query.replace(result[i],timeStamp);
+                    }
+                    // console.log(query);
+                }
+                $.ajax({
+                  type:"post",
+                  url:"/org/seg/query", 
+                  data:{query:query},
+                  dataType:"json",
+                  success:function(data,status){
+                    console.log(data);
+                    $("#table").bootstrapTable('load',data);
+                  }
+                });
+            }
+        }
+
+        /**
+         * 多项删除响应函数
+         *
+         * 第一步，通过getSelections获得选中的项，返回值是数组
+         * 第二步，将数组转换成字符串（如1,2,3或1）
+         * 第三步，调用发送删除段信息请求函数deleteSegmentRequest(target)
+         */
+        function delSegfunc(){
+            var array = $("#table").bootstrapTable('getSelections');//返回所选的行，当没有选择任何行的时候返回一个空数组。
+            var target = "";
+            //将数组转换成字符串
+            for (var i = array.length - 1; i >= 0; i--) {
+                target +=array[i].id;
+                if(i > 0 )
+                    target +=",";
+            }
+            deleteSegmentRequest(target);
+        }
+
+        /**
+         * 发送删除段信息请求
+         * 
+         * 第一步，用post方式，当请求成功后重新加载页面
+         * @param  {待删除的id字符串（格式：1,2,3或者1）}
+         * @return {从表格删除行}
+         */
+        function deleteSegmentRequest(target){
+            $.ajax({
+                type:"post",
+                url:"/org/seg/delete",
+                data:{ids:target},
+                success:function(data,status){//当成功时调用这个函数，移除删除项
+                    alert("delete ：" + status);
+                    $("#table").bootstrapTable('remove', {field: 'id', values: target.split(',')});
+                }
+            });
+        }
+
+        /**
+         * 查询中属性下拉框值改变事件
+         * @param  {HTMLElement} obj [当前的控件]
+         * 第一步，获取选中值
+         * 第二步，根据选中值更新运算符下拉框的值
+         */
+        function proprityChange(obj){
+            var selectedValue = obj.selectedOptions[0].value;//获取选中value值,因为它被泛化了，不能用bootstrap-select方法
+            switch (selectedValue) {
+              case 'id':
+                  setOperatorOptions(['like','<','>','=']);
+                  break;
+              case 'name':
+                  setOperatorOptions(['like','=']);
+                  break;
+              case 'type':
+                  setOperatorOptions(['like','=']);
+                  break;
+              case 'dep_name':
+                  setOperatorOptions(['like','=']);
+                  break;
+              case 'seg_date':
+                  setOperatorOptions(['<','>','=']);
+                  break;
+              case 'railway':
+                  setOperatorOptions(['like','=']);
+                  break;
+              default:
+                // statements_def
+                break;
+            }
+        }
+
+        /**
+         * 设置运算符下拉框的选项
+         * @param {数组} array 包含所有选项的数组
+         */
+        function setOperatorOptions(array){
+            $("#operator").html("");
+            var text = "";
+            for (var i  = 0; i < array.length; i++) {
+                text += '<option value="' + array[i] + '">' + array[i] + '</option>';
+            }
+            $("#operator").html(text);
+            $("#operator").selectpicker('refresh');
+        }
+
+        /**
+         * 添加sql查询语句
+         *
+         * 第一步，读取查询条件中控件的值
+         * 第二步，输出到textarea中
+         * @return {[type]} [description]
+         */
+        function insertSqlQuery(){
+            var id = $("#proprity").selectpicker('val');//选中的属性值
+            var operator = $("#operator").selectpicker('val');//选中的运算符值
+            var value = $("#value").val();//值
+            //TODO value的有效值判断（可以不做的）
+            var joinOperator = $("#joinOperator").selectpicker('val');//选中的连接符
+            var text = id + " " + operator + " '";
+            if ( operator === 'like'){
+                text += "%" + value + "%'";
+            }
+            else
+                text += value + "'";
+            if( $("#search_sqltext").val() != "" ){
+                text += " " + joinOperator;
+            } 
+            $("#search_sqltext").val( text + " " + $("#search_sqltext").val() );
+        }
+
+        function exportDataTypeChange(){
+            console.log($('#toolbar').find('select').val());
+            $("#table").bootstrapTable('refreshOptions',{exportDataType:$('#toolbar').find('select').val()});
+        }
+
+    </script>
+    
+
+</body>
+</html>
