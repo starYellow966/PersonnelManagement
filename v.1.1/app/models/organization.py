@@ -341,16 +341,6 @@ class Organization(db.Model):
             print e;
             return False;
 
-    @classmethod
-    def queryStatement(cls, statement, type_name):
-        try:
-            type_id = OrganizationType.getIdByName(type_name);(
-                        results = db.session.execute('select * from Organization where type_id='+type_id+' and '+ statement).fetchall();
-        except Exception as e:
-            raise e
-        finally:
-            pass
-
     #db.session有问题
     @classmethod
     def getSession(cls):

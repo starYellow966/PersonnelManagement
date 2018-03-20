@@ -22,10 +22,10 @@
 	<nav class="navbar navbar-default navbar-fixed-top" role="navigation"> 
 		<div class="container-fluid"> 
 			<div class="navbar-header"> 
-				<a class="navbar-brand" href="#">客运段人事管理系统</a> 
+				<a class="navbar-brand" href="/">客运段人事管理系统</a> 
 			</div> 
 			<ul class="nav navbar-nav navbar-right"> 
-				<li><a href="#"><span class="glyphicon glyphicon-user"></span> 注册</a></li> 
+				<!-- <li><a href="#"><span class="glyphicon glyphicon-user"></span> 注册</a></li>  -->
 				<li><a href="#"><span class="glyphicon glyphicon-log-in"></span> 登录</a></li> 
 			</ul> 
 		</div> 
@@ -54,7 +54,7 @@
 						<i class="fa fa-angle-left pull-right"></i>
 					</a>
 					<ul class="treeview-menu">
-						<li><a href="#"><i class="fa fa-circle-o"></i> 数据字典管理</a></li>
+						<li><a href="/dict"><i class="fa fa-circle-o"></i> 数据字典管理</a></li>
 						<li><a href="/org"><i class="fa fa-circle-o"></i> 组织机构管理</a></li>
 					</ul>
 				</li>
@@ -91,9 +91,9 @@
 			<li><a href="/org/team">班组</a></li>
 		</ul>
         <!-- 查询栏 -->
-        <span data-toggle="collapse" class="panel-heading" href="#search_div">高级查询栏</span>
+        <!-- <span data-toggle="collapse" class="panel-heading" href="#search_div">高级查询栏</span>
         <div class="panel panel-default" id="search_div">
-            <!-- <div class="panel-heading" >查询条件</div> -->
+            <div class="panel-heading" >查询条件</div>
             <div class="panel-body" id="search_div_body">
                 <div id="formSearch" class="form-horizontal">
                     <label class="control-label col-sm-3" style="text-align: center;">属性</label>
@@ -106,7 +106,7 @@
                         <select class="selectpicker " id="proprity" onchange="proprityChange(this)">
                             <option value="id" selected>编号</option>
                             <option value="name">名称</option>
-                            <!-- <option value="type">类型</option> -->
+                             <option value="type">类型</option> 
                         </select>
                     </div>
                     <div class="col-sm-3">
@@ -135,7 +135,7 @@
                 <input type="button" class="btn btn-primary" name="insert" value="添加" onclick="insertSqlQuery()">
                 <input type="submit" class="btn btn-success" name="submit" value="查询" onclick="queryRequest()">
             </div>
-        </div>
+        </div>  -->
             
 		<!-- 表格的工具栏 -->
 		<div id="table_toolbar" class="btn-group">
@@ -190,7 +190,7 @@
                             <span id="name_tip"></span>
                         </li>
                         <li>
-                            <label>所属路局：</label>
+                            <label>所属上级：</label>
                             <select id="deatailmodal_parent" class="selectpicker form-control" data-live-search="true"></select>
                             <span id="parent_tip`"></span>
                         </li>
@@ -469,27 +469,27 @@
     				});
     		}
 
-            /**
-             * 发送查询请求
-             * 第一步，获得查询语句
-             * 第二步，发送请求
-             * 第三步，更新数据
-             */
-            function queryRequest(){
-                var query = $("#search_sqltext").val();
-                if( query != ""){
-                    $.ajax({
-                        type:"post",
-                        url:"/org/seg/query", 
-                        data:{query:query},
-                        dataType:"json",
-                        success:function(data,status){
-                            console.log(data);
-                            $("#table").bootstrapTable('load',data);
-                        }
-                    });
-                }
-            }
+            // /**
+            //  * 发送查询请求
+            //  * 第一步，获得查询语句
+            //  * 第二步，发送请求
+            //  * 第三步，更新数据
+            //  */
+            // function queryRequest(){
+            //     var query = $("#search_sqltext").val();
+            //     if( query != ""){
+            //         $.ajax({
+            //             type:"post",
+            //             url:"/org/seg/query", 
+            //             data:{query:query},
+            //             dataType:"json",
+            //             success:function(data,status){
+            //                 console.log(data);
+            //                 $("#table").bootstrapTable('load',data);
+            //             }
+            //         });
+            //     }
+            // }
 
             /**
              * 发送更新/新增请求前对值进行非空判断
@@ -521,68 +521,68 @@
                     return true;
             }
 
-            /**
-             * 查询中属性下拉框值改变事件
-             * @param  {HTMLElement} obj [当前的控件]
-             * 第一步，获取选中值
-             * 第二步，根据选中值更新运算符下拉框的值
-             */
-            function proprityChange(obj){
-                var selectedValue = obj.selectedOptions[0].value;//获取选中value值,因为它被泛化了，不能用bootstrap-select方法
-                switch (selectedValue) {
-                  case 'id':
-                      setOperatorOptions(['like','<','>','=']);
-                      break;
-                  case 'name':
-                      setOperatorOptions(['like','=']);
-                      break;
-                  // case 'type':
-                  //     setOperatorOptions(['like','=']);
-                  //     break;
-                  default:
-                    // statements_def
-                    break;
-                }
-            }
+            // /**
+            //  * 查询中属性下拉框值改变事件
+            //  * @param  {HTMLElement} obj [当前的控件]
+            //  * 第一步，获取选中值
+            //  * 第二步，根据选中值更新运算符下拉框的值
+            //  */
+            // function proprityChange(obj){
+            //     var selectedValue = obj.selectedOptions[0].value;//获取选中value值,因为它被泛化了，不能用bootstrap-select方法
+            //     switch (selectedValue) {
+            //       case 'id':
+            //           setOperatorOptions(['like','<','>','=']);
+            //           break;
+            //       case 'name':
+            //           setOperatorOptions(['like','=']);
+            //           break;
+            //       // case 'type':
+            //       //     setOperatorOptions(['like','=']);
+            //       //     break;
+            //       default:
+            //         // statements_def
+            //         break;
+            //     }
+            // }
 
-            /**
-            * 设置运算符下拉框的选项
-            * @param {数组} array 包含所有选项的数组
-            */
-            function setOperatorOptions(array){
-                $("#operator").html("");
-                var text = "";
-                for (var i  = 0; i < array.length; i++) {
-                    text += '<option value="' + array[i] + '">' + array[i] + '</option>';
-                }
-                $("#operator").html(text);
-                $("#operator").selectpicker('refresh');
-            }
+            // /**
+            // * 设置运算符下拉框的选项
+            // * @param {数组} array 包含所有选项的数组
+            // */
+            // function setOperatorOptions(array){
+            //     $("#operator").html("");
+            //     var text = "";
+            //     for (var i  = 0; i < array.length; i++) {
+            //         text += '<option value="' + array[i] + '">' + array[i] + '</option>';
+            //     }
+            //     $("#operator").html(text);
+            //     $("#operator").selectpicker('refresh');
+            // }
 
-            /**
-            * 添加sql查询语句
-            *
-            * 第一步，读取查询条件中控件的值
-            * 第二步，输出到textarea中
-            * @return {[type]} [description]
-            */
-            function insertSqlQuery(){
-                var id = $("#proprity").selectpicker('val');//选中的属性值
-                var operator = $("#operator").selectpicker('val');//选中的运算符值
-                var value = $("#value").val();//值
-                //TODO value的有效值判断（可以不做的）
-                var joinOperator = $("#joinOperator").selectpicker('val');//选中的连接符
-                var text = id + " " + operator + " '";
-                if ( operator === 'like'){
-                    text += "%" + value + "%'";
-                }
-                else
-                    text += value + "'";
-                if( $("#search_sqltext").val() != "" ){
-                    text += " " + joinOperator;
-                } 
-                $("#search_sqltext").val( text + " " + $("#search_sqltext").val() );
-            }
+            // /**
+            // * 添加sql查询语句
+            // *
+            // * 第一步，读取查询条件中控件的值
+            // * 第二步，输出到textarea中
+            // * @return {[type]} [description]
+            // */
+            // function insertSqlQuery(){
+            //     var id = $("#proprity").selectpicker('val');//选中的属性值
+            //     var operator = $("#operator").selectpicker('val');//选中的运算符值
+            //     var value = $("#value").val();//值
+            //     //TODO value的有效值判断（可以不做的）
+            //     var joinOperator = $("#joinOperator").selectpicker('val');//选中的连接符
+            //     var text = id + " " + operator + " '";
+            //     if ( operator === 'like'){
+            //         text += "%" + value + "%'";
+            //     }
+            //     else
+            //         text += value + "'";
+            //     if( $("#search_sqltext").val() != "" ){
+            //         text += " " + joinOperator;
+            //     } 
+            //     $("#search_sqltext").val( text + " " + $("#search_sqltext").val() );
+            // }
 
             /**
              * 导出模式下拉框 选项改变响应事件

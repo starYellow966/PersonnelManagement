@@ -141,13 +141,13 @@ def removeSegment():
     else:
         return 'failure,删除失败',500;
 
-@organizationBlueprint.route('/seg/query', methods = ['GET','POST'])
-def query():
-    query = request.form['query'];
-    if (query != ""):
-        datas = organization.Organization.queryStatement(query,u'客运段');
-        return json.dumps(datas),200;
-    return "",200;
+# @organizationBlueprint.route('/seg/query', methods = ['GET','POST'])
+# def query():
+#     query = request.form['query'];
+#     if (query != ""):
+#         datas = organization.Organization.queryStatement(query,u'客运段');
+#         return json.dumps(datas),200;
+#     return "",200;
 
 '''下载一个excel文件，是批量导入时指定文件
 
