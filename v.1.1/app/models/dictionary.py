@@ -4,8 +4,10 @@ import sys
 reload(sys);
 sys.setdefaultencoding("utf-8");
 
-from flask import Flask
+from flask import Flask,request
 from flask_sqlalchemy import SQLAlchemy
+from operate_log import Log
+# from flask_login import current_user
 
 app = Flask(__name__);
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://hx:huangxin123456@120.79.147.151/gdesignV1_1?charset=utf8';
@@ -83,6 +85,7 @@ class Dictionary(db.Model):
 
     type_id = db.Column(db.Integer(), nullable = False);
 
+
     """docstring for Dictionary"""
     def __init__(self, id, name, type_id):
         super(Dictionary, self).__init__()
@@ -93,15 +96,20 @@ class Dictionary(db.Model):
     def __repr__(self):
         return u'<Dictionary {0} {1} {2}>' .format(self.id, self.name, self.type_id);
 
-    '''根据type_id返回同组的所有字典数据
-    
-    :param['type_id'] : 字典类型编号
-    :return : list<dict> 或者 None
-    :date :2018/3/17
-    '''
     @classmethod
     def listDictByTypeId(cls, type_id):
+        '''根据type_id返回同类型的所有字典数据
+
+        Arguments:
+            type_id {int} -- 字典类型编号
+        Returns:
+            [list<dict>] -- None 或者 同类型的所有字典数据
+        
+        Raises:
+            e -- 所有异常
+        '''
         dictlist = [];
+        query_log = Log.createLog(u'Query', u'查询所有' + DictionaryType.getNameById(type_id) + u'数据');
         try:
             results = Dictionary.query.filter_by(type_id = type_id).order_by(Dictionary.id).all();
             for x in results:
@@ -112,17 +120,24 @@ class Dictionary(db.Model):
             raise e;
             db.session.rollback();
             dictlist = None;
+            query_log.setStatus(False)
         finally:
+            query_log.insertLog()
             return dictlist;
 
-    '''根据type_name返回同组的所有字典数据
-    
-    :param['type_name'] : 字典类型名称
-    :return : list<dict> 或者 None
-    :date :2018/3/17
-    '''
     @classmethod
     def listDictByTypeName(cls, type_name):
+        '''根据type_name返回同组的所有字典数据
+        
+        Arguments:
+            type_name {string} -- 字典类型名称
+        
+        Returns:
+            [list<dict>] -- None 或者 根据type_name返回同组的所有字典数据
+        
+        Raises:
+            e -- 所有异常
+        '''
         dictlist = None;
         try:
             type_id = DictionaryType.query.filter_by(name = type_name).first();
@@ -134,24 +149,38 @@ class Dictionary(db.Model):
         finally:
             return dictlist;
     
-    '''删除字典数据
-    
-    :param['id_string'] : 待删除id串，格式1,2,3
-    :return : 响应码 200-成功，500-失败 
-    '''
     @classmethod
     def remove(cls, id_string):
+        '''删除字典数据
+        
+        可删除一个或者多个字典数据
+        
+        Arguments:
+            id_string {string} -- 待删除id串，格式1,2,3
+        
+        Returns:
+            [int] -- 响应码 200-成功，500-失败 
+        
+        Raises:
+            e -- 所有异常
+        '''
         response = 200;
+        query_log_list = [];
         try:
             for id in id_string.split(','):
                 d = Dictionary.query.filter_by(id = id).first();
+                query_log_list.append(Log.createLog(u'Delete', u'删除' + DictionaryType.getNameById(d.type_id) + '数据{id:' + d.id + ',name:' + d.name + '}'))
                 db.session.delete(d);
             db.session.commit();
         except Exception as e:
             raise e;
             db.session.rollback();
             response = 500;
+            for log in query_log_list:
+                log.setStatus(False)
         finally:
+            for log in query_log_list:
+                log.insertLog()
             return response;
 
     '''通过组织id来更新=信息，返回响应码
@@ -161,6 +190,7 @@ class Dictionary(db.Model):
     '''
     def updateDictionary(self):
         response = 200;
+        query_log = Log.createLog(u'Update', u'修改字典数据为{ id:' + self.id + ',name:' + self.name + '}')
         try:
             Dictionary.query.filter_by(id = self.id).update({'name': self.name});
             db.session.commit();
@@ -168,7 +198,9 @@ class Dictionary(db.Model):
             print e;
             db.session.rollback();
             response = 500;
+            query_log.setStatus(False)
         finally:
+            query_log.insertLog()
             return response;
 
     '''id查重并插入，返回响应码
@@ -178,6 +210,8 @@ class Dictionary(db.Model):
     '''
     def insertDictionary(self):
         response = 200;
+        query_log = Log.createLog(u'Insert', u'插入数据{id:' + self.id + ',name:' + self.name +
+            ',type:' + DictionaryType.getNameById(self.type_id) + '}')
         try:
             if(Dictionary.query.filter_by(id = self.id).first() != None):
                 response = 300;
@@ -188,7 +222,9 @@ class Dictionary(db.Model):
             raise e;
             db.session.rollback();
             response = 500;
+            query_log.setStatus(False)
         finally:
+            query_log.insertLog()
             return response;
 
     @classmethod

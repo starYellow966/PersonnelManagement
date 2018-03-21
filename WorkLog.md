@@ -29,3 +29,12 @@ $.ajax({
 工作线程执行完异步任务后把对应的回调函数封装成一条消息放入消息队列中，主线程不断执行从消息队列取消息，执行的过程。
 例如$.ajax()发送异步请求，在工作线程接受到响应后就对应的回调函数封装成一条消息放入消息队列中
 ```
+
+
+###Flask.request###
+简单地理解就是：
+1. 你的 current_user_id 应该是根据此次请求的上下文拿到的（比如从 URL 或者 session 中拿），每个请求对应的是不同的 request 上下文
+2. 虽然 request 是用 from flask import request 得到的，看起来是共同的一个全局变量，但实际上 flask 用了一个叫 thread local 的方法保证 request 是线程安全的。也就是说，即使在并发场景下，每个人拿到的 request 也是不一样的，处理起来和串行没什么区别。
+
+[参考文献](http://flask.pocoo.org/docs/0.12/quickstart/#accessing-request-data)
+还得了解flask的活动上下文

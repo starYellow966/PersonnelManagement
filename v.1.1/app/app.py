@@ -11,7 +11,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager,login_user,login_required,logout_user,current_user
 from flask_bootstrap import Bootstrap
 
-from controller import organizationBlueprint,dictionaryBlueprint
+from controller import organizationBlueprint,dictionaryBlueprint,logBlueprint
 from models import organization,dictionary,users,redirectForm
 
 app = Flask(__name__)
@@ -23,12 +23,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://hx:huangxin123456@120.79.147.15
 # LoginManager对象让程序和Flask_login一起工作
 login_manager = LoginManager();
 
-
-
-
-# 注册蓝图
-app.register_blueprint(organizationBlueprint);
-app.register_blueprint(dictionaryBlueprint);
 
 '''人事管理首页
 
@@ -45,11 +39,9 @@ def login():
     if form.validate_on_submit():
         user = users.User.query.filter_by(name = form.name.data).first();
         if (user is not None and user.password == form.pwd.data):
-            print form.remember_me.data;
             # remember 防止用户意外被退出由于浏览器的session意外被删掉
             # 与@fresh_login_required 连用
             login_user(user, remember = form.remember_me.data);
-            print current_user.id;
             flash(u'登录成功');
             next = request.args.get('next');
             # is_safe_url should check if the url is safe for redirects.
@@ -98,8 +90,15 @@ def initLoginManager():
     login_manager.needs_refresh_message = u"To protect your account, please reauthenticate to access this page."
     login_manager.needs_refresh_message_category = "info"
 
+def initBlueprint():
+    # 注册蓝图
+    app.register_blueprint(organizationBlueprint)
+    app.register_blueprint(dictionaryBlueprint)
+    app.register_blueprint(logBlueprint)
+
 if __name__ == '__main__':
     initLoginManager()
+    initBlueprint()
     login_manager.init_app(app);
     excel.init_excel(app); # required since version 0.0.7
     # Bootstrap(app)

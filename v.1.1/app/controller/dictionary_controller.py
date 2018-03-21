@@ -47,8 +47,6 @@ def listAllType():
         [json] -- 所有字典类型数据
     '''
     data = dictionary.DictionaryType.listAll();#listAll()失败时返回None
-    query_log = operate_log.Log(int(current_user.id), request.remote_addr, u'Query', u'获取所有字典类型')
-    query_log.insert_log()
     if (data == None):
         return json.dumps([]),200;
     else:
@@ -63,12 +61,13 @@ def listAllType():
 @dictionaryBlueprint.route('/listDictByTypeId', methods = ['GET'])
 @fresh_login_required
 def listDictByTypeId():
-    type_id = request.args['id'];
-    data = dictionary.Dictionary.listDictByTypeId(type_id);
+    type_id = request.args['id']
+    data = dictionary.Dictionary.listDictByTypeId(type_id)
+    # operate_log.Log.createLog(current_user.name, request.remote_addr, u'Query', 
+        # u'查询所有' + dictionary.DictionaryType.getNameById(type_id) + '数据',data == None)
     if (data == None):
-        return json.dumps([]),200;
-    else:
-        return json.dumps(data),200;
+        data = []
+    return json.dumps(data),200;
 
 '''删除字典数据
 
@@ -147,31 +146,39 @@ def dictionaryDownload():
     # print response;
     return response;
 
-'''上传excel文件
-
-TODO: 自动跳过重复信息
-:return : 成功重定向到'/seg'；反之，错误提示
-:date : 2018/3/14
-'''
 @dictionaryBlueprint.route('/unload', methods = ['POST'])
 @fresh_login_required
 def dictionaryUnload():
-    '''将excel中每行数据读取并封装成Dictionary对象
-    :return ：Organization对象或者None
+    '''上传excel文件
+    
+    TODO(hx): 自动跳过重复信息
+    
+    Decorators:
+        dictionaryBlueprint.route
+        fresh_login_required
+    
+    Returns:
+        [string] -- 成功重定向到'/seg'；反之，错误提示
+    
+    Raises:
+        e -- 所有异常
     '''
     def dictionary_init_func(row):
         seg = dictionary.Dictionary(row[u'编号'], row[u'名称'], int(request.form['unload_type_id']));
         #当创建失败seg==None
-        print seg;
+        # print seg;
         return seg;
-
+    insert_log = operate_log.Log.createLog(u'Batch', u'向' + dictionary.DictionaryType.getNameById(request.form['unload_type_id']) + u'批量导入')
     try:
         request.save_book_to_database(field_name='file',session=dictionary.Dictionary.getSession(),
             tables=[dictionary.Dictionary],initializers=[dictionary_init_func]);
+        insert_log.insertLog()
         return redirect(url_for('dictionaryBlueprint.index'));
     except Exception as e:
         #FIXME：当sheet名不等于表名时，会报‘No suitable database adapter found!’
         raise e;
+        insert_log.setStatus(False)
+        insert_log.insertLog()
         return "文件上传失败，请检查excel文件，其中不能修改sheet名，编号不能重复";
 
 '''返回一个装有所有Dictionary表数据的excel文件
