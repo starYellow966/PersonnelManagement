@@ -41,7 +41,8 @@ def login():
         if (user is not None and user.password == form.pwd.data):
             # remember 防止用户意外被退出由于浏览器的session意外被删掉
             # 与@fresh_login_required 连用
-            login_user(user, remember = form.remember_me.data);
+            # login_user(user, remember = form.remember_me.data);
+            login_user(user)
             flash(u'登录成功');
             next = request.args.get('next');
             # is_safe_url should check if the url is safe for redirects.

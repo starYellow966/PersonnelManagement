@@ -1,20 +1,20 @@
-create table if not exists OrganizationType(
-id varchar(30) primary key,
-name varchar(50) unique
-)CHARSET=utf8;
+-- create table if not exists OrganizationType(
+-- id varchar(30) primary key,
+-- name varchar(50) unique
+-- )CHARSET=utf8;
 
-create table if not exists Organization(
-id varchar(30) primary key,
-name varchar(50) unique,
-type_id varchar(30) not null,
-parent_id varchar(30) not null,
-foreign key (type_id) references OrganizationType(id)
-on delete cascade
-on update cascade,
-foreign key (parent_id) references Organization(id)
-on delete cascade
-on update cascade
-)CHARSET=utf8;
+-- create table if not exists Organization(
+-- id varchar(30) primary key,
+-- name varchar(50) unique,
+-- type_id varchar(30) not null,
+-- parent_id varchar(30) not null,
+-- foreign key (type_id) references OrganizationType(id)
+-- on delete cascade
+-- on update cascade,
+-- foreign key (parent_id) references Organization(id)
+-- on delete cascade
+-- on update cascade
+-- )CHARSET=utf8;
 
 create table if not exists DictionaryType(
 id int primary key AUTO_INCREMENT,
@@ -55,3 +55,23 @@ ip_address varchar(20) not null,
 event_type varchar(20) not null,
 info varchar(100)
 )CHARSET=utf8;
+
+create table if not exists Organization(
+id varchar(20) primary key,
+name varchar(50) unique,
+status tinyint(1) not null, --0代表虚拟节点，1代表实节点；如name=车间就是虚拟节点
+level tinyint not null,
+parent_id varchar(20),
+num int ,
+foreign key(parent_id) references Organization(id)
+on delete cascade
+on update cascade
+)CHARSET=utf8;
+
+insert into Organization(id,name,status,level) values('0000000','成都客运段',0,0);
+insert into Organization(id,name,status,level,parent_id,num) values('0000001','段领导',0,1,'0000000',0);
+insert into Organization(id,name,status,level,parent_id,num) values('0000002','车间',0,1,'0000000',1);
+insert into Organization(id,name,status,level,parent_id,num) values('0000003','成都车队',1,2,'0000002',0);
+insert into Organization(id,name,status,level,parent_id,num) values('0000004','成都1队',1,3,'0000003',0);
+insert into Organization(id,name,status,level,parent_id,num) values('0000005','段长',1,3,'0000001',0);
+insert into Organization(id,name,status,level,parent_id,num) values('0000006','副段长',1,3,'0000001',1);
