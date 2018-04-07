@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% extends "base.html" %}
+    {% block head %}
+        {{ super() }}
+    {% endblock head%}
+</head>
+<body>
+    {% block body %}
+        {% block top_nav %}
+            {{ super() }}
+        {% endblock top_nav %}
+
+        {% block left_nav %}
+            {{ super() }}
+        {% endblock left_nav %}
+
+        <div class="container">
+            <!-- 树状结构 -->
+            <div class="col-sm-4" id="tree" ></div>
+            <!-- 树状结构end -->
+            <div class="col-sm-8" id="tableview">
+                
+            </div>
+        </div>
+
+        {% block base_script %}
+            {{ super() }}
+            <script src="../static/js/bootstrap-treeview.js"></script>
+            <script src="../static/js/bootstrap-table.js"></script>
+            <script src="../static/js/bootstrap-select.js"></script>
+            <script src="../static/js/jquery.form.js"></script>
+            <script src="../static/js/bootstrap-table-export.js"></script>
+            <script src="../static/js/tableExport.js"></script><!-- bootstrap table本身是没有实现表格的导出的，需要扩展插件tableExport，扩展的tableExport在导出csv，txt，sql，json等格式的时候能很好的支持中文 -->
+        {% endblock base_script %}
+
+        <script>
+            $(document).ready(function(){
+                $.ajax({
+                    type: 'get',
+                    url: '/employee/treeAll',
+                    success: function(data){
+                        // $(tab) = $('#type_tab');
+                        var text = "";
+                        // 转换为json对象
+                        var dataObj=eval("("+data+")");
+                        // alert(dataObj);
+                        $('#tree').treeview({
+                            levels: 9, //设置默认情况下树会展开的深层级别数量
+                            data: dataObj,
+                            expandIcon: "glyphicon glyphicon-chevron-right",
+                            collapseIcon: "glyphicon glyphicon-chevron-down",
+                            showTags: true,
+                            onNodeSelected: function(event, node){
+                                console.log(node)
+                                if(node.nodes == null && node.icon == "glyphicon glyphicon-user"){
+                                    $('#tableview').html('<form method=POST enctype=multipart/form-data action="/employee/upload"> <input type="file" name="photo"><input type="submit"></form>');
+                                }
+                                else
+                                    $('#tableview').html('');
+                            },
+                            onNodeUnselected: function(event, node){
+                                //实现点击任何部位都能收缩,不再是点击箭头才能收缩
+                                // var tree = $('#tree')
+                                // console.log(node);
+                                // if(node.state.expanded){
+                                //     tree.treeview('collapseNode', node.nodeId);
+                                // }else {
+                                //     tree.treeview('expandNode', node.nodeId);
+                                // }
+                            }
+                        })
+                    }
+                });
+            });
+        </script>
+    {% endblock body %}
+</body>
+</html>

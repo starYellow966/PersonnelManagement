@@ -1,110 +1,142 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>客运段人事管理系统</title>
-    <link rel="stylesheet" href="../static/css/bootstrap.min.css" /> 
-    <link rel="stylesheet" href="../static/css/bootstrap-table.css">
-    <link rel="stylesheet" href="../static/css/bootstrap-select.css">
-    <link rel="stylesheet" href="../static/css/bootstrap-datetimepicker.min.css" media="screen">
-    <link rel="stylesheet" href="../static/css/style.css" /> 
-    <link rel="stylesheet" href="../static/css/sidebar-menu.css">
-    <link rel="stylesheet" href="http://cdn.bootcss.com/font-awesome/4.6.0/css/font-awesome.min.css">
-
-</style>
-  <!--[if IE]>
-    <script src="http://libs.useso.com/js/html5shiv/3.7/html5shiv.min.js"></script>
-<![endif]-->
+    {% extends "base.html" %}
+    {% block head %}
+        {{ super() }}
+    {% endblock head%}
 </head>
 <body>
-    <nav class="navbar navbar-default navbar-fixed-top" role="navigation"> 
-        <div class="container-fluid"> 
-            <div class="navbar-header"> 
-                <a class="navbar-brand" href="/">客运段人事管理系统</a> 
-            </div> 
-            <ul class="nav navbar-nav navbar-right"> 
-                <!-- <li><a href="#"><span class="glyphicon glyphicon-user"></span> 注册</a></li>  -->
-                <li><a href="#"><span class="glyphicon glyphicon-log-in"></span> 登录</a></li> 
-            </ul> 
-        </div> 
-    </nav>
-    <aside class="main-sidebar">
-        <section  class="sidebar">
-            <ul class="sidebar-menu">
-                <!-- <li class="header" style="color: white;font-size: 180%"><strong>人事管理系统</strong></li> -->
-                <li class="treeview">
-                    <a href="#">
-                        <i class="fa fa-dashboard"></i> <span>人员管理</span> <i class="fa fa-angle-left pull-right"></i>
-                    </a>
-                    <ul class="treeview-menu">
-                        <li><a href="#"><i class="fa fa-circle-o"></i> 人员信息管理</a></li>
-                        <li><a href="#"><i class="fa fa-circle-o"></i> 人员信息浏览</a></li>
-                        <!-- <li><a href="#"><i class="fa fa-circle-o"></i> 人员信息浏览</a></li> -->
-                        <!-- <li><a href="#"><i class="fa fa-circle-o"></i> 人员列表查询</a></li> -->
-                        <li><a href="#"><i class="fa fa-circle-o"></i> 人员信息统计</a></li>
-                        <li><a href="#"><i class="fa fa-circle-o"></i> 人员变动管理</a></li>
-                    </ul>
-                </li>
-                <li class="treeview">
-                    <a href="#">
-                        <i class="fa fa-laptop"></i>
-                        <span>数据标准管理</span>
-                        <i class="fa fa-angle-left pull-right"></i>
-                    </a>
-                    <ul class="treeview-menu">
-                        <li><a href="/dict"><i class="fa fa-circle-o"></i> 数据字典管理</a></li>
-                        <li><a href="/org"><i class="fa fa-circle-o"></i> 组织机构管理</a></li>
-                    </ul>
-                </li>
-                <li class="treeview">
-                    <a href="#">
-                        <i class="fa fa-pie-chart"></i>
-                        <span>统计分析</span>
-                        <i class="fa fa-angle-left pull-right"></i>
-                    </a>
-                    <ul class="treeview-menu">
-                        <li><a href="#"><i class="fa fa-circle-o"></i> 人员变动统计</a></li>
-                    </ul>
-                </li>
-                <li class="treeview">
-                    <a href="#">
-                        <i class="fa fa-edit"></i> <span>系统管理</span>
-                        <i class="fa fa-angle-left pull-right"></i>
-                    </a>
-                    <ul class="treeview-menu">
-                        <li><a href="#"><i class="fa fa-circle-o"></i> 系统日志管理</a></li>
-                        <li><a href="#"><i class="fa fa-circle-o"></i> 登录用户管理</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </section>
-    </aside>
-    
-    <div class="container">
-        <!-- 标签栏 -->
-        <ul id="titleTab" class="nav nav-tabs"> 
-            <li class="active"><a href="#" data-toggle="tab">首页</a></li>
-            <li ><a href="/org/seg">客运段</a></li>
-            <li><a href="/org/work">车间</a></li>
-            <li><a href="/org/team">班组</a></li>
-        </ul>
-        
-    </div>
+    {% block body %}
+        {% block top_nav %}
+            {{ super() }}
+        {% endblock top_nav %}
 
-    <script src="../static/js/jquery-2.1.1.min.js"></script>
-    <script src="../static/js/bootstrap.min.js"></script>
-    <script src="../static/js/bootstrap-table.js"></script>
-    <script src="../static/js/bootstrap-select.js"></script>
-    <!-- <script src="../static/js/bootstrap-datetimepicker.js" charset="UTF-8"></script>
-        <script src="../static/js/bootstrap-datetimepicker.zh-CN.js" charset="UTF-8"></script> -->
-        <script src="../static/js/sidebar-menu.js"></script>
-        <script src="../static/js/bootstrap-table-export.js"></script>
-        <script src="../static/js/tableExport.js"></script><!-- bootstrap table本身是没有实现表格的导出的，需要扩展插件tableExport，扩展的tableExport在导出csv，txt，sql，json等格式的时候能很好的支持中文 -->
+        {% block left_nav %}
+            {{ super() }}
+        {% endblock left_nav %}
+
+        <div class="container">
+            <div class="col-sm-4" id="tree" ></div>
+            <!-- 表格区域 -->
+            <div class="col-sm-8">
+                <!-- 表格的工具栏 -->
+                <div id="table_toolbar" class="btn-group">
+                    <button id="btn_addSeg" class="btn btn-default" onclick="initInsertModalFunc()">
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>新增
+                    </button>
+                    <button id="btn_removeSeg" class="btn btn-default" onclick="removeDictionarysFunc()">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>删除
+                    </button>
+                    <!-- 批处理下拉按钮 -->
+                    <div class="btn-group">
+                        <button id="btn_batch" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                            <span class="glyphicon glyphicon-import" aria-hidden="true"></span>批处理
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" id="download_btn">下载格式文件</a></li>
+                            <li><a href="#unloadModal" data-toggle="modal">批量上传数据</a></li>
+                        </ul>
+                    </div>
+                </div><!-- 表格的工具栏end -->
+
+                <table id="table"></table>
+
+            </div><!-- 表格区域end -->
+        </div>
+
+        {% block base_script %}
+            {{ super() }}
+            <script src="../static/js/bootstrap-treeview.js"></script>
+            <script src="../static/js/bootstrap-table.js"></script>
+            <script src="../static/js/bootstrap-select.js"></script>
+            <script src="../static/js/jquery.form.js"></script>
+            <script src="../static/js/bootstrap-table-export.js"></script>
+            <script src="../static/js/tableExport.js"></script><!-- bootstrap table本身是没有实现表格的导出的，需要扩展插件tableExport，扩展的tableExport在导出csv，txt，sql，json等格式的时候能很好的支持中文 -->
+        {% endblock base_script %}
 
         <script>
-            $.sidebarMenu($('.sidebar-menu'))
+            $(document).ready(function(){
+                $.ajax({
+                    type: 'get',
+                    url: '/org/treeAll',
+                    success: function(data){
+                        // $(tab) = $('#type_tab');
+                        var text = "";
+                        // 转换为json对象
+                        var dataObj=eval("("+data+")");
+                        // alert(dataObj);
+                        $('#tree').treeview({
+                            levels: 9, //设置默认情况下树会展开的深层级别数量
+                            data: dataObj,
+                            expandIcon: "glyphicon glyphicon-chevron-right",
+                            collapseIcon: "glyphicon glyphicon-chevron-down",
+                            showTags: true,
+                            onNodeSelected: function(event, node){
+                                $('#table').bootstrapTable('refresh',{url:'/org/listChildsByName?name=' + node.text});
+                            },
+                            onNodeUnselected: function(event, node){
+                                //实现点击任何部位都能收缩,不再是点击箭头才能收缩
+                                // var tree = $('#tree')
+                                // console.log(node);
+                                // if(node.state.expanded){
+                                //     tree.treeview('collapseNode', node.nodeId);
+                                // }else {
+                                //     tree.treeview('expandNode', node.nodeId);
+                                // }
+                            }
+                        })
+                    }
+                });
+                $('#table').bootstrapTable({
+                    toolbar:'#table_toolbar',
+                    search: true, //是否显示 搜索框
+                    showColumns: true, //是否显示 选择显示列按钮
+                    pagination: true, //设置分页
+                    pageList: [25,50,100],
+                    pageSize: 25,
+                    idField: 'id', //重要,可设置checkbox的值为指定字段
+                    selectItemName: 'id', //设置checkbox name属性，可用于遍历获取选中值
+                    clickToSelect: true, //将在点击行时，自动选择checkbox
+                    striped: true, //是否显示 表格条纹
+                    showExport: true, //是否显示导出按钮
+                    exportDataType: 'basic',//FIXME:导出文件方式  支持: 'basic', 'all', 'selected'. basic：本页数据，all，获取服务器所有数据，selected,本页选择行数据
+                    Icon: 'glyphicon-export', //导出的图标设置
+                    exportOptions:{ //导出文件格式设置
+                        ignoreColumn: [0,5],
+                        fileName: '客运段信息表'+new Date().getFullYear() + (new Date().getMonth() + 1) + new Date().getDate()
+                    },
+                    columns: [{
+                        checkbox: true,
+                    }, {
+                        field: 'id',
+                        title: '编号',
+                        sortable: true
+                    }, {
+                        field: 'name',
+                        title: '名称',
+                        sortable: true
+                    }, {
+                        field: 'parent_name',
+                        title: '所属上级',
+                        sortable: true
+                    }, {
+                        field: 'num',
+                        title: '序号',
+                        sortable: true,
+                    }, {
+                        field: 'operation',
+                        title: '操作',
+                        align: 'center',
+                        valign: 'middle',
+                        formatter: function(value, row, index){
+                            return "<a href='#' data-toggle='modal' onclick='initEditModalFunc(\""+row.id+"\",\""+row.name+"\",\""+row.parent_name+"\")'>修改</a> " + 
+                            " <a href='#' onclick='removeSegmentRequest(\""+row.id+"\")' >删除</a>"
+                        }
+                    }],
+                });
+            });
         </script>
-    </body>
-    </html>
+    {% endblock body %}
+</body>
+</html>

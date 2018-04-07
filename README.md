@@ -29,3 +29,7 @@
 - 好好阅读flask的官方文档，尤其是context（上下文）这块
 - cookie时间设置
 - db.session.close()的使用
+- 
+
+## 问题记录
+- 切换网络，出现异常StatementError: (sqlalchemy.exc.InvalidRequestError) Can't reconnect until invalid transaction is rolled back [SQL: u'SELECT `User`.id AS `User_id`, `User`.name AS `User_name`, `User`.password AS `User_password` \nFROM `User` \nWHERE `User`.id = %s'] [parameters: [{'%(78380168 param)s': 1}]]

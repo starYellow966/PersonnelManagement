@@ -12,6 +12,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://hx:huangxin123456@120.79.147.151/gdesignV1_1?charset=utf8';
 db = SQLAlchemy(app)
 
+
 class TreeNode:
     '''树节点类
     
@@ -20,17 +21,20 @@ class TreeNode:
         parent_id {string} -- 父亲节点编号
         text {string} -- 名称
         node {List<TreeNode>} -- 子节点
+        icon {str} -- 图标
     '''
     id = ""
     parent_id = ""
     text = ""
-    nodes = None
+    nodes = []
+    icon = ""
 
-    def __init__(self, id, parent_id, text, nodes = None):
+    def __init__(self, id, parent_id, text, nodes = []):
         self.id = id
         self.parent_id = parent_id
         self.text = text
         self.nodes = nodes
+        self.icon = "glyphicon glyphicon-bed"
     def __repr__(self):
         return u'id:{},text:{}, nodes:{}' .format(self.id, self.text, self.nodes)
 
@@ -67,14 +71,13 @@ class TreeNode:
         '''
         try:
             result = []
-            if self.nodes == None :
+            if len(self.nodes) == 0 :
                 return
             for x in self.nodes:
                 # temp = json.dumps(x.__dict__)
                 temp = x.__dict__
-                del temp['id']
                 del temp['parent_id']
-                if temp['nodes'] == None:
+                if len(temp['nodes']) == 0:
                     del temp['nodes']
                 result.append(temp)
             self.nodes = result
@@ -127,7 +130,7 @@ class Organization(db.Model):
 
     @classmethod
     def getNameById(cls, id):
-        '''通过id获得名称
+        '''通过待查询的组织编号获得待查询的组织名称
         
         Arguments:
             id {string} -- 待查询的组织编号
@@ -148,19 +151,29 @@ class Organization(db.Model):
             return name
 
     @classmethod
-    def listAll(cls):
+    def listAll(cls, level_direction=False):
         '''获得组织表中所有数据，且封装成list
-        根据level降序排列
+        根据level_direction的值决定结果按level值升序或降序排列
         
+        Keyword Arguments:
+            level_direction {bool} -- false代表结果按level升序排列 (default: {False})
+
         Returns:
             [list<Organization>] -- 组织表中所有数据
         
         Raises:
             e -- 所有异常
+        
+        
         '''
         result = None
         try:
-            result = Organization.query.order_by(Organization.level.desc()).all()
+            if level_direction :
+                #先按level降序再按num升序
+                result = Organization.query.order_by(Organization.level.desc(), Organization.num).all()
+            else:
+                #先按level升序再按num升序
+                result = Organization.query.order_by(Organization.level, Organization.num).all()
         except Exception as e:
             raise e
             result = None
@@ -171,9 +184,10 @@ class Organization(db.Model):
     def treeAll(cls):
         '''获得组织表中所有数据，并以tree形结构展示
 
-        思路：从小往上一层层建树
+        思路：从下往上一层层建树
         首先获取最后一层的节点child_list，然后获取倒数第二层的节点cur_list，通过parent_id将child_list连接到cur_list中
         然后让child_list=cur_list，再将上一层的节点放入cur_list，依此类推。
+        注意：每次成功为一个节点链接上孩子后，还需要将孩子从TreeNode转换成dict
         
         Returns:
             [TreeNode] -- 根节点
@@ -192,19 +206,20 @@ class Organization(db.Model):
             cur_list = child_list
             # 逐层向上连接成树
             while cur_level >= 0:
+                '''
+                1.获得child_list上一层的所有组织机构信息，存放在cur_list
+                2.循环cur_list，为这层的每一个组织机构从child_list中选出属于自己的孩子，并连接在自己的nodes中,链接后将孩子从TreeNode转换成dict
+                3.循环结束后，将cur_list赋值给child_list
+                '''
                 cur_list = TreeNode.convert(Organization.query.filter_by(level = cur_level).order_by(Organization.num).all())
-                # print cur_list
-                # print child_list
-                # print "================="
                 #循环遍历当前层级的所有节点
                 for cur in cur_list:
-                    #表示当前没有待寻亲的节点
-                    if len(child_list) == 0 :
-                        break;
-                    cur.nodes = cur.findChild(child_list)
-                    #从待寻亲的节点中删除已经找到父亲的节点
-                    for child in cur.nodes:
-                        child_list.remove(child)
+                    #表示当前还有待寻亲的节点
+                    if len(child_list) > 0 :
+                        cur.nodes = cur.nodes + cur.findChild(child_list)
+                        #从待寻亲的节点中删除已经找到父亲的节点
+                        for child in cur.nodes:
+                            child_list.remove(child)
                     cur.convertToDict()
                     # print cur
                 child_list = cur_list
@@ -214,8 +229,28 @@ class Organization(db.Model):
             del root['id']
             del root['parent_id']
         except Exception as e:
+            print e
             raise e
             root = None
         finally:
             return root
 
+    def listChilds(self):
+        '''返回子节点
+        
+        根据当前节点的name，利用广度遍历全局变量获得其所有的子节点
+        '''
+        # child_list = None
+        # try:
+        #     all_nodes = Organization.listAll(False) #按广度遍历排序好的结果
+        #     cur_organization = Organization.query.filter_by(name = self.name).first()
+        #     if len(all_nodes) > 0 :
+        #         index = all_nodes.index(cur_organization) #不存在时抛ValueError
+        #         nodes_list = all_nodes[index + 1 :] #只有排在当前节点后面的节点才可能是其子节点
+        #         if len(nodes_list) > 0 :
+                    
+                
+        # except Exception as e:
+        #     raise e
+        # finally:
+        #     return child_list

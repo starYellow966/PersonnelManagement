@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #上面注释是为了告诉Python解释器，按照UTF-8编码读取源代码
-import sys 
+import sys,os
 reload(sys);
 sys.setdefaultencoding("utf-8");
 
@@ -9,20 +9,49 @@ from flask import Flask,render_template,Blueprint,request,flash,redirect,url_for
 import flask_excel as excel #excel操作工具包
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager,login_user,login_required,logout_user,current_user
+from flask_uploads import UploadSet,IMAGES,configure_uploads,patch_request_class
 from flask_bootstrap import Bootstrap
 
-from controller import organizationBlueprint,dictionaryBlueprint,logBlueprint
-from models import organization,dictionary,users,redirectForm
+from controller import organizationBlueprint,dictionaryBlueprint,logBlueprint,employeeBlueprint
+from models import organization,dictionary,users,redirectForm,employee
 
 app = Flask(__name__)
 # auth = HTTPBasicAuth()
 app.config['SECRET_KEY'] = 'i do not know how to use this one'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://hx:huangxin123456@120.79.147.151/gdesignV1_1?charset=utf8';
+
+print os.getcwd()
+app.config['UPLOADED_PHOTOS_DEST'] = os.getcwd()
+
+photos = UploadSet('photos', IMAGES)
+configure_uploads(app, photos)
+patch_request_class(app)
+
+configure_uploads(app, photos)
 # db = SQLAlchemy(app)
 
 # LoginManager对象让程序和Flask_login一起工作
 login_manager = LoginManager();
 
+
+html = '''
+    <!DOCTYPE html>
+    <title>Upload File</title>
+    <h1>图片上传</h1>
+    <form method=post enctype=multipart/form-data>
+         <input type=file name=photo>
+         <input type=submit value=上传>
+    </form>
+    '''
+
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST' and 'photo' in request.files:
+        filename = photos.save(request.files['photo'])
+        file_url = photos.url(filename)
+        return html + '<br><img src=' + file_url + '>'
+    return html
 
 '''人事管理首页
 
@@ -96,6 +125,7 @@ def initBlueprint():
     app.register_blueprint(organizationBlueprint)
     app.register_blueprint(dictionaryBlueprint)
     app.register_blueprint(logBlueprint)
+    app.register_blueprint(employeeBlueprint)
 
 if __name__ == '__main__':
     initLoginManager()

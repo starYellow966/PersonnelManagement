@@ -73,5 +73,41 @@ insert into Organization(id,name,status,level,parent_id,num) values('0000001','�
 insert into Organization(id,name,status,level,parent_id,num) values('0000002','车间',0,1,'0000000',1);
 insert into Organization(id,name,status,level,parent_id,num) values('0000003','成都车队',1,2,'0000002',0);
 insert into Organization(id,name,status,level,parent_id,num) values('0000004','成都1队',1,3,'0000003',0);
-insert into Organization(id,name,status,level,parent_id,num) values('0000005','段长',1,3,'0000001',0);
-insert into Organization(id,name,status,level,parent_id,num) values('0000006','副段长',1,3,'0000001',1);
+insert into Organization(id,name,status,level,parent_id,num) values('0000005','段长',1,2,'0000001',0);
+insert into Organization(id,name,status,level,parent_id,num) values('0000006','副段长',1,2,'0000001',1);
+
+-- 打算创建一个简单的员工信息表和一个详细的员工信息表
+-- 两者区别：前者用于树状结构，因为树状结构需要的字段少；后者用于展示详情
+create table if not exists Employee(
+id varchar(20) primary key,
+name varchar(30) not null,
+org_id varchar(20) not null, --所属部门
+foreign key(org_id) references Organization(id)
+on delete cascade
+on update cascade,
+emp_type varchar(30) , --用工性质
+unit varchar(10) default '成都客运段', --所属单位
+)CHARSET=utf8;
+
+
+-- create table if not exists Person(
+-- id varchar(20) primary key,
+-- name varchar(30) not null,
+-- emp_typeid varchar(30) not null,
+-- unit varchar(10) not null default('成都客运段'),
+-- org_id varchar(10) not null,
+-- position_id varchar(30) not null,
+-- status varchar(10) not null,
+-- old_name varchar(30),
+-- sex tinyint(1),
+-- recordnum varchar(20),
+-- foreign key(emp_typeid) references Dictionary(id)
+-- on delete cascade
+-- on update cascade,
+-- foreign key(org_id) references Organization(id)
+-- on delete cascade
+-- on update cascade,
+-- foreign key(position_id) references Dictionary(id)
+-- on delete cascade
+-- on update cascade
+-- )CHARSET=utf8;

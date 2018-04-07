@@ -1,8 +1,10 @@
-from dictionary import DictionaryType,Dictionary
-from operate_log import Log
+# -*- coding: utf-8 -*-
+# from dictionary import DictionaryType,Dictionary
+# from operate_log import Log
 from organization import Organization
-import json
-# print Organization.listAll()
-print Organization.treeAll()
-# print json.dumps([])
-# print json.dumps(Organization.treeAll())
+from employee import Employee
+
+for x in Employee.query.with_entities(Employee.id, Employee.name).all():
+    print x.id
+    print x.name
+

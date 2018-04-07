@@ -5,6 +5,7 @@ sys.setdefaultencoding("utf-8");
 
 from flask import Flask,Blueprint,render_template,request,redirect,url_for
 import flask_excel as excel #excel操作工具包
+from flask_login import login_required,fresh_login_required,current_user
 import json
 
 sys.path.append("..");#修改路径，为了引用models包
@@ -19,12 +20,14 @@ organizationBlueprint = Blueprint('organizationBlueprint', __name__, template_fo
 :return : 首页
 :date : 2018/3/13
 '''
+@fresh_login_required
 @organizationBlueprint.route('/')
 def index():
     #TODO: 组织管理首页未完成
     # return render_template('organizationindex.html');
-    return render_template('test.html')
+    return render_template('organizationindex.html')
 
+@fresh_login_required
 @organizationBlueprint.route('/treeAll')
 def treeAll():
     '''返回组织表中所有数据，
@@ -36,3 +39,13 @@ def treeAll():
         organizationBlueprint.route
     '''
     return json.dumps([organization.Organization.treeAll()])
+
+@fresh_login_required
+@organizationBlueprint.route('/listChildsByName')
+def listChildsByParentName():
+    '''根据节点名称返回它所有孩子节点
+    
+    Decorators:
+        organizationBlueprint.route
+    '''
+    request.args['name']

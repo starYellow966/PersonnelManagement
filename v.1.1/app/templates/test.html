@@ -1,149 +1,164 @@
-<!DOCTYPE html>
-<html>
-<head>
-    {% extends "base.html" %}
-    {% block head %}
-        {{ super() }}
-    {% endblock head%}
-</head>
-<body>
-    {% block body %}
-        {% block top_nav %}
-            {{ super() }}
-        {% endblock top_nav %}
-
-        {% block left_nav %}
-            {{ super() }}
-        {% endblock left_nav %}
-
-        <div class="container">
-            <div class="col-sm-4" id="tree" ></div>
-            <!-- 表格区域 -->
-            <div class="col-sm-8">
-                <!-- 表格的工具栏 -->
-                <div id="table_toolbar" class="btn-group">
-                    <button id="btn_addSeg" class="btn btn-default" onclick="initInsertModalFunc()">
-                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>新增
-                    </button>
-                    <button id="btn_removeSeg" class="btn btn-default" onclick="removeDictionarysFunc()">
-                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>删除
-                    </button>
-                    <!-- 批处理下拉按钮 -->
-                    <div class="btn-group">
-                        <button id="btn_batch" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                            <span class="glyphicon glyphicon-import" aria-hidden="true"></span>批处理
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a href="#" id="download_btn">下载格式文件</a></li>
-                            <li><a href="#unloadModal" data-toggle="modal">批量上传数据</a></li>
-                        </ul>
-                    </div>
-                </div><!-- 表格的工具栏end -->
-
-                <table id="table"></table>
-
-            </div><!-- 表格区域end -->
-        </div>
-
-        {% block base_script %}
-            {{ super() }}
-            <script src="../static/js/bootstrap-treeview.js"></script>
-            <script src="../static/js/bootstrap-table.js"></script>
-            <script src="../static/js/bootstrap-select.js"></script>
-            <script src="../static/js/jquery.form.js"></script>
-            <script src="../static/js/bootstrap-table-export.js"></script>
-            <script src="../static/js/tableExport.js"></script><!-- bootstrap table本身是没有实现表格的导出的，需要扩展插件tableExport，扩展的tableExport在导出csv，txt，sql，json等格式的时候能很好的支持中文 -->
-        {% endblock base_script %}
-
-        <script>
-            var text = [{"nodes": [{"nodes": [{"text": "\u6bb5\u957f"}, {"text": "\u526f\u6bb5\u957f"}], "text": "\u6bb5\u9886\u5bfc"}, {"nodes": [{"nodes": [{"text": "\u6210\u90fd1\u961f"}], "text": "\u6210\u90fd\u8f66\u961f"}], "text": "\u8f66\u95f4"}], "text": "\u6210\u90fd\u5ba2\u8fd0\u6bb5"}];
-            $(document).ready(function(){
-                $.ajax({
-                    type: 'get',
-                    url: '/org/treeAll',
-                    success: function(data){
-                        // $(tab) = $('#type_tab');
-                        var text = "";
-                        // 转换为json对象
-                        var dataObj=eval("("+data+")");
-                        // alert(dataObj);
-                        $('#tree').treeview({
-                            levels: 9, //设置默认情况下树会展开的深层级别数量
-                            data: dataObj,
-                            expandIcon: "glyphicon glyphicon-chevron-right",
-                            collapseIcon: "glyphicon glyphicon-chevron-down",
-                            nodeIcon: "glyphicon glyphicon-user",
-                            showTags: true,
-                            onNodeSelected: function(event, node){
-                                //实现点击任何部位都能收缩,不再是点击箭头才能收缩
-                                var tree = $('#tree')
-                                if(node.state.expanded){
-                                    tree.treeview('collapseNode', node.nodeId);
-                                }else {
-                                    tree.treeview('expandNode', node.nodeId);
-                                }
-                            },
-                            onNodeUnselected: function(event, node){
-                                //实现点击任何部位都能收缩,不再是点击箭头才能收缩
-                                var tree = $('#tree')
-                                if(node.state.expanded){
-                                    tree.treeview('collapseNode', node.nodeId);
-                                }else {
-                                    tree.treeview('expandNode', node.nodeId);
-                                }
-                            }
-                        })
-                    }
-                });
-                $('#table').bootstrapTable({
-                    toolbar:'#table_toolbar',
-                    search: true, //是否显示 搜索框
-                    showColumns: true, //是否显示 选择显示列按钮
-                    pagination: true, //设置分页
-                    pageList: [25,50,100],
-                    pageSize: 25,
-                    idField: 'id', //重要,可设置checkbox的值为指定字段
-                    selectItemName: 'id', //设置checkbox name属性，可用于遍历获取选中值
-                    clickToSelect: true, //将在点击行时，自动选择checkbox
-                    striped: true, //是否显示 表格条纹
-                    showExport: true, //是否显示导出按钮
-                    exportDataType: 'basic',//FIXME:导出文件方式  支持: 'basic', 'all', 'selected'. basic：本页数据，all，获取服务器所有数据，selected,本页选择行数据
-                    Icon: 'glyphicon-export', //导出的图标设置
-                    exportOptions:{ //导出文件格式设置
-                        ignoreColumn: [0,5],
-                        fileName: '客运段信息表'+new Date().getFullYear() + (new Date().getMonth() + 1) + new Date().getDate()
-                    },
-                    columns: [{
-                        checkbox: true,
-                    }, {
-                        field: 'id',
-                        title: '编号',
-                        sortable: true
-                    }, {
-                        field: 'name',
-                        title: '名称',
-                        sortable: true
-                    }, {
-                        field: 'parent_name',
-                        title: '所属上级',
-                        sortable: true
-                    }, {
-                        field: 'num',
-                        title: '序号',
-                        sortable: true,
-                    }, {
-                        field: 'operation',
-                        title: '操作',
-                        align: 'center',
-                        valign: 'middle',
-                        formatter: function(value, row, index){
-                            return "<a href='#' data-toggle='modal' onclick='initEditModalFunc(\""+row.id+"\",\""+row.name+"\",\""+row.parent_name+"\")'>修改</a> " + 
-                            " <a href='#' onclick='removeSegmentRequest(\""+row.id+"\")' >删除</a>"
-                        }
-                    }],
-                });
-            });
-        </script>
-    {% endblock body %}
-</body>
-</html>
+<table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin:5px;">
+      <tr>
+          <td height="30px;">
+          <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td width="97%" height="35" bgcolor="#FAF7EB"><p align="center"><font style="font-size:18px; font-weight:700">西南交通大学西南交通大学学生学籍信息表</font></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td bgcolor="#6E6E6E" height=30>
+        
+          
+          
+             
+            <table border="1" width="100%" cellspacing="0" cellpadding="0" bordercolorlight="#6C6C6C" bordercolordark="#F7F7F5" id="table4">
+            <tr>
+                <td height="28" width="12%" bgcolor="#F0F9FB">&nbsp;学&nbsp;&nbsp;&nbsp;&nbsp;号</td>
+                <td height="28" width="25%" bgcolor="#ffffff">&nbsp;2014112138</td>
+                <td height="28" width="12%" bgcolor="#F0F9FB">&nbsp;姓&nbsp;&nbsp;&nbsp;&nbsp;名</td>
+                <td height="28" width="25%" bgcolor="#ffffff">&nbsp;黄鑫</td>
+                <td height="160" rowspan="6" align="center" bgcolor="#ffffff"><img src="http://jiaowu.swjtu.edu.cn:80//servlet/StudentPhotoView?UserName=2014112138" width="120" height="160"></td>
+            </tr>
+            <tr>
+                <td height="28"  bgcolor="#F0F9FB">&nbsp;英文姓名</td>
+                <td bgcolor="#ffffff">&nbsp;NULL</td>
+                <td bgcolor="#F0F9FB">&nbsp;性&nbsp;&nbsp;&nbsp;&nbsp;别</td>
+                <td bgcolor="#ffffff">&nbsp;男</td>
+            </tr>
+            <tr>
+                <td height="28"   bgcolor="#F0F9FB">&nbsp;出生年月</td>
+                <td   bgcolor="#ffffff">&nbsp;1996-07-09</td>
+                <td   bgcolor="#F0F9FB">&nbsp;学籍状态</td>
+                <td   bgcolor="#ffffff">&nbsp;
+                
+                    
+                           有学籍
+                    
+                    
+                
+                &nbsp;&nbsp;在读</td>
+            </tr>
+            <tr>
+                <td height="28" bgcolor="#F0F9FB">&nbsp;所在学院</td>
+                <td  bgcolor="#ffffff">&nbsp;信息科学与技术学院</td>
+                <td  bgcolor="#F0F9FB">&nbsp;年&nbsp;&nbsp;&nbsp;&nbsp;级</td>
+                <td  bgcolor="#ffffff">&nbsp;2014</td>
+            </tr>
+            <tr>
+                <td height="28" bgcolor="#F0F9FB">&nbsp;所在专业</td>
+                <td height="28" bgcolor="#ffffff">&nbsp;软件工程</td>
+                <td height="28" bgcolor="#F0F9FB">&nbsp;班&nbsp;&nbsp;&nbsp; 级</td>
+                <td height="28" bgcolor="#ffffff">&nbsp;软件2014-02班</td>
+            </tr>
+            <tr>
+                <td height="28"  bgcolor="#F0F9FB">&nbsp;籍&nbsp;&nbsp;&nbsp; 贯</td>
+                <td height="28" bgcolor="#ffffff">&nbsp;广东省深圳市宝安区</td>
+                <td height="28" bgcolor="#F0F9FB">&nbsp;民&nbsp;&nbsp;&nbsp; 族</td>
+                <td height="28" bgcolor="#ffffff">&nbsp;汉族</td>
+            </tr>
+            <tr>
+                <td height="28"  bgcolor="#F0F9FB">&nbsp;政治面貌</td>
+                <td height="28" bgcolor="#ffffff" >&nbsp;中国共产主义青年团团员</td>
+                <td height="28" bgcolor="#F0F9FB">&nbsp;身份证号</td>
+                <td height="28" colspan="2" bgcolor="#ffffff">&nbsp;441622199607092074</td>
+            </tr>
+            <tr>
+                <td height="28"  bgcolor="#F0F9FB">&nbsp;考 生 号</td>
+                <td height="28"  bgcolor="#ffffff">&nbsp;14440306101217</td>
+                <td height="28"  bgcolor="#F0F9FB">&nbsp;乘车区间</td>
+                <td height="28" bgcolor="#ffffff" colspan="2">&nbsp;广州</td>
+            </tr>
+            
+            <tr>
+                <td height="28"  bgcolor="#F0F9FB">&nbsp;联系电话</td>
+                <td height="28"  bgcolor="#ffffff">&nbsp;18328718993</td>
+                <td height="28"  bgcolor="#F0F9FB">&nbsp;家庭住址</td>
+                <td height="28"  bgcolor="#ffffff" colspan="2">&nbsp;广东&nbsp;河源市&nbsp;市&nbsp;广东深圳市宝安区宝安中学高中部</td>
+            </tr>
+            
+            <tr id="TR1" >
+                <td height="28" bgcolor="#F0F9FB">&nbsp;生 源 地</td>
+                <td height="28"  bgcolor="#ffffff">&nbsp;440306</td>
+                <td height="28"  bgcolor="#F0F9FB">&nbsp;毕业学校</td>
+                <td height="28"  bgcolor="#ffffff" colspan="2">&nbsp;深圳市宝安中学                </td>
+            </tr>
+            <tr id="TR2" >
+                <td height="28" bgcolor="#F0F9FB">&nbsp;考生类别</td>
+                <td height="28"  bgcolor="#ffffff">&nbsp;第一批次本科</td>
+                <td height="28" bgcolor="#F0F9FB">&nbsp;录取形式</td>
+                <td height="28"  bgcolor="#ffffff" colspan="2">&nbsp;理科</td>
+            </tr>
+            <tr id="TR3" >
+                <td height="28"  bgcolor="#F0F9FB">&nbsp;外语语种</td>
+                <td height="28"  bgcolor="#ffffff">&nbsp;英语</td>
+                <td height="28"  bgcolor="#F0F9FB">&nbsp;入学时间</td>
+                <td height="28"  bgcolor="#ffffff" colspan="2">&nbsp;2014-09-01</td>
+            </tr>
+            <tr id="TR3" >
+                <td height="28"  bgcolor="#F0F9FB">&nbsp;双学位专业</td>
+                <td height="28"  bgcolor="#ffffff">&nbsp;</td>
+                <td height="28"  bgcolor="#F0F9FB">&nbsp;特殊学生标记</td>
+                <td height="28"  bgcolor="#ffffff" colspan="2">&nbsp;<font color=red></font></td>
+            </tr>
+            <tr id="TR4" style="display:none" >
+                <td height="28"  bgcolor="#F0F9FB">&nbsp;宿 舍 号</td>
+                <td height="28"  bgcolor="#ffffff">&nbsp;</td>
+                <td height="28"  bgcolor="#F0F9FB">&nbsp;宿舍电话</td>
+                <td height="28"  bgcolor="#ffffff" colspan="2">&nbsp;</td>
+            </tr>
+            <tr id="TR5" style="display:none" >
+                <td height="28"  bgcolor="#F0F9FB">&nbsp;母亲电话</td>
+                <td height="28"  bgcolor="#ffffff">&nbsp;</td>
+                <td height="28"  bgcolor="#F0F9FB">&nbsp;父亲电话</td>
+                <td height="28"  bgcolor="#ffffff" colspan="2">&nbsp;</td>
+            </tr>
+            <tr id="TR6" style="display:none" >
+                <td height="28" width="105" bgcolor="#F0F9FB">&nbsp;其他电话</td>
+                <td height="28"  bgcolor="#ffffff">&nbsp;</td>
+                <td height="28"  bgcolor="#F0F9FB">&nbsp;电子邮件</td>
+                <td height="28"   bgcolor="#ffffff" colspan="2">&nbsp;</td>
+            </tr>
+            <tr id="TR7" style="display:none" >
+                <td height="28"  bgcolor="#F0F9FB">&nbsp;身&nbsp;&nbsp;&nbsp; 高</td>
+                <td height="28"  bgcolor="#ffffff">&nbsp;</td>
+                <td height="28" bgcolor="#F0F9FB">&nbsp;体重/血型</td>
+                <td height="28"  bgcolor="#ffffff" colspan="2">&nbsp;&nbsp;KG&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;血型：A</td>
+            </tr>
+            <tr id="TR8" style="display:none" >
+                <td height="28"  bgcolor="#F0F9FB">&nbsp;个人特长</td>
+                <td height="28"  bgcolor="#ffffff" colspan="4">&nbsp;</td>
+            </tr>
+            <tr id="TR9" style="display:none" >
+                <td height="28"  bgcolor="#F0F9FB">&nbsp;获奖情况</td>
+                <td height="28"  bgcolor="#ffffff" colspan="4">&nbsp;</td>
+            </tr>
+            <tr id="TR10" style="display:none" >
+                <td height="28"  width="12%" bgcolor="#F0F9FB">&nbsp;备&nbsp;&nbsp;&nbsp; 注</td>
+                <td height="28"  width="88%" bgcolor="#ffffff" colspan="4">&nbsp;596
+                
+                    
+                           <font color=blue>收费正常</font>
+                    
+                    
+                    
+                
+                </td>
+            </tr>
+            </table>
+            
+          
+        
+        </td>
+      </tr>
+      <tr class="xx">
+          <td height="35" colspan=5 bgcolor="#ffffff"><a href="javascript:ViewType('view')"><font style="font-size:13px;" color=blue face="宋体"><u>√显示该生所有信息</u></font></a>&nbsp;&nbsp;&nbsp;&nbsp; 
+          <a href="javascript:ViewType('hidden')"><font style="font-size:13px;" color=red face="宋体"><u>×只显示简要信息</u></font></a>&nbsp;&nbsp;&nbsp;&nbsp; 
+          <a href="http://jiaowu.swjtu.edu.cn:80//servlet/StudentInfoMapAction?MapID=101&PageUrl=../public/student/StudentStatusCertificate.jsp&student_id=2014112138" target=_blank><font style="font-size:13px;" face="宋体"><u>√打印学籍证明</u></font></a>&nbsp;&nbsp;&nbsp;&nbsp; 
+          <a href="javascript:window.print()"><font style="font-size:13px;"><u>√打印本页 </u></font></a>&nbsp;&nbsp;&nbsp;&nbsp; 
+          </td>
+      </tr>
+      
+    </table>
