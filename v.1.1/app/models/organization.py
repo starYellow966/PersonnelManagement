@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
 # 设置默认编码
-import sys
-reload(sys);
-sys.setdefaultencoding("utf-8");
+# import sys
+# reload(sys);
+# sys.setdefaultencoding("utf-8");
 
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
+# from flask_sqlalchemy import SQLAlchemy
 import json
-
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://hx:huangxin123456@120.79.147.151/gdesignV1_1?charset=utf8';
-db = SQLAlchemy(app)
+from extensions import db
 
 
 class TreeNode:
@@ -104,6 +101,8 @@ class Organization(db.Model):
     '''
 
     __tablename__ = 'Organization'
+
+    __table_args__ = {"extend_existing": True}
 
     id = db.Column(db.String(20), primary_key = True)
 

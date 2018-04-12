@@ -40,8 +40,8 @@
                             <span class="glyphicon glyphicon-import" aria-hidden="true"></span>批处理
                         </button>
                         <ul class="dropdown-menu">
-                            <li><a href="#" id="download_btn">下载格式文件</a></li>
-                            <li><a href="#unloadModal" data-toggle="modal">批量上传数据</a></li>
+                            <li><a href="#" id="download_btn">创建格式文件</a></li>
+                            <li><a href="#unloadModal" data-toggle="modal">批量导入数据</a></li>
                         </ul>
                     </div>
                 </div><!-- 表格的工具栏end -->
@@ -84,7 +84,7 @@
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal"
                         aria-hidden="true">&times;</button>
-                        <h4 class="modal-title" >批量上传数据</h4>
+                        <h4 class="modal-title" >批量导入数据</h4>
                     </div> <!-- modal.header -->
                     <form id="unloadModal_form" class="modal-body" action="/dict/unload" method='post' enctype='multipart/form-data'>
                         <h1>Excel file upload (xls, xlsx please)</h1>
@@ -92,7 +92,7 @@
                         <input type="hidden" id="unload_type_id" name="unload_type_id">
                         <div class="modal-footer">
                             <input type="button" class="btn btn-default" data-dismiss="modal" value="取消">
-                            <input type="submit" class="btn btn-primary" id="unloadModal_submit" name="submit" value="上传">
+                            <input type="submit" class="btn btn-primary" id="unloadModal_submit" name="submit" value="导入">
                         </div>
                     </form><!-- modal-body -->
                 </div><!-- /.modal.content -->

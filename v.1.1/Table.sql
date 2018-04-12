@@ -87,6 +87,7 @@ on delete cascade
 on update cascade,
 emp_type varchar(30) , --用工性质
 unit varchar(10) default '成都客运段', --所属单位
+photo_url varchar(200)
 )CHARSET=utf8;
 
 

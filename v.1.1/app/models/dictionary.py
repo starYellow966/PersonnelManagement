@@ -1,35 +1,35 @@
 # -*- coding: utf-8 -*-
 # 设置默认编码
-import sys
-reload(sys);
-sys.setdefaultencoding("utf-8");
+# import sys
+# reload(sys);
+# sys.setdefaultencoding("utf-8");
+# import sys
+# print sys.getdefaultencoding()
 
 from flask import Flask,request
 from flask_sqlalchemy import SQLAlchemy
 from operate_log import Log
 # from flask_login import current_user
-
-app = Flask(__name__);
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://hx:huangxin123456@120.79.147.151/gdesignV1_1?charset=utf8';
-db = SQLAlchemy(app);
+from extensions import db
 
 class DictionaryType(db.Model):
     
 
-    __tablename__ = 'DictionaryType';
+    __tablename__ = 'DictionaryType'
+    __table_args__ = {"extend_existing": True}
 
-    id = db.Column(db.Integer(), primary_key = True);
+    id = db.Column(db.Integer(), primary_key = True)
 
-    name = db.Column(db.String(50), unique = True);
+    name = db.Column(db.String(50), unique = True)
 
 
     def __init__(self, id, name):
-        super(DictionaryType, self).__init__();
+        super(DictionaryType, self).__init__()
         self.id = id;
-        self.name = name;
+        self.name = name
 
     def __repr__(self):
-        return u'<DictionaryType %d %s>' %(self.id, self.name);
+        return u'<DictionaryType %d %s>' %(self.id, self.name)
 
 
     '''返回所有字典类型
@@ -77,21 +77,22 @@ class DictionaryType(db.Model):
 
 class Dictionary(db.Model):
 
-    __tablename__ = 'Dictionary';
+    __tablename__ = 'Dictionary'
+    __table_args__ = {"extend_existing": True}
 
-    id = db.Column(db.String(30), primary_key = True);
+    id = db.Column(db.String(30), primary_key = True)
 
-    name = db.Column(db.String(50), nullable = False);
+    name = db.Column(db.String(50), nullable = False)
 
-    type_id = db.Column(db.Integer(), nullable = False);
+    type_id = db.Column(db.Integer(), nullable = False)
 
 
     """docstring for Dictionary"""
     def __init__(self, id, name, type_id):
         super(Dictionary, self).__init__()
-        self.id = id;
-        self.name = name;
-        self.type_id = type_id;
+        self.id = id
+        self.name = name
+        self.type_id = type_id
 
     def __repr__(self):
         return u'<Dictionary {0} {1} {2}>' .format(self.id, self.name, self.type_id);
@@ -109,21 +110,23 @@ class Dictionary(db.Model):
             e -- 所有异常
         '''
         dictlist = [];
-        query_log = Log.createLog(u'Query', u'查询所有' + DictionaryType.getNameById(type_id) + u'数据');
+        # query_log = Log.createLog(u'Query', u'查询所有' + DictionaryType.getNameById(type_id) + u'数据');
         try:
             results = Dictionary.query.filter_by(type_id = type_id).order_by(Dictionary.id).all();
+            # print results
             for x in results:
                 temp = x.__dict__;
                 del temp['_sa_instance_state'];
                 dictlist.append(temp);
         except Exception as e:
-            raise e;
-            db.session.rollback();
-            dictlist = None;
-            query_log.setStatus(False)
+            print e
+            raise e
+            db.session.rollback()
+            dictlist = None
+            # query_log.setStatus(False)
         finally:
-            query_log.insertLog()
-            return dictlist;
+            # query_log.insertLog()
+            return dictlist
 
     @classmethod
     def listDictByTypeName(cls, type_name):
@@ -165,22 +168,22 @@ class Dictionary(db.Model):
             e -- 所有异常
         '''
         response = 200;
-        query_log_list = [];
+        # query_log_list = [];
         try:
             for id in id_string.split(','):
                 d = Dictionary.query.filter_by(id = id).first();
-                query_log_list.append(Log.createLog(u'Delete', u'删除' + DictionaryType.getNameById(d.type_id) + '数据{id:' + d.id + ',name:' + d.name + '}'))
+                # query_log_list.append(Log.createLog(u'Delete', u'删除' + DictionaryType.getNameById(d.type_id) + '数据{id:' + d.id + ',name:' + d.name + '}'))
                 db.session.delete(d);
             db.session.commit();
         except Exception as e:
             raise e;
             db.session.rollback();
             response = 500;
-            for log in query_log_list:
-                log.setStatus(False)
+            # for log in query_log_list:
+            #     log.setStatus(False)
         finally:
-            for log in query_log_list:
-                log.insertLog()
+            # for log in query_log_list:
+            #     log.insertLog()
             return response;
 
     '''通过组织id来更新=信息，返回响应码
@@ -190,7 +193,7 @@ class Dictionary(db.Model):
     '''
     def updateDictionary(self):
         response = 200;
-        query_log = Log.createLog(u'Update', u'修改字典数据为{ id:' + self.id + ',name:' + self.name + '}')
+        # query_log = Log.createLog(u'Update', u'修改字典数据为{ id:' + self.id + ',name:' + self.name + '}')
         try:
             Dictionary.query.filter_by(id = self.id).update({'name': self.name});
             db.session.commit();
@@ -198,9 +201,9 @@ class Dictionary(db.Model):
             print e;
             db.session.rollback();
             response = 500;
-            query_log.setStatus(False)
+            # query_log.setStatus(False)
         finally:
-            query_log.insertLog()
+            # query_log.insertLog()
             return response;
 
     '''id查重并插入，返回响应码
@@ -210,8 +213,8 @@ class Dictionary(db.Model):
     '''
     def insertDictionary(self):
         response = 200;
-        query_log = Log.createLog(u'Insert', u'插入数据{id:' + self.id + ',name:' + self.name +
-            ',type:' + DictionaryType.getNameById(self.type_id) + '}')
+        # query_log = Log.createLog(u'Insert', u'插入数据{id:' + self.id + ',name:' + self.name +
+        #     ',type:' + DictionaryType.getNameById(self.type_id) + '}')
         try:
             if(Dictionary.query.filter_by(id = self.id).first() != None):
                 response = 300;
@@ -222,9 +225,9 @@ class Dictionary(db.Model):
             raise e;
             db.session.rollback();
             response = 500;
-            query_log.setStatus(False)
+            # query_log.setStatus(False)
         finally:
-            query_log.insertLog()
+            # query_log.insertLog()
             return response;
 
     @classmethod

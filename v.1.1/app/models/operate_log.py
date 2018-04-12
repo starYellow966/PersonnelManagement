@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 # 设置默认编码
-import sys
-reload(sys);
-sys.setdefaultencoding("utf-8");
+# import sys
+# reload(sys);
+# sys.setdefaultencoding("utf-8");
 
 from flask import Flask,request
 from flask_sqlalchemy import SQLAlchemy
 from users import User
 import time
 from flask_login import current_user
-
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://hx:huangxin123456@120.79.147.151/gdesignV1_1?charset=utf8'
-db = SQLAlchemy(app)
+from extensions import db
+# app = Flask(__name__)
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://hx:huangxin123456@120.79.147.151/gdesignV1_1?charset=utf8'
+# db = SQLAlchemy(app)
 
 class Log(db.Model):
     '''操作日志表
@@ -34,6 +34,8 @@ class Log(db.Model):
     '''
 
     __tablename__ = 'Log'
+
+    __table_args__ = {"extend_existing": True}
 
     id = db.Column(db.Integer(),primary_key = True)
 

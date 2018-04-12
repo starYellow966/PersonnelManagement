@@ -73,7 +73,12 @@
                             collapseIcon: "glyphicon glyphicon-chevron-down",
                             showTags: true,
                             onNodeSelected: function(event, node){
-                                $('#table').bootstrapTable('refresh',{url:'/org/listChildsByName?name=' + node.text});
+                                var childId_string = node.id;
+                                if('nodes' in node)
+                                    for (var i = 0; i < node.nodes.length; i++) 
+                                        childId_string += ',' + node.nodes[i].id;
+                                console.log(childId_string);
+
                             },
                             onNodeUnselected: function(event, node){
                                 //实现点击任何部位都能收缩,不再是点击箭头才能收缩

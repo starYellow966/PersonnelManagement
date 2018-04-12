@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 # 设置默认编码
-import sys
-reload(sys);
-sys.setdefaultencoding("utf-8");
-
-from db_helper import db
+# import sys
+# reload(sys);
+# sys.setdefaultencoding("utf-8")
+from extensions import db
 from organization import TreeNode,Organization
 
 class Employee(db.Model):
@@ -23,12 +22,17 @@ class Employee(db.Model):
     '''
 
     __tablename__ = 'Employee'
+    __table_args__ = {"extend_existing": True}
 
     id = db.Column(db.String(20), primary_key = True)
 
     name = db.Column(db.String(30), nullable = False)
 
     org_id = db.Column(db.String(20), nullable = False)
+
+    unit = db.Column(db.String(10), default= u'成都客运段')
+
+    photo_url = db.Column(db.String(100))
 
     def __init__(self, id, name, org_id):
         self.id = id
@@ -110,3 +114,42 @@ class Employee(db.Model):
         finally:
             return result
 
+
+    @classmethod
+    def updatePhoto(cls, eid, photo_url):
+        '''根据员工id更新图片
+        
+        Arguments:
+            eid {str} -- 员工id
+            photo_url {str} -- 图片路径
+        
+        Returns:
+            [int] -- 响应码。200-成功，500-失败
+        
+        Raises:
+            e -- 更新异常
+        '''
+        response = 200
+        try:
+            Employee.query.filter_by(id = eid).update({'photo_url': photo_url})
+            db.session.commit()
+        except Exception as e:
+            print e
+            raise e
+            db.session.rollback()
+            response = 500
+        finally:
+            return response
+
+    @classmethod
+    def getEmployeeById(cls, eid):
+        result = None
+        try:
+            result = Employee.query.filter_by(id = eid).first()
+        except Exception as e:
+            print e
+            raise e
+            db.session.rollback()
+            result = None
+        finally:
+            return result

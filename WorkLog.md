@@ -38,3 +38,35 @@ $.ajax({
 
 [参考文献](http://flask.pocoo.org/docs/0.12/quickstart/#accessing-request-data)
 还得了解flask的活动上下文
+
+
+### 异步上传文件
+```javascript
+$('#photo-form').submit(function(event){
+    event.preventDefault();
+    var form = $(this);
+    var formData = new FormData(this);
+    $.ajax({
+        type: 'post',
+        url: '/uploadPhoto',
+        mimeType: 'multipart/form-data',
+        data: formData,
+        contentType: false,
+        cache: false,
+        processData: false,
+        success: function(photourl){
+            alert(photourl);
+            $('img').attr('src',photourl);
+        },
+        error: function(){
+            alert('上传失败');
+        }
+    });
+});
+```
+
+### flask默认变量
+>current_app # 当前激活程序的程序实例
+>g # 处理请求时用作临时存储的对象。每次请求会重设这个变量
+>request # 请求对象，封装了客户端发出的http请求中的内容
+>session # 用户会话，用于存储请求之间需要‘记住‘的值的词典
