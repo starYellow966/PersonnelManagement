@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% extends "base.html" %}
+    {% block head %}
+        {{ super() }}
+    {% endblock head %}
+</head>
+<body>
+    {% block body %}
+        {% block top_nav %}
+            {{ super() }}
+        {% endblock top_nav %}
+
+        {% block left_nav %}
+            {{ super() }}
+        {% endblock left_nav %}
+
+        <div class="container">
+            <!-- 树状目录结构 -->
+            <div class="col-sm-4">
+                <form class="form-inline" role="form">
+                    <div class="form-group">
+                        <input type="input" class="form-control" id="input-search" placeholder="Type to search..." value="" onkeypress="searchTreeview()">
+                        <button type="button" class="btn btn-success" id="btn-search" onclick="searchTreeview()">Search</button>
+                    </div>
+                </form>
+                <!-- treeview的工具栏 -->
+                <!-- <div id="table_toolbar" >
+                    <button id="btn_addSeg" class="btn btn-default" onclick="initInsertModalFunc()">
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>新增
+                    </button>
+                    <button id="btn_removeSeg" class="btn btn-default" onclick="removeDictionarysFunc()">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>删除
+                    </button>
+                    <div class="btn-group">
+                        <button id="btn_batch" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                            <span class="glyphicon glyphicon-import" aria-hidden="true"></span>批处理
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" id="download_btn">创建格式文件</a></li>
+                            <li><a href="#unloadModal" data-toggle="modal">批量导入数据</a></li>
+                        </ul>
+                    </div>
+                </div> -->
+                <!-- treeview的工具栏end -->
+                <div id="tree"></div>
+            </div>
+            <!-- 树状结构end -->
+            <div class="col-sm-8" id="tableview">
+                <table id="employee-detail-table" class="table-setting">
+                    <!-- TODO(HX):还有字段没有添加 -->
+                    <tbody style="display: table-row-group;vertical-align: middle;padding: 10px;">
+                        <tr>
+                            <td>
+                                <div class="avatar">
+                                    <img src="" >
+                                </div>
+                            </td>
+                            <td>
+                                <form id="photo-form" class="btn btn-hollow" action="/upload" method='post' enctype='multipart/form-data'>
+                                    <input type="file" id="photo" name="photo" class="hide" onchange="UploadPhoto(this)" accept="image/*">
+                                    更换头像
+                                </form>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="setting-title">
+                                工号
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" id="person-id"  readonly="true">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="setting-title">
+                                姓名
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" id="person-name">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="setting-title">
+                                性别
+                            </td>
+                            <td>
+                                <div class="col-xs-6">
+                                    <input type="radio" name="sex-radio" id="person-sex-man" value="0"> 
+                                    <span>男</span>
+                                </div>
+                                <div class="col-xs-6">
+                                    <input type="radio" name="sex-radio" id="person-sex-woman" value="1"> 
+                                    <span>女</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="setting-title">
+                                用工性质
+                            </td>
+                            <td>
+                                <select class="selectpicker" id="person-worktype"></select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="setting-title">
+                                所属单位
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" name="" value="成都客运段" readonly="true">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="setting-title">
+                                所属部门
+                            </td>
+                            <td>
+                                <select class="selectpicker" id="person-org"></select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <button class="btn btn-success" id="person-save-button" onclick="updateEmployeeRequest()">保存</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% block base_script %}
+            {{ super() }}
+            <script src="../static/js/bootstrap-treeview.js"></script>
+            <script src="../static/js/bootstrap-table.js"></script>
+            <script src="../static/js/bootstrap-select.js"></script>
+            <script src="../static/js/jquery.form.js"></script>
+            <script src="../static/js/bootstrap-table-export.js"></script>
+            <script src="../static/js/tableExport.js"></script><!-- bootstrap table本身是没有实现表格的导出的，需要扩展插件tableExport，扩展的tableExport在导出csv，txt，sql，json等格式的时候能很好的支持中文 -->
+        {% endblock base_script %}
+
+        <script>
+            $(document).ready(function(){
+                $('#employee-detail-table').hide();
+
+                //请求treeview的数据，并加载、设置treeview的属性
+                $.ajax({
+                    type: 'get',
+                    url: '/employee/treeAll',
+                    success: function(data){
+                        var text = "";
+                        var dataObj=eval("("+data+")");// 转换为json对象
+                        initTreeview(dataObj);
+                    }
+                });           
+                initPhotoSumbit();            
+            });
+
+
+            /**
+             * 初始化treeview，加载数据，并设置属性
+             * @param  {json} dataObj treeview的数据
+             */
+            function initTreeview(dataObj){
+                $('#tree').treeview({
+                    levels: 9, //设置默认情况下树会展开的深层级别数量
+                    data: dataObj,
+                    expandIcon: "glyphicon glyphicon-chevron-right",
+                    collapseIcon: "glyphicon glyphicon-chevron-down",
+                    showTags: true,
+                    showBorder: false, //不显示边框
+                    onNodeSelected: function(event, node){
+                        /**
+                         * 选中某一项时，先判断选中是否一个员工
+                         * 如果是员工，请求员工的数据
+                         */
+                        console.log(node)
+                        //选中一个员工，则发送请求
+                        if(node.nodes == null && node.icon == "glyphicon glyphicon-user"){
+                            $.ajax({
+                                type: 'get',
+                                url: '/employee/getemployeebyid',
+                                data: {id: node.id},
+                                success: function(data){
+                                    //请求成功后，服务器传回员工详细数据
+                                    var dataObj=eval("("+data+")");// 转换为json对象
+                                    console.log(dataObj);
+                                    loadEmployeeTable(dataObj);
+                                },
+                                error: function(){
+                                    alert('获取id出错');
+                                }
+                            });
+                            $('#employee-detail-table').show();
+                        }
+                        else
+                            $('#employee-detail-table').hide();
+                    },
+                    onNodeUnselected: function(event, node){
+                    }
+                });
+            }
+
+            /**
+             * 为table加载员工详细信息
+             * 当选中treeview中属于员工的选项时，右侧会显示员工详细信息
+             * TODO(HX):还有字段没有添加
+             * @param  {json} dataObj 员工详细信息
+             */
+            function loadEmployeeTable(dataObj){
+                $('img').attr('src',dataObj['photo_url']);
+                $('#person-id').val(dataObj['id']);
+                $("#person-name").val(dataObj['name']);
+                //TODO(HX):性别的单选框有问题
+                console.log(dataObj['sex'] + "");
+                $('input:radio[name="sex-radio"]').attr('checked',dataObj['sex'] + "");
+                // if(dataObj['sex'] == 0){
+                //     $('#person-sex-man').attr('checked', true);
+                // }
+                // else{
+                //     $('#person-sex-woman').attr('checked', true);
+                // }
+                $.ajax({
+                    type: 'get',
+                    url: '/org/listall',
+                    data: {type: 2},
+                    success: function(data){
+                        var array=eval("("+data+")");// 转换为json对象
+                        // console.log(array);
+                        //返回所有组织机构信息
+                        $('#person-org').html('');
+                        var text = "";
+                        for (var i  = 0; i < array.length; i++) {
+                            id = array[i][0];
+                            name = array[i][1];
+                            if(id == dataObj['org_id'])
+                                text += '<option value="' + id + '" selected >' + name + '</option>'
+                            else
+                                text += '<option value="' + id + '">' + name + '</option>';
+                        }
+                        console.log(text);
+                        $("#person-org").html(text);
+                        $("#person-org").selectpicker('refresh');
+                    }
+                });
+
+            }
+
+            /**
+             * 自定义图片异步上传请求
+             */
+            function initPhotoSumbit(){
+                //设置表单的异步图片上传
+                $('#photo-form').submit(function(event){
+                    event.preventDefault();
+                    var form = $(this);
+                    var formData = new FormData(this);
+                    $.ajax({
+                        type: 'post',
+                        url: '/employee/uploadPhoto',
+                        mimeType: 'multipart/form-data',
+                        data: formData,
+                        contentType: false,
+                        cache: false,
+                        processData: false,
+                        success: function(photourl){
+                            alert(photourl);
+                            $('img').attr('src',photourl);
+                        },
+                        error: function(){
+                            alert('上传失败');
+                        }
+                    });
+                });
+            }
+
+            /**
+             * onchange响应函数
+             * 负责异步发送上传图片请求
+             * @param {HTMLElementObject} obj  this
+             */
+            function UploadPhoto(obj) {
+                if( obj.value != "")//只有选中文件才能上传
+                    $('#photo-form').submit();//自定义异步上传
+                return false;  
+            }
+
+            /**
+             * 查询treeview 节点
+             * @return {[type]} [description]
+             */
+            function searchTreeview(){
+                var pattern = $('#input-search').val();
+                $('#tree').treeview('search', [pattern, {
+                    ignoreCase: true,     // case insensitive
+                    exactMatch: false,    // like or equals
+                    revealResults: true,  // reveal matching nodes
+                }]);
+            }
+
+            /**
+             * 异步发送更新员工文本信息请求
+             * TODO(HX):还有字段没有添加
+             * @return {[type]} [description]
+             */
+            function updateEmployeeRequest(){
+                var id = $('#person-id').val();
+                var name = $('#person-name').val();
+                var sex = $('input:radio[name="sex-radio"]:checked').val();
+                var worktype_id = $('#person-worktype').val();
+                var org_id = $('#person-org').val();
+                // console.log(id + name + sex + worktype_id + org_id);
+                $.ajax({
+                    type: 'post',
+                    url: '/employee/updateemployee',
+                    data:{
+                        id: id,
+                        name: name,
+                        sex: sex,
+                        org_id: org_id
+                    },
+                    success: function(code){
+                        //返回响应码
+                        alert('update :' + code);
+                    }
+                });
+            }
+        </script>
+    {% endblock body %}
+</body>
+</html>

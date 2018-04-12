@@ -81,6 +81,7 @@ insert into Organization(id,name,status,level,parent_id,num) values('0000006','�
 create table if not exists Employee(
 id varchar(20) primary key,
 name varchar(30) not null,
+sex tinyint(1),
 org_id varchar(20) not null, --所属部门
 foreign key(org_id) references Organization(id)
 on delete cascade

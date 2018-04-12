@@ -231,5 +231,17 @@ class Dictionary(db.Model):
             return response;
 
     @classmethod
+    def getDictionaryById(cls, id):
+        result = None
+        try:
+            result = Dictionary.query.filter_by(id = id).first()
+        except Exception as e:
+            raise e
+            result = None
+            db.session.rollback()
+        finally:
+            return result
+
+    @classmethod
     def getSession(cls):
         return db.session;

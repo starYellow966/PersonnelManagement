@@ -18,6 +18,7 @@ class Employee(db.Model):
         __tablename__ {str} -- 表名
         id {str} -- 员工编号
         name {str} -- 员工姓名
+        sex {int} -- 性别，0--男生，1--女生
         org_id {str} -- 所属部门编号
     '''
 
@@ -28,15 +29,18 @@ class Employee(db.Model):
 
     name = db.Column(db.String(30), nullable = False)
 
+    sex = db.Column(db.Integer())
+
     org_id = db.Column(db.String(20), nullable = False)
 
     unit = db.Column(db.String(10), default= u'成都客运段')
 
     photo_url = db.Column(db.String(100))
 
-    def __init__(self, id, name, org_id):
+    def __init__(self, id, name, sex, org_id):
         self.id = id
         self.name = name
+        self.sex = sex
         self.org_id = org_id
 
     def __repr__(self):
@@ -153,3 +157,19 @@ class Employee(db.Model):
             result = None
         finally:
             return result
+
+    def update_employee(self):
+        response_code = 200
+        try:
+            Employee.query.filter_by(id = self.id).update({
+                'name': self.name,
+                'sex': self.sex,
+                'org_id': self.org_id});
+            db.session.commit()
+        except Exception as e:
+            raise e
+            print e
+            response_code = 500
+            db.session.rollback()
+        else:
+            return response_code

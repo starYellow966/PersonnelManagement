@@ -43,6 +43,24 @@ def treeAll():
     return json.dumps([organization.Organization.treeAll()])
 
 @fresh_login_required
+@organizationBlueprint.route('/listall', methods=['GET'])
+def list_all():
+    '''返回所有组织信息
+    
+    Decorators:
+        fresh_login_required
+        organizationBlueprint.route
+    
+    Returns:
+        [type] -- 类型，1代表需要组织详细信息，其他代表只需要组织编号和名字信息
+    '''
+    query_type = request.args['type']
+    if(query_type == 1):
+        return json.dumps([organization.Organization.listAll()])
+    else:
+        return json.dumps(organization.Organization.list_all_name())
+
+@fresh_login_required
 @organizationBlueprint.route('/listChildsByName')
 def listChildsByParentName():
     '''根据节点名称返回它所有孩子节点

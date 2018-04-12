@@ -26,6 +26,9 @@
     border: 1px solid rgba(59,194,29,.7);
     color: #42c02e!important;
 }
+.table-setting td{
+    padding: 20px;
+}
 .setting-title{
     font-size:15px;
     color:#969696

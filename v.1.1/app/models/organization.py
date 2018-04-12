@@ -145,6 +145,7 @@ class Organization(db.Model):
             name = Organization.query.filter_by(id = id).first().name
         except Exception as e:
             raise e
+            db.session.rollback()
             name = None
         finally:
             return name
@@ -175,6 +176,7 @@ class Organization(db.Model):
                 result = Organization.query.order_by(Organization.level, Organization.num).all()
         except Exception as e:
             raise e
+            db.session.rollback()
             result = None
         finally:
             return result
@@ -230,6 +232,7 @@ class Organization(db.Model):
         except Exception as e:
             print e
             raise e
+            db.session.rollback()
             root = None
         finally:
             return root
@@ -253,3 +256,21 @@ class Organization(db.Model):
         #     raise e
         # finally:
         #     return child_list
+        #     
+    @classmethod
+    def list_all_name(cls):
+        '''只返回所有组织的编号和名字
+        
+        Raises:
+            e -- [description]
+        '''
+        result = None
+        try:
+            result = Organization.query.with_entities(Organization.id, Organization.name).order_by(Organization.level, Organization.num).all()
+        except Exception as e:
+            raise e
+            print e
+            db.session.rollback()
+            result = None
+        else:
+            return result
