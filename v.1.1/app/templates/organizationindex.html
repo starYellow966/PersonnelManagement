@@ -25,7 +25,7 @@
                     <button id="btn_addSeg" class="btn btn-default" onclick="initInsertModalFunc()">
                         <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>新增
                     </button>
-                    <button id="btn_removeSeg" class="btn btn-default" onclick="removeDictionarysFunc()">
+                    <button id="btn_removeSeg" class="btn btn-default" onclick="multi_removeFunc()">
                         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>删除
                     </button>
                     <!-- 批处理下拉按钮 -->
@@ -45,6 +45,75 @@
             </div><!-- 表格区域end -->
         </div>
 
+        <!-- 详情模态框 -->
+        <div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"
+                        aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="detailModal_title"></h4>
+                    </div> <!-- modal.header -->
+                    <form class="modal-body" id="detailModal_form">
+                        <label>编号:</label>
+                        <input type="text" name="detailModal_id" id="detailModal_id" class="form-control" >
+                        <span id="detailModal_id_tip" style="color: red"></span>
+                        <br>
+                        <label>名称:</label>
+                        <input type="text" name="detailModal_name" id="detailModal_name" class="form-control" >
+                        <span id="detailModal_name_tip" style="color: red"></span>
+                        <br>
+                        <label>虚拟节点:</label>
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <input type="radio" name="status-radio" id="status-yes" value="0"> 
+                                <span>是</span>
+                            </div>
+                            <div class="col-xs-6">
+                                <input type="radio" name="status-radio" id="status-no" value="1"> 
+                                <span>否</span>
+                            </div>
+                        </div>
+                        
+                        <br>
+                        <label>所属上级:</label>
+                        <select class="selectpicker form-control" id="detailModal_parent" ></select>
+                        <span id="detailModal_parent_tip" style="color: red"></span>
+                        <br>
+                        <label>序号:</label>
+                        <input type="number" id="detailModal_num" class="form-control">
+                        <span id="detailModal_num_tip" style="color: red"></span>
+                        <div class="modal-footer">
+                            <input type="button" class="btn btn-default" data-dismiss="modal" value="取消">
+                            <input type="button" class="btn btn-primary" name="detailModal_submit" id="detailModal_submit" value="确定">
+                        </div><!-- modal-footer -->
+                    </form>
+                </div><!-- modal-content end -->
+            </div><!-- modal-dialog end -->
+        </div><!-- 详情模态框end -->
+    
+        <!--上传文件模态框-->
+        <div class="modal fade" id="unloadModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"
+                        aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" >批量导入数据</h4>
+                    </div> <!-- modal.header -->
+                    <form id="unloadModal_form" class="modal-body" action="/dict/unload" method='post' enctype='multipart/form-data'>
+                        <h1>Excel file upload (xls, xlsx please)</h1>
+                        <input type='file' class="btn btn-default" name='file'>
+                        <input type="hidden" id="unload_type_id" name="unload_type_id">
+                        <div class="modal-footer">
+                            <input type="button" class="btn btn-default" data-dismiss="modal" value="取消">
+                            <input type="submit" class="btn btn-primary" id="unloadModal_submit" name="submit" value="导入">
+                        </div>
+                    </form><!-- modal-body -->
+                </div><!-- /.modal.content -->
+            </div><!-- /.modal -->
+        </div><!--上传文件模态框end-->
+    
         {% block base_script %}
             {{ super() }}
             <script src="../static/js/bootstrap-treeview.js"></script>
@@ -66,33 +135,51 @@
                         // 转换为json对象
                         var dataObj=eval("("+data+")");
                         // alert(dataObj);
-                        $('#tree').treeview({
-                            levels: 9, //设置默认情况下树会展开的深层级别数量
-                            data: dataObj,
-                            expandIcon: "glyphicon glyphicon-chevron-right",
-                            collapseIcon: "glyphicon glyphicon-chevron-down",
-                            showTags: true,
-                            onNodeSelected: function(event, node){
-                                var childId_string = node.id;
-                                if('nodes' in node)
-                                    for (var i = 0; i < node.nodes.length; i++) 
-                                        childId_string += ',' + node.nodes[i].id;
-                                console.log(childId_string);
-
-                            },
-                            onNodeUnselected: function(event, node){
-                                //实现点击任何部位都能收缩,不再是点击箭头才能收缩
-                                // var tree = $('#tree')
-                                // console.log(node);
-                                // if(node.state.expanded){
-                                //     tree.treeview('collapseNode', node.nodeId);
-                                // }else {
-                                //     tree.treeview('expandNode', node.nodeId);
-                                // }
-                            }
-                        })
+                        initTreeView(dataObj);
                     }
                 });
+                initTable();
+            });
+
+            /**
+             * 初始化加载treeview数据
+             * @param  {json} dataObj 数据
+             * @return {[type]}         [description]
+             */
+            function initTreeView(dataObj){
+                $('#tree').treeview({
+                    levels: 9, //设置默认情况下树会展开的深层级别数量
+                    data: dataObj,
+                    expandIcon: "glyphicon glyphicon-chevron-right",
+                    collapseIcon: "glyphicon glyphicon-chevron-down",
+                    showTags: true,
+                    onNodeSelected: function(event, node){
+                        if('nodes' in node){
+                            // console.log(node.nodes);
+                            reloadTableData(node.text, node.nodes);
+                        }
+                        else
+                            $('#table').bootstrapTable('load',[]);
+
+                    },
+                    onNodeUnselected: function(event, node){
+                        //实现点击任何部位都能收缩,不再是点击箭头才能收缩
+                        // var tree = $('#tree')
+                        // console.log(node);
+                        // if(node.state.expanded){
+                        //     tree.treeview('collapseNode', node.nodeId);
+                        // }else {
+                        //     tree.treeview('expandNode', node.nodeId);
+                        // }
+                    }
+                });
+            }
+
+            /**
+             * 初始化Table
+             * @return {[type]} [description]
+             */
+            function initTable(){
                 $('#table').bootstrapTable({
                     toolbar:'#table_toolbar',
                     search: true, //是否显示 搜索框
@@ -135,12 +222,273 @@
                         align: 'center',
                         valign: 'middle',
                         formatter: function(value, row, index){
-                            return "<a href='#' data-toggle='modal' onclick='initEditModalFunc(\""+row.id+"\",\""+row.name+"\",\""+row.parent_name+"\")'>修改</a> " + 
-                            " <a href='#' onclick='removeSegmentRequest(\""+row.id+"\")' >删除</a>"
+                            return "<a href='#' data-toggle='modal' onclick='initEditModalFunc(\""+row.id+"\")'>修改</a> " + 
+                            " <a href='#' onclick='removeRequest(\""+row.id+"\")' >删除</a>"
                         }
                     }],
                 });
-            });
+            }
+
+            /**
+             * 重新加载table的数据
+             * 用于将选中的树节点的子节点数据加载到table中显示
+             * @param  {Array} data 待加载的数据
+             * @param  {string} parent_name 当前选中节点的名字
+             * @return {[type]}      [description]
+             */
+            function reloadTableData(parent_name, data){
+                // console.log(JSON.stringify(data));
+                //$('#table').bootstrapTable('load',[{id:'1',name:'heloo',parent_name:'3',num:5}]);
+                rows = [];
+                for (var i = 0; i < data.length; i++) {
+                    rows.push({
+                        id: data[i].id,
+                        name: data[i].text,
+                        parent_name: parent_name,
+                        num: ''
+                    });
+                }
+                $('#table').bootstrapTable('load', rows);
+            }
+
+
+            /**
+             * 初始化新增详情模态框
+             * @return {[type]} [description]
+             */
+            function initInsertModalFunc(){
+                // console.log($('#tree').treeview('getSelected')[0].id);
+                initModalSelectFunc($('#tree').treeview('getSelected')[0].id);
+                $('#detailModal_id').val('');
+                $('#detailModal_name').val('');
+                $('#detailModal_num').val('');
+                $("#detailModal_submit").click(insertRequest); //将提交更改按钮绑定插入操作
+                $("#detailModal_title").text("新增段信息");
+                $("#detailModal").modal("show");
+            }
+
+            function initEditModalFunc(id){
+                $.ajax({
+                    type: 'get',
+                    url: '/org/query',
+                    data: {
+                        id: id
+                    },
+                    success: function(data){
+                        console.log(data);
+                        if(data != '500'){
+                            data = eval("("+data+")");
+                            initModalSelectFunc(data['parent_id']);
+                            $('#detailModal_id').val(id);
+                            $('#detailModal_id').attr('readonly', true);
+                            $('#detailModal_name').val(data['name']);
+                            $('#detailModal_num').val(data['num']);
+                            if(data['status'] == 1)
+                                $('#status-no').attr('checked', true);
+                            else
+                                $('#status-yes').attr('checked', true);
+                            $("#detailModal_submit").click(updateRequest); //将提交更改按钮绑定插入操作
+                            $("#detailModal_title").text("修改段信息");
+                            $("#detailModal").modal("show");
+                        }else{
+                            alert('error');
+                        }
+                    }
+                });
+            }
+
+            /**
+             * 初始化模态框中所属路局下拉框的数据
+             * 
+             * 第一步，发送获得所有路局信息的请求
+             * 第二步，select中加载数据
+             * 
+             * @return 模态框中所属路局下拉框
+             */
+            function initModalSelectFunc(selected_parent_id){
+                // console.log(selected_parent_id);
+                $.ajax({
+                    type: "get",
+                    url: "/org/listall",
+                    data: {type: 2},
+                    success: function(data,status){
+                        // console.log(data);
+                        $('#detailModal_parent').html("");
+                        var text ="";
+                        // 转换为json对象
+                        var dataObj=eval("("+data+")");
+                        for(var i in dataObj){
+                            if(typeof(selected_parent_id) != "undefined" && selected_parent_id != null && selected_parent_id == dataObj[i][0])
+                                text += '<option value="' + dataObj[i][0] + '"selected>' + dataObj[i][1] + '</option>';
+                            else
+                                text += '<option value="' + dataObj[i][0] + '">' + dataObj[i][1] + '</option>';
+                            // text += '<option >' + dataObj[i].parent_name + '</option>';
+                        }
+                        $("#detailModal_parent").html(text);
+                        $("#detailModal_parent").selectpicker('refresh');
+                    }
+                });
+            }
+
+            /**
+             * 删除多个项的响应函数
+             * 删除table中勾选的项,并将list转换为string
+             * @return {[type]} [description]
+             */
+            function multi_removeFunc(){
+                var id_list = $('#table').bootstrapTable('getSelections');
+                // console.log(id_list);
+                if(id_list != null){
+                    id_string = "";
+                    for (i in id_list) {
+                        id_string += id_list[i].id;
+                        if(i < id_list.length - 1)
+                            id_string += ','
+                    }
+                    console.log(id_string);
+                    removeRequest(id_string);
+                }
+            }
+
+            /**
+             * 发送插入请求
+             * 第一步，获取值
+             * 第二步，非空判断
+             * 第三步，发送请求，根据请求值可以进行查重
+             * @return {[type]} [description]
+             */
+            var insertRequest = function(){
+                var id = $("#detailModal_id").val();
+                var name = $("#detailModal_name").val();
+                var parent_id = $("#detailModal_parent").val();
+                var num = $('#detailModal_num').val();
+                var status = $('input:radio[name="status-radio"]:checked').val();;
+                
+                //只进行非空判断，查重交给input的onblur事件
+                if(beforeSubmit(id, name, parent_id, num))
+                    $.ajax({
+                        type: 'GET',
+                        url: '/org/insert',
+                        dataType: 'json',
+                        data:{
+                            id: id,
+                            name: name,
+                            status: status,
+                            parent_id: parent_id,
+                            num : num
+                        },
+                        success:function(data){
+                            //data可能出现的值有id_error,name_error,error,success
+                            // list = data.split(',');
+                            // console.log(list);
+                            // for (var i = 0; i < list.length; i++) {
+                            //     if(list[i] == 'success'){
+                            //         alert('insert success!!!');
+                            //         $("#SegmentDetailModal").modal("hide");
+                            //         location.reload();
+                            //     }
+                            //     else if(list[i] == 'id_error')
+                            //         $('#id_tip').html('此id已存在，请更换');
+                            //     else if(list[i] == 'name_error')
+                            //         $('#name_tip').html('此名称已存在，请更换');
+                            //     else if(list[i] == 'error')
+                            //         alert('insert failure,服务器内部错误');
+                            // }
+                            if(data == '200'){
+                                alert('insert : success ');
+                                location.reload();
+                            }
+                            else
+                                alert('insert : fail , please check out your information');
+                        }
+                    });
+
+            }
+
+            var updateRequest = function(){
+                var id = $("#detailModal_id").val();
+                var name = $("#detailModal_name").val();
+                var parent_id = $("#detailModal_parent").val();
+                var num = $('#detailModal_num').val();
+                var status = $('input:radio[name="status-radio"]:checked').val();;
+                
+                //只进行非空判断，查重交给input的onblur事件
+                if(beforeSubmit(id, name, parent_id, num))
+                    $.ajax({
+                        type: 'GET',
+                        url: '/org/update',
+                        dataType: 'json',
+                        data:{
+                            id: id,
+                            name: name,
+                            status: status,
+                            parent_id: parent_id,
+                            num : num
+                        },
+                        success:function(data){
+                            if(data == '200'){
+                                alert('update : success ');
+                                location.reload();
+                            }
+                            else
+                                alert('update : fail , please check out your information');
+                        }
+                    });
+            }
+
+            /**
+             * 发送删除请求
+             * @param  {string} id_string 待删除节点的id组成的字符串，格式如1,2,3
+             * @return {[type]}           [description]
+             */
+            var removeRequest = function(id_string){
+                console.log(id_string);
+                $.ajax({
+                    type: 'get',
+                    url: '/org/remove',
+                    data: {
+                        id: id_string
+                    },
+                    success: function(data){
+                        if(data == '200'){
+                            alert('delete : success ');
+                            location.reload();
+                        }
+                        else
+                            alert('delete : fail ');
+                    }
+                });
+            }
+
+            /**
+             * 发送更新/新增请求前对值进行非空判断
+             * @param  {string} id          编号输入框的值
+             * @param  {string} name        名称输入框的值
+             * @param  {string} parent_name 所属路局下拉框的值
+             * @return {boolean}            只要有一项为空就返回false
+             */
+            function beforeSubmit(id, name, parent_name, num){
+                if(id == ""){
+                    $('#id_tip').html('必填');
+                }
+                else{
+                    $('#id_tip').html('');
+                }
+                if(name == ""){
+                    $('#name_tip').html('必填');
+                }
+                else
+                    $('#name_tip').html('');
+                if(parent_name == ""){
+                    $('#parent_tip').html('必填');
+                }
+                else
+                    $('#parent_tip').html('');
+                if(id == "" || name == "" || parent_name == "")
+                    return false;
+                else
+                    return true;
+            }
         </script>
     {% endblock body %}
 </body>

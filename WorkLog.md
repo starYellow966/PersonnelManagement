@@ -42,8 +42,12 @@ $.ajax({
 
 ### 异步上传文件
 ```javascript
+<form id="photo-form" class="btn btn-hollow" action="/upload" method='post' enctype='multipart/form-data'>
+    <input type="file" id="photo" name="photo" class="hide" onchange="UploadPhoto(this)" accept="image/*">
+    更换头像
+</form>
 $('#photo-form').submit(function(event){
-    event.preventDefault();
+    event.preventDefault(); //禁止默认submit操作
     var form = $(this);
     var formData = new FormData(this);
     $.ajax({
@@ -70,3 +74,15 @@ $('#photo-form').submit(function(event){
 >g # 处理请求时用作临时存储的对象。每次请求会重设这个变量
 >request # 请求对象，封装了客户端发出的http请求中的内容
 >session # 用户会话，用于存储请求之间需要‘记住‘的值的词典
+
+### JQuery 发送json
+```javascript
+var data = {};
+data['id'] = '11';
+$.ajax({
+    url: 'xxxx',
+    dataType: 'json',
+    data: data,
+    ....
+});
+```

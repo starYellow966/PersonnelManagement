@@ -7,6 +7,302 @@
     {% endblock head %}
 </head>
 <body>
+    {% block body %}
+        {% block top_nav %}
+            {{ super() }}
+        {% endblock top_nav %}
 
+        {% block left_nav %}
+            {{ super() }}
+        {% endblock left_nav %}
+
+        <div class="container">
+            <!-- 高级查询栏 -->
+            <div class="panel-group" id="query-panel">
+                <div class="panel panel-default">
+                    <div class="panel-heading" data-toggle="collapse" data-parent='query-panel' href='#query-panel-body'>高级查询条件</div>
+                    <div id="query-panel-body">
+                        <div class="panel-body">
+                            <div id="formSearch" class="form-horizontal">
+                                <label class="control-label col-sm-3" style="text-align: center;">属性</label>
+                                <label class="control-label col-sm-3" style="text-align: center;">运算符</label>
+                                <label class="control-label col-sm-3" style="text-align: center;">值</label>
+                                <label class="control-label col-sm-3" style="text-align: center;">连接符</label>
+                                <br>
+                                <br>
+                                <div class="col-sm-3" >
+                                    <select class="selectpicker " id="proprity" onchange="proprityChange(this)">
+                                        <option value="id" selected>编号</option>
+                                        <option value="name">名称</option>
+                                        <option value="type">类型</option>
+                                        <option value="dep_name">部门名称</option>
+                                        <option value="seg_date">成立时间</option>
+                                        <option value="railway">所属路局</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-3">
+                                    <select class="selectpicker " id="operator">
+                                        <option value="like" selected>like</option>
+                                        <option value="<"><</option>
+                                        <option value=">">></option>
+                                        <option value="=">=</option>
+                                    </select>
+                                </div>                  
+                                <div class="col-sm-3">
+                                    <input type="text" class="form-control" id="value">
+                                </div>
+                                <div class="col-sm-3">
+                                    <select class="selectpicker" id="joinOperator">
+                                        <option value="and" selected>and</option>
+                                        <option value="or">or</option>
+                                    </select>
+                                </div>
+                                <br>
+                                <br>
+                                <textarea id="search_sqltext" class="form-control col-sm-12" rows="5" style="overflow-x: hidden;overflow-y: auto;resize: none;"></textarea>
+                            </div>
+                        </div>
+                        <div class="panel panel-footer" align="right">
+                          <input type="button" class="btn btn-primary" name="insert" value="添加" onclick="insertSqlQuery()">
+                          <input type="submit" class="btn btn-success" name="submit" value="查询" onclick="queryRequest()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 高级查询栏end -->
+
+            <table id="table"></table>
+        </div>
+        
+        <div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"
+                        aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">员工详情信息表</h4>
+                    </div> <!-- modal.header -->
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin:5px;">
+                        <td bgcolor="#6E6E6E" height=30>
+                            <table border="1" width="100%" cellspacing="0" cellpadding="0" bordercolorlight="#6C6C6C" bordercolordark="#F7F7F5" id="table4">
+                                <tr>
+                                    <td height="28" width="12%" bgcolor="#F0F9FB">&nbsp;学&nbsp;&nbsp;&nbsp;&nbsp;号</td>
+                                    <td height="28" width="25%" bgcolor="#ffffff">&nbsp;2014112138</td>
+                                    <td height="28" width="12%" bgcolor="#F0F9FB">&nbsp;姓&nbsp;&nbsp;&nbsp;&nbsp;名</td>
+                                    <td height="28" width="25%" bgcolor="#ffffff">&nbsp;黄鑫</td>
+                                    <td height="160" rowspan="6" align="center" bgcolor="#ffffff"><img src="http://jiaowu.swjtu.edu.cn:80//servlet/StudentPhotoView?UserName=2014112138" width="120" height="160"></td>
+                                </tr>
+                                <tr>
+                                    <td height="28"  bgcolor="#F0F9FB">&nbsp;英文姓名</td>
+                                    <td bgcolor="#ffffff">&nbsp;NULL</td>
+                                    <td bgcolor="#F0F9FB">&nbsp;性&nbsp;&nbsp;&nbsp;&nbsp;别</td>
+                                    <td bgcolor="#ffffff">&nbsp;男</td>
+                                </tr>
+                                <tr>
+                                    <td height="28"   bgcolor="#F0F9FB">&nbsp;出生年月</td>
+                                    <td   bgcolor="#ffffff">&nbsp;1996-07-09</td>
+                                    <td   bgcolor="#F0F9FB">&nbsp;学籍状态</td>
+                                    <td   bgcolor="#ffffff">&nbsp;
+
+
+                                       有学籍
+
+
+
+                                   &nbsp;&nbsp;在读</td>
+                               </tr>
+                               <tr>
+                                <td height="28" bgcolor="#F0F9FB">&nbsp;所在学院</td>
+                                <td  bgcolor="#ffffff">&nbsp;信息科学与技术学院</td>
+                                <td  bgcolor="#F0F9FB">&nbsp;年&nbsp;&nbsp;&nbsp;&nbsp;级</td>
+                                <td  bgcolor="#ffffff">&nbsp;2014</td>
+                            </tr>
+                            <tr>
+                                <td height="28" bgcolor="#F0F9FB">&nbsp;所在专业</td>
+                                <td height="28" bgcolor="#ffffff">&nbsp;软件工程</td>
+                                <td height="28" bgcolor="#F0F9FB">&nbsp;班&nbsp;&nbsp;&nbsp; 级</td>
+                                <td height="28" bgcolor="#ffffff">&nbsp;软件2014-02班</td>
+                            </tr>
+                            <tr>
+                                <td height="28"  bgcolor="#F0F9FB">&nbsp;籍&nbsp;&nbsp;&nbsp; 贯</td>
+                                <td height="28" bgcolor="#ffffff">&nbsp;广东省深圳市宝安区</td>
+                                <td height="28" bgcolor="#F0F9FB">&nbsp;民&nbsp;&nbsp;&nbsp; 族</td>
+                                <td height="28" bgcolor="#ffffff">&nbsp;汉族</td>
+                            </tr>
+                            <tr>
+                                <td height="28"  bgcolor="#F0F9FB">&nbsp;政治面貌</td>
+                                <td height="28" bgcolor="#ffffff" >&nbsp;中国共产主义青年团团员</td>
+                                <td height="28" bgcolor="#F0F9FB">&nbsp;身份证号</td>
+                                <td height="28" colspan="2" bgcolor="#ffffff">&nbsp;441622199607092074</td>
+                            </tr>
+                            <tr>
+                                <td height="28"  bgcolor="#F0F9FB">&nbsp;考 生 号</td>
+                                <td height="28"  bgcolor="#ffffff">&nbsp;14440306101217</td>
+                                <td height="28"  bgcolor="#F0F9FB">&nbsp;乘车区间</td>
+                                <td height="28" bgcolor="#ffffff" colspan="2">&nbsp;广州</td>
+                            </tr>
+
+                            <tr>
+                                <td height="28"  bgcolor="#F0F9FB">&nbsp;联系电话</td>
+                                <td height="28"  bgcolor="#ffffff">&nbsp;18328718993</td>
+                                <td height="28"  bgcolor="#F0F9FB">&nbsp;家庭住址</td>
+                                <td height="28"  bgcolor="#ffffff" colspan="2">&nbsp;广东&nbsp;河源市&nbsp;市&nbsp;广东深圳市宝安区宝安中学高中部</td>
+                            </tr>
+
+                            <tr id="TR1" >
+                                <td height="28" bgcolor="#F0F9FB">&nbsp;生 源 地</td>
+                                <td height="28"  bgcolor="#ffffff">&nbsp;440306</td>
+                                <td height="28"  bgcolor="#F0F9FB">&nbsp;毕业学校</td>
+                                <td height="28"  bgcolor="#ffffff" colspan="2">&nbsp;深圳市宝安中学                </td>
+                            </tr>
+                            <tr id="TR2" >
+                                <td height="28" bgcolor="#F0F9FB">&nbsp;考生类别</td>
+                                <td height="28"  bgcolor="#ffffff">&nbsp;第一批次本科</td>
+                                <td height="28" bgcolor="#F0F9FB">&nbsp;录取形式</td>
+                                <td height="28"  bgcolor="#ffffff" colspan="2">&nbsp;理科</td>
+                            </tr>
+                            <tr id="TR3" >
+                                <td height="28"  bgcolor="#F0F9FB">&nbsp;外语语种</td>
+                                <td height="28"  bgcolor="#ffffff">&nbsp;英语</td>
+                                <td height="28"  bgcolor="#F0F9FB">&nbsp;入学时间</td>
+                                <td height="28"  bgcolor="#ffffff" colspan="2">&nbsp;2014-09-01</td>
+                            </tr>
+                            <tr id="TR3" >
+                                <td height="28"  bgcolor="#F0F9FB">&nbsp;双学位专业</td>
+                                <td height="28"  bgcolor="#ffffff">&nbsp;</td>
+                                <td height="28"  bgcolor="#F0F9FB">&nbsp;特殊学生标记</td>
+                                <td height="28"  bgcolor="#ffffff" colspan="2">&nbsp;<font color=red></font></td>
+                            </tr>
+                            <tr id="TR4" style="display:none" >
+                                <td height="28"  bgcolor="#F0F9FB">&nbsp;宿 舍 号</td>
+                                <td height="28"  bgcolor="#ffffff">&nbsp;</td>
+                                <td height="28"  bgcolor="#F0F9FB">&nbsp;宿舍电话</td>
+                                <td height="28"  bgcolor="#ffffff" colspan="2">&nbsp;</td>
+                            </tr>
+                            <tr id="TR5" style="display:none" >
+                                <td height="28"  bgcolor="#F0F9FB">&nbsp;母亲电话</td>
+                                <td height="28"  bgcolor="#ffffff">&nbsp;</td>
+                                <td height="28"  bgcolor="#F0F9FB">&nbsp;父亲电话</td>
+                                <td height="28"  bgcolor="#ffffff" colspan="2">&nbsp;</td>
+                            </tr>
+                            <tr id="TR6" style="display:none" >
+                                <td height="28" width="105" bgcolor="#F0F9FB">&nbsp;其他电话</td>
+                                <td height="28"  bgcolor="#ffffff">&nbsp;</td>
+                                <td height="28"  bgcolor="#F0F9FB">&nbsp;电子邮件</td>
+                                <td height="28"   bgcolor="#ffffff" colspan="2">&nbsp;</td>
+                            </tr>
+                            <tr id="TR7" style="display:none" >
+                                <td height="28"  bgcolor="#F0F9FB">&nbsp;身&nbsp;&nbsp;&nbsp; 高</td>
+                                <td height="28"  bgcolor="#ffffff">&nbsp;</td>
+                                <td height="28" bgcolor="#F0F9FB">&nbsp;体重/血型</td>
+                                <td height="28"  bgcolor="#ffffff" colspan="2">&nbsp;&nbsp;KG&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;血型：A</td>
+                            </tr>
+                            <tr id="TR8" style="display:none" >
+                                <td height="28"  bgcolor="#F0F9FB">&nbsp;个人特长</td>
+                                <td height="28"  bgcolor="#ffffff" colspan="4">&nbsp;</td>
+                            </tr>
+                            <tr id="TR9" style="display:none" >
+                                <td height="28"  bgcolor="#F0F9FB">&nbsp;获奖情况</td>
+                                <td height="28"  bgcolor="#ffffff" colspan="4">&nbsp;</td>
+                            </tr>
+                            <tr id="TR10" style="display:none" >
+                                <td height="28"  width="12%" bgcolor="#F0F9FB">&nbsp;备&nbsp;&nbsp;&nbsp; 注</td>
+                                <td height="28"  width="88%" bgcolor="#ffffff" colspan="4">&nbsp;596
+
+
+                                   <font color=blue>收费正常</font>
+
+
+
+
+                               </td>
+                           </tr>
+                       </table>
+                    
+                </div><!-- modal-content end -->
+            </div><!-- modal-dialog end -->
+        </div><!-- 详情模态框end -->
+
+        {% block base_script %}
+            {{ super() }}
+            <script src="../static/js/bootstrap-treeview.js"></script>
+            <script src="../static/js/bootstrap-table.js"></script>
+            <script src="../static/js/bootstrap-select.js"></script>
+            <script src="../static/js/jquery.form.js"></script>
+            <script src="../static/js/bootstrap-table-export.js"></script>
+            <script src="../static/js/tableExport.js"></script><!-- bootstrap table本身是没有实现表格的导出的，需要扩展插件tableExport，扩展的tableExport在导出csv，txt，sql，json等格式的时候能很好的支持中文 -->
+            <script type="text/javascript">
+                $(document).ready(function() {
+                    initEmplpoyeeTable();
+                });
+
+                function initEmplpoyeeTable(){
+                    $('#table').bootstrapTable({
+                        url: '/employee/scan/list_all',
+                        search: true, //是否显示 搜索框
+                        showColumns: true, //是否显示 选择显示列按钮
+                        pagination: true, //设置分页
+                        pageList: [25,50,100],
+                        pageSize: 25,
+                        idField: 'id', //重要,可设置checkbox的值为指定字段
+                        selectItemName: 'id', //设置checkbox name属性，可用于遍历获取选中值
+                        clickToSelect: true, //将在点击行时，自动选择checkbox
+                        striped: true, //是否显示 表格条纹
+                        showExport: true, //是否显示导出按钮
+                        exportDataType: 'all',
+                        Icon: 'glyphicon-export', //导出的图标设置
+                        exportOptions:{ //导出文件格式设置
+                            //ignoreColumn: [0,3],
+                            fileName: '人员信息表'+new Date().getFullYear() + (new Date().getMonth() + 1) + new Date().getDate()
+                        },
+                        columns: [{
+                            checkbox: true
+                        }, {
+                            field: 'id',
+                            title: '编号',
+                            sortable: true
+                        }, {
+                            field: 'name',
+                            title: '名称',
+                            sortable: true
+                        }, {
+                            field: 'sex',
+                            title: '性别',
+                            formatter: function(value, row, index){
+                                if(value == 0)
+                                    return '男';
+                                else
+                                    return '女';
+                            }
+                        }, {
+                            field: 'emp_type_name',
+                            title: '用工性质',
+                            sortable: true
+                        }, {
+                            field: 'org_name',
+                            title: '所属部门',
+                            sortable: true
+                        }, {
+                            field: 'political_status',
+                            title: '政治面貌',
+                            sortable: true
+                        }, {
+                            field: 'operation',
+                            title: '操作',
+                            align: 'center',
+                            valign: 'middle',
+                            formatter: function(value, row, index){
+                                return "<a href='#' data-toggle='modal' onclick='initDetailModalFunc(\""+row.id+"\")'>详情</a> ";
+                            }
+                        }],
+                    });
+                }
+
+                function initDetailModalFunc(id){
+                    window.open('/employee/scan/detail?id=' + id);
+                }
+            </script>
+        {% endblock base_script %}
+    {% endblock body %}
 </body>
 </html>

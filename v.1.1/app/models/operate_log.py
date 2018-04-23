@@ -97,9 +97,9 @@ class Log(db.Model):
                 del temp['_sa_instance_state']
                 logs_list.append(temp)
         except Exception as e:
-            raise e
             db.session.rollback()
             logs_list = None
+            raise e
         finally:
             return logs_list
 
@@ -118,9 +118,9 @@ class Log(db.Model):
             db.session.add(self)
             db.session.commit()
         except Exception as e:
-            raise e
             db.session.rollback()
             response = 500
+            raise e
         finally:
             return response
 

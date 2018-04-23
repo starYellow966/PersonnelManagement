@@ -4,11 +4,11 @@
 # reload(sys);
 # sys.setdefaultencoding("utf-8");
 
-from flask import Flask
+# from flask import Flask
 # from flask_sqlalchemy import SQLAlchemy
 import json
 from extensions import db
-
+# from db_helper import db
 
 class TreeNode:
     '''树节点类
@@ -116,12 +116,14 @@ class Organization(db.Model):
 
     num = db.Column(db.Integer(), nullable = True)
 
-    def __init__(self, id, name, status, level, parent_id):
+    def __init__(self, id, name, status, parent_id, num):
         self.id = id
         self.name = name
         self.status = status
-        self.level = level
         self.parent_id = parent_id
+        # self.level = 0
+        self.setLevel()
+        self.num = num
 
     def __repr__(self):
         return u'<Organization {} {} status:{} level:{} parent:{} >' .format(
@@ -144,11 +146,14 @@ class Organization(db.Model):
         try:
             name = Organization.query.filter_by(id = id).first().name
         except Exception as e:
-            raise e
             db.session.rollback()
             name = None
+            raise e
         finally:
             return name
+
+    def setLevel(self):
+        self.level = Organization.query.filter_by(id = self.parent_id).first().level + 1
 
     @classmethod
     def listAll(cls, level_direction=False):
@@ -175,9 +180,9 @@ class Organization(db.Model):
                 #先按level升序再按num升序
                 result = Organization.query.order_by(Organization.level, Organization.num).all()
         except Exception as e:
-            raise e
             db.session.rollback()
             result = None
+            raise e
         finally:
             return result
 
@@ -231,10 +236,11 @@ class Organization(db.Model):
             del root['parent_id']
         except Exception as e:
             print e
-            raise e
             db.session.rollback()
             root = None
+            raise e
         finally:
+            # print root
             return root
 
     def listChilds(self):
@@ -268,9 +274,65 @@ class Organization(db.Model):
         try:
             result = Organization.query.with_entities(Organization.id, Organization.name).order_by(Organization.level, Organization.num).all()
         except Exception as e:
-            raise e
             print e
             db.session.rollback()
             result = None
-        else:
+            raise e
+        finally:
+            return result
+
+    def insert(self):
+        response = '200'
+        try:
+            db.session.add(self)
+            db.session.commit()
+        except Exception as e:
+            print e
+            db.session.rollback()
+            response = '500'
+            raise e
+        finally:
+            return response
+
+    def update(self):
+        response = '200'
+        try:
+            Organization.query.filter_by(id = self.id).update({'name': self.name,
+                'status': self.status, 'parent_id': self.parent_id, 'num': self.num, 'level':self.level})
+            db.session.commit()
+        except Exception as e:
+            print e
+            db.session.rollback()
+            response = '500'
+            raise e
+        finally:
+            return response
+
+    @classmethod
+    def remove(cls, id_list):
+        response = '200'
+        try:
+            for x in id_list:
+                o = Organization.query.filter_by(id = x).first()
+                db.session.delete(o)
+            db.session.commit()
+        except Exception as e:
+            print e
+            db.session.rollback()
+            response = '500'
+            raise e
+        finally:
+            return response
+
+    @classmethod
+    def queryById(cls, oid):
+        result = None
+        try:
+            result = Organization.query.filter_by(id = oid).first()
+        except Exception as e:
+            print e
+            result = None
+            db.session.rollback()
+            raise e
+        finally:
             return result

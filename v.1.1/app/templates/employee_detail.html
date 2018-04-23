@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% extends "base.html" %}
+    {% block head%}
+    {{ super() }}
+    {% endblock head %}
+</head>
+<body>
+    {% block body %}
+    <div id="pageBodyRight"> 
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin:5px;"> 
+            <tbody>
+               <tr> 
+                  <td height="30px;"> 
+                     <table width="100%" border="0" cellspacing="0" cellpadding="0"> 
+                        <tbody>
+                           <tr> 
+                                <td width="97%" height="35" bgcolor="#FAF7EB"><p align="center"><font style="font-size:18px; font-weight:700">客运段员工个人信息表</font></p></td> 
+                          </tr> 
+                      </tbody>
+                  </table> </td> 
+              </tr> 
+              <tr> 
+              <td bgcolor="#6E6E6E" height="30"> 
+                 <table border="1" width="100%" cellspacing="0" cellpadding="0" bordercolorlight="#6C6C6C" bordercolordark="#F7F7F5" id="table4"> 
+                    <tbody>
+                       <tr> 
+                          <td height="28" width="12%" bgcolor="#F0F9FB">&nbsp;工&nbsp;&nbsp;&nbsp;&nbsp;号</td> 
+                          <td height="28" width="25%" bgcolor="#ffffff">&nbsp;{{ user.id }}</td> 
+                          <td height="28" width="12%" bgcolor="#F0F9FB">&nbsp;姓&nbsp;&nbsp;&nbsp;&nbsp;名</td> 
+                          <td height="28" width="25%" bgcolor="#ffffff">&nbsp;{{ user.name }}</td> 
+                          <td height="160" rowspan="6" align="center" bgcolor="#ffffff"><img src='{{ user.photo_url }}' width="120" height="160" /></td> 
+                      </tr> 
+                      <tr> 
+                          <td height="28" bgcolor="#F0F9FB">&nbsp;曾用名</td> 
+                          <td bgcolor="#ffffff">&nbsp;{{ user.old_name }}</td> 
+                          <td bgcolor="#F0F9FB">&nbsp;用工性质</td> 
+                          <td bgcolor="#ffffff">&nbsp;{{ user.emp_type }}</td> 
+                      </tr> 
+                      <tr> 
+                          <td height="28" bgcolor="#F0F9FB">&nbsp;所属部门</td> 
+                          <td bgcolor="#ffffff">&nbsp;{{ user.org_name }}</td> 
+                          <td bgcolor="#F0F9FB">&nbsp;人员状态</td> 
+                          <td bgcolor="#ffffff">&nbsp;{{ user.status }}</td> 
+                      </tr> 
+                      <tr> 
+                          <td height="28" bgcolor="#F0F9FB">&nbsp;职&nbsp;名</td> 
+                          <td bgcolor="#ffffff">&nbsp;{{ user.position }}</td> 
+                          <td bgcolor="#F0F9FB">&nbsp;身份证号</td> 
+                          <td bgcolor="#ffffff">&nbsp;{{ user.id_num }}</td> 
+                      </tr> 
+                      <tr> 
+                          <td height="28" bgcolor="#F0F9FB">&nbsp;政治面貌</td> 
+                          <td height="28" bgcolor="#ffffff">&nbsp;{{ user.political_status }}</td> 
+                          <td height="28" bgcolor="#F0F9FB">&nbsp;民&nbsp;&nbsp;&nbsp;族</td> 
+                          <td height="28" bgcolor="#ffffff">&nbsp;{{ user.nation }}</td> 
+                      </tr> 
+                      <tr> 
+                          <td height="28" bgcolor="#F0F9FB">&nbsp;学&nbsp;&nbsp;&nbsp;历</td> 
+                          <td height="28" bgcolor="#ffffff">&nbsp;{{ user.degree }}</td> 
+                          <td height="28" bgcolor="#F0F9FB">&nbsp;性&nbsp;&nbsp;&nbsp;&nbsp;别</td> 
+                          <td bgcolor="#ffffff">&nbsp;{{ user.sex }}</td> 
+                      </tr> 
+                      <tr> 
+                          <td height="28" bgcolor="#F0F9FB">&nbsp;出生日期</td> 
+                          <td height="28" bgcolor="#ffffff">&nbsp;{{ user.birthdate }}</td> 
+                          <td height="28" bgcolor="#F0F9FB">&nbsp;入职时间</td> 
+                          <td height="28" colspan="2" bgcolor="#ffffff">&nbsp;{{ user.work_date }}</td> 
+                      </tr> 
+                      <tr> 
+                          <td height="28" bgcolor="#F0F9FB">&nbsp;籍贯</td> 
+                          <td height="28" bgcolor="#ffffff">&nbsp;{{ user.origin }}</td> 
+                          <td height="28" bgcolor="#F0F9FB">&nbsp;联系电话1</td> 
+                          <td height="28" bgcolor="#ffffff" colspan="2">&nbsp;{{ user.phone1 }}</td> 
+                      </tr> 
+                      <tr> 
+                          <td height="28" bgcolor="#F0F9FB">&nbsp;联系电话2</td> 
+                          <td height="28" bgcolor="#ffffff">&nbsp;{{ user.phone2 }}</td> 
+                          <td height="28" bgcolor="#F0F9FB">&nbsp;家庭住址</td> 
+                          <td height="28" bgcolor="#ffffff" colspan="2">&nbsp;{{ user.address }}</td> 
+                      </tr> 
+                      <tr >
+                          <td height="28" bgcolor="#F0F9FB">&nbsp;电子邮件</td> 
+                          <td height="28" bgcolor="#ffffff">&nbsp;{{ user.email }} </td> 
+                          <td height="28" bgcolor="#F0F9FB">&nbsp;技能档次</td> 
+                          <td height="28" bgcolor="#ffffff" colspan="2">&nbsp;{{ user.techlevel }}</td> 
+                      </tr> 
+                      <tr> 
+                          <td height="28" bgcolor="#F0F9FB">&nbsp;备注</td> 
+                          <td height="28" bgcolor="#ffffff" colspan="4">&nbsp;{{ user.others }}</td>
+                      </tr> 
+                  </tbody>
+              </table> </td> 
+          </tr> 
+      </tbody>
+  </table> 
+</div>
+{% block base_script %}
+{{ super() }}
+{% endblock base_script %}
+{% endblock body %}
+</body>
+</html>

@@ -4,22 +4,42 @@
 # reload(sys);
 # sys.setdefaultencoding("utf-8")
 from extensions import db
+# from db_helper import db
 from organization import TreeNode,Organization
+from dictionary import Dictionary     
 
 class Employee(db.Model):
-    '''简单的员工信息表
+    '''员工信息表
     
-    仅包含树状结构图所需要的字段
     
     Extends:
         db.Model
     
     Variables:
         __tablename__ {str} -- 表名
-        id {str} -- 员工编号
-        name {str} -- 员工姓名
-        sex {int} -- 性别，0--男生，1--女生
-        org_id {str} -- 所属部门编号
+        __table_args__ {dict} -- 选项
+        id {str} -- 工号
+        name {str} -- 姓名
+        old_name {str} -- 曾用名
+        photo_url {str} -- 照片地址
+        sex {boolean} -- 性别，1-男，0-女
+        org_id {str} -- 所属部门编号，来源于Organization表
+        emp_type {str} -- 用工性质编号，来源于Dictionary表
+        status_id {str} -- 人员状态编号，来源于Dictionary表
+        position_id {str} -- 职名编号，来源于Dictionary表
+        id_num {str} -- 身份证号
+        political_status_id {str} -- 政治面貌编号，来源于Dictionary表
+        nation_id {str} -- 民族编号，来源于Dictionary表
+        degree_id {str} -- 学历编号，来源于Dictionary表
+        birthdate {str} -- 出生日期，时间戳
+        work_date {str} -- 入职时间，时间戳
+        origin {str} -- 出生地
+        phone1 {str} -- 电话1
+        phone2 {str} -- 电话2
+        address {str} -- 住址
+        email {str} -- 邮箱
+        techlevel_id {str} -- 技能等级编号，来源于Dictionary表
+        others {str} -- 备注
     '''
 
     __tablename__ = 'Employee'
@@ -29,26 +49,100 @@ class Employee(db.Model):
 
     name = db.Column(db.String(30), nullable = False)
 
-    sex = db.Column(db.Integer())
+    old_name = db.Column(db.String(45), nullable = True)
 
-    org_id = db.Column(db.String(20), nullable = False)
+    photo_url = db.Column(db.String(100), nullable = True)
 
-    unit = db.Column(db.String(10), default= u'成都客运段')
+    sex = db.Column(db.Integer(), nullable = True)
 
-    photo_url = db.Column(db.String(100))
+    org_id = db.Column(db.String(20), nullable = True)
 
-    def __init__(self, id, name, sex, org_id):
+    emp_type = db.Column(db.String(30), nullable = True)
+
+    status_id = db.Column(db.String(30), nullable = True)
+
+    position_id = db.Column(db.String(30), nullable = True)
+
+    id_num = db.Column(db.String(20), nullable = True)
+
+    political_status_id = db.Column(db.String(30), nullable = True)
+
+    nation_id = db.Column(db.String(30), nullable = True)
+
+    degree_id = db.Column(db.String(30), nullable = True)
+
+    birthdate = db.Column(db.Integer(), nullable = True)
+
+    work_date = db.Column(db.Integer(), nullable = True)
+
+    origin = db.Column(db.String(40), nullable = True)
+
+    phone1 = db.Column(db.String(20), nullable = True)
+
+    phone2 = db.Column(db.String(20), nullable = True)
+
+    address = db.Column(db.String(30), nullable = True)
+
+    email = db.Column(db.String(20), nullable = True)
+
+    techlevel_id = db.Column(db.String(30), nullable = True)
+
+    others = db.Column(db.String(40), nullable = True)
+
+    def __init__(self, id, name, sex, org_id, **kw):
         self.id = id
         self.name = name
         self.sex = sex
         self.org_id = org_id
+        self.setOption(kw)
+
+    def setOption(self, kw):
+        if 'old_name' in kw:
+            self.old_name = kw['old_name']
+        if 'photo_url' in kw:
+            self.photo_url = kw['photo_url']
+        if 'emp_type' in kw:
+            self.emp_type = kw['emp_type']
+        if 'status_id' in kw:
+            self.status_id = kw['status_id']
+        if 'position_id' in kw:
+            self.position_id = kw['position_id']
+        if 'nation_id' in kw:
+            self.nation_id = kw['nation_id']
+        if 'degree_id' in kw:
+            self.degree_id = kw['degree_id']
+        import time
+        if 'birthdate' in kw:
+            # kw['birthdate']不是时间戳 FIXME(HX):有问题
+            self.birthdate = time.strftime(kw['birthdate'], '%Y-%m-%d').time()
+            print self.birthdate
+        if 'work_date' in kw:
+            self.work_date = time.strftime(kw['work_date'], '%Y-%m-%d').time()
+        if 'origin' in kw:
+            self.origin = kw['origin']
+        if 'phone1' in kw:
+            self.phone1 = kw['phone1']
+        if 'phone2' in kw:
+            self.phone2 = kw['phone2']
+        if 'address' in kw:
+            self.address = kw['address']
+        if 'email' in kw:
+            self.email = kw['email']
+        if 'techlevel_id' in kw:
+            self.techlevel_id = kw['techlevel_id']
+        if 'others' in kw:
+            self.others = kw['others']
 
     def __repr__(self):
-        return u'<Employee {} {} {}>' .format(self.id, self.name, self.org_id)
+        return u'<Employee {}>' .format(self.id)
 
     @classmethod
-    def listAll(cls):
-        return Employee.query.all()
+    def list_all(cls):
+        return Employee.query.order_by(Employee.id).all()
+
+    @classmethod
+    def getEmployeeById(cls, eid):
+        return Employee.query.filter_by(id = eid).first();
 
     @classmethod
     def treeAll(cls):
@@ -83,8 +177,8 @@ class Employee(db.Model):
             del root['parent_id']
         except Exception as e:
             print e
-            raise e
             root = None
+            raise e   
         finally:
             return root
 
@@ -119,34 +213,35 @@ class Employee(db.Model):
             return result
 
 
-    @classmethod
-    def updatePhoto(cls, eid, photo_url):
-        '''根据员工id更新图片
+    # @classmethod
+    # def updatePhoto(cls, eid, photo_url):
+    #     '''根据员工id更新图片
         
-        Arguments:
-            eid {str} -- 员工id
-            photo_url {str} -- 图片路径
+    #     Arguments:
+    #         eid {str} -- 员工id
+    #         photo_url {str} -- 图片路径
         
-        Returns:
-            [int] -- 响应码。200-成功，500-失败
+    #     Returns:
+    #         [int] -- 响应码。200-成功，500-失败
         
-        Raises:
-            e -- 更新异常
-        '''
-        response = 200
-        try:
-            Employee.query.filter_by(id = eid).update({'photo_url': photo_url})
-            db.session.commit()
-        except Exception as e:
-            print e
-            raise e
-            db.session.rollback()
-            response = 500
-        finally:
-            return response
+    #     Raises:
+    #         e -- 更新异常
+    #     '''
+    #     response = 200
+    #     try:
+    #         Employee.query.filter_by(id = eid).update({'photo_url': photo_url})
+    #         db.session.commit()
+    #     except Exception as e:
+    #         print e
+    #         db.session.rollback()
+    #         response = 500
+    #         raise e            
+    #     finally:
+    #         return response
 
     @classmethod
     def getEmployeeById(cls, eid):
+        # print eid
         result = None
         try:
             result = Employee.query.filter_by(id = eid).first()
@@ -158,6 +253,7 @@ class Employee(db.Model):
         finally:
             return result
 
+
     def update_employee(self):
         response_code = 200
         try:
@@ -167,9 +263,9 @@ class Employee(db.Model):
                 'org_id': self.org_id});
             db.session.commit()
         except Exception as e:
-            raise e
             print e
             response_code = 500
             db.session.rollback()
+            raise e
         else:
             return response_code

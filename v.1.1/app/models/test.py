@@ -1,15 +1,24 @@
 # -*- coding: utf-8 -*-
+import sys
+sys.path.append('E:\\Programming\\PersonnelManagement\\v.1.1\\app')
+# print sys.path
 # from dictionary import DictionaryType,Dictionary
 # from operate_log import Log
-# from organization import Organization
-# from employee import Employee
+d = {'1':'1'}
+d['2'] = 2
 
-import sys
-sys.path.insert(0, 'E:\\Programming\\PersonnelManagement\\v.1.1\\app')
-print sys.path
-from dictionary import DictionaryType,Dictionary
+print d
 
-# import pdb
-# pdb.set_trace()
-print Dictionary.listDictByTypeId(1)
+d = {'id':'1','sex':1,'org_id':'2','name':'hh','test':'ttt'}
+id = d['id']
+name = d['name']
 
+class Person():
+    def __init__(self, id, name, **kw):
+        self.id = id
+        self.name = name
+        self.hh = hh
+        print kw
+
+
+p = Person(**d)

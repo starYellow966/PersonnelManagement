@@ -68,6 +68,21 @@ def listDictByTypeId():
         data = []
     return json.dumps(data),200;
 
+@dictionaryBlueprint.route('/listDictByTypeName', methods = ['GET'])
+@fresh_login_required
+def listDictByTypeName():
+    '''根据字典类型名字返回同类型的所有字典数据
+    
+    Decorators:
+        dictionaryBlueprint.route
+        fresh_login_required
+    '''
+    type_name = request.args['type']
+    data = dictionary.Dictionary.listDictByTypeName(type_name)
+    if (data == None):
+        data = []
+    return json.dumps(data),200;
+
 '''删除字典数据
 
 :return : 响应码 success，failure

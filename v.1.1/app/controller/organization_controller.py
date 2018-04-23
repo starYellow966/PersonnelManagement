@@ -59,6 +59,48 @@ def list_all():
         return json.dumps([organization.Organization.listAll()])
     else:
         return json.dumps(organization.Organization.list_all_name())
+@fresh_login_required
+@organizationBlueprint.route('/insert', methods=['GET'])
+def insert():
+    oid = request.args.get('id')
+    name = request.args.get('name')
+    status = request.args.get('status')
+    parent_id = request.args.get('parent_id')
+    num = request.args.get('num')
+    o = organization.Organization(oid, name, status, parent_id, num)
+    # print o
+    return o.insert()
+
+@fresh_login_required
+@organizationBlueprint.route('/remove', methods=['GET'])
+def remove():
+    id_list = request.args.get('id').split(',')
+    print id_list
+    return organization.Organization.remove(id_list)
+
+@fresh_login_required
+@organizationBlueprint.route('/query',methods=['GET'])
+def query():
+    oid = request.args.get('id')
+    o = organization.Organization.queryById(oid)
+    if(o is not None):
+        result = o.__dict__
+        del result['_sa_instance_state']
+        return json.dumps(result)
+    else:
+        return '500'
+
+@fresh_login_required
+@organizationBlueprint.route('/update', methods=['GET'])
+def update():
+    oid = request.args.get('id')
+    name = request.args.get('name')
+    status = request.args.get('status')
+    parent_id = request.args.get('parent_id')
+    num = request.args.get('num')
+    o = organization.Organization(oid, name, status, parent_id, num)
+    print o
+    return o.update()
 
 @fresh_login_required
 @organizationBlueprint.route('/listChildsByName')

@@ -62,8 +62,7 @@
                             </a>
                             <ul class="treeview-menu">
                                 <li><a href="/employee"><i class="fa fa-circle-o"></i> 人员信息管理</a></li>
-                                <li><a href="#"><i class="fa fa-circle-o"></i> 人员信息浏览</a></li>
-                                <li><a href="#"><i class="fa fa-circle-o"></i> 人员信息统计</a></li>
+                                <li><a href="/employee/scan"><i class="fa fa-circle-o"></i> 人员信息浏览</a></li>
                                 <li><a href="#"><i class="fa fa-circle-o"></i> 人员变动管理</a></li>
                             </ul>
                         </li>
@@ -85,6 +84,7 @@
                                 <i class="fa fa-angle-left pull-right"></i>
                             </a>
                             <ul class="treeview-menu">
+                                <li><a href="#"><i class="fa fa-circle-o"></i> 人员信息统计</a></li>
                                 <li><a href="#"><i class="fa fa-circle-o"></i> 人员变动统计</a></li>
                             </ul>
                         </li>
@@ -102,6 +102,10 @@
                 </section>
             </aside>
         {% endblock left_nav%}
+        
+        <div class="container">
+            <iframe src="ok.html"></iframe>
+        </div>
 
         {# 基础引用的包 #}
         {% block base_script%}

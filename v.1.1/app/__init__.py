@@ -64,7 +64,14 @@ def init_loginManager():
         Returns:
             [User对象] --  User对象或者None(当user_id无效时)
         '''
-        return users.User.query.get(int(user_id))
+        cur_user = None
+        try:
+            cur_user = users.User.query.get(int(user_id))
+        except Exception as e:
+            print e
+            db.session.rollback()
+        finally:
+            return cur_user
 
 def init_blueprint(app):
     '''注册蓝图

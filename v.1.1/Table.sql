@@ -81,15 +81,51 @@ insert into Organization(id,name,status,level,parent_id,num) values('0000006','�
 create table if not exists Employee(
 id varchar(20) primary key,
 name varchar(30) not null,
+old_name varchar(30),
 sex tinyint(1),
-org_id varchar(20) not null, --所属部门
-foreign key(org_id) references Organization(id)
+org_id varchar(20),
+photo_url varchar(100),
+emp_type varchar(30),
+status_id varchar(30),
+position_id varchar(30),
+id_num varchar(20),
+political_status_id varchar(30),
+nation_id varchar(30),
+degree_id varchar(30),
+birthdate int,
+work_date int,
+origin varchar(40),
+phone1 varchar(20),
+phone2 varchar(20),
+address varchar(30),
+email varchar(20),
+techlevel_id varchar(30),
+others varchar(40),
+foreign key (org_id) references Organization(id)
+on update cascade
+on delete cascade,
+foreign key (emp_type) references Dictionary(id)
+on update cascade
+on delete cascade,
+foreign key (status_id) references Dictionary(id)
+on update cascade
+on delete cascade,
+foreign key (position_id) references Dictionary(id)
+on update cascade
+on delete cascade,
+foreign key (political_status_id) references Dictionary(id)
+on update cascade
+on delete cascade,
+foreign key (nation_id) references Dictionary(id)
+on update cascade
+on delete cascade,
+foreign key (degree_id) references Dictionary(id)
+on update cascade
+on delete cascade,
+foreign key (techlevel_id) references Dictionary(id)
+on update cascade
 on delete cascade
-on update cascade,
-emp_type varchar(30) , --用工性质
-unit varchar(10) default '成都客运段', --所属单位
-photo_url varchar(200)
-)CHARSET=utf8;
+)charset=utf8;
 
 
 -- create table if not exists Person(

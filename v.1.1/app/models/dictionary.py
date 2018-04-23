@@ -57,9 +57,9 @@ class DictionaryType(db.Model):
                 del temp['_sa_instance_state'];
                 typelist.append(temp);
         except Exception as e:
-            raise e;
-            db.session.rollback();
-            typelist = [];
+            db.session.rollback()
+            typelist = []
+            raise e
         finally:
             return typelist;
 
@@ -70,8 +70,8 @@ class DictionaryType(db.Model):
         try:
             name = DictionaryType.query.filter_by(id = id).first().name;
         except Exception as e:
-            raise e;
             name = None;
+            raise e;
         finally:
             return name;
 
@@ -120,9 +120,9 @@ class Dictionary(db.Model):
                 dictlist.append(temp);
         except Exception as e:
             print e
-            raise e
             db.session.rollback()
             dictlist = None
+            raise e
             # query_log.setStatus(False)
         finally:
             # query_log.insertLog()
@@ -143,14 +143,15 @@ class Dictionary(db.Model):
         '''
         dictlist = None;
         try:
-            type_id = DictionaryType.query.filter_by(name = type_name).first();
-            dictlist = Dictionary.listDictByTypeId(type_id);
+            type_id = DictionaryType.query.filter_by(name = type_name).first().id
+            dictlist = Dictionary.listDictByTypeId(type_id)
         except Exception as e:
-            raise e;
-            db.session.rollback();
-            dictlist = None;
+            db.session.rollback()
+            dictlist = None
+            print e
+            raise e
         finally:
-            return dictlist;
+            return dictlist
     
     @classmethod
     def remove(cls, id_string):
@@ -176,9 +177,9 @@ class Dictionary(db.Model):
                 db.session.delete(d);
             db.session.commit();
         except Exception as e:
-            raise e;
             db.session.rollback();
             response = 500;
+            raise e;
             # for log in query_log_list:
             #     log.setStatus(False)
         finally:
@@ -222,9 +223,9 @@ class Dictionary(db.Model):
                 db.session.add(self);
                 db.session.commit();
         except Exception as e:
-            raise e;
             db.session.rollback();
             response = 500;
+            raise e;
             # query_log.setStatus(False)
         finally:
             # query_log.insertLog()
@@ -236,12 +237,22 @@ class Dictionary(db.Model):
         try:
             result = Dictionary.query.filter_by(id = id).first()
         except Exception as e:
-            raise e
             result = None
             db.session.rollback()
+            raise e
         finally:
             return result
-
+    @classmethod
+    def getNameById(cls, id):
+        result = None
+        try:
+            result = Dictionary.query.filter_by(id = id).first().name
+        except Exception as e:
+            result = None
+            db.session.rollback()
+            raise e
+        finally:
+            return result
     @classmethod
     def getSession(cls):
         return db.session;
