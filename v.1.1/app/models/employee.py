@@ -31,8 +31,8 @@ class Employee(db.Model):
         political_status_id {str} -- 政治面貌编号，来源于Dictionary表
         nation_id {str} -- 民族编号，来源于Dictionary表
         degree_id {str} -- 学历编号，来源于Dictionary表
-        birthdate {str} -- 出生日期，时间戳
-        work_date {str} -- 入职时间，时间戳
+        birthdate {str} -- 出生日期,日期不满10前面要加0，如2018-03-12
+        work_date {str} -- 入职时间,日期不满10前面要加0，如2018-03-12
         origin {str} -- 出生地
         phone1 {str} -- 电话1
         phone2 {str} -- 电话2
@@ -71,9 +71,9 @@ class Employee(db.Model):
 
     degree_id = db.Column(db.String(30), nullable = True)
 
-    birthdate = db.Column(db.Integer(), nullable = True)
+    birthdate = db.Column(db.String(12), nullable = True)
 
-    work_date = db.Column(db.Integer(), nullable = True)
+    work_date = db.Column(db.String(12), nullable = True)
 
     origin = db.Column(db.String(40), nullable = True)
 
@@ -90,51 +90,48 @@ class Employee(db.Model):
     others = db.Column(db.String(40), nullable = True)
 
     def __init__(self, id, name, sex, org_id, **kw):
-        self.id = id
-        self.name = name
-        self.sex = sex
-        self.org_id = org_id
+        self.id = ''.join(id)
+        self.name = ''.join(name)
+        self.sex = ''.join(sex)
+        self.org_id = ''.join(org_id)
         self.setOption(kw)
 
     def setOption(self, kw):
         if 'old_name' in kw:
-            self.old_name = kw['old_name']
+            self.old_name = ''.join(kw['old_name'])
         if 'photo_url' in kw:
-            self.photo_url = kw['photo_url']
+            self.photo_url = ''.join(kw['photo_url'])
         if 'emp_type' in kw:
-            self.emp_type = kw['emp_type']
+            self.emp_type = ''.join(kw['emp_type'])
         if 'status_id' in kw:
-            self.status_id = kw['status_id']
+            self.status_id = ''.join(kw['status_id'])
         if 'position_id' in kw:
-            self.position_id = kw['position_id']
+            self.position_id = ''.join(kw['position_id'])
         if 'nation_id' in kw:
-            self.nation_id = kw['nation_id']
+            self.nation_id = ''.join(kw['nation_id'])
         if 'degree_id' in kw:
-            self.degree_id = kw['degree_id']
-        import time
+            self.degree_id = ''.join(kw['degree_id'])
         if 'birthdate' in kw:
-            # kw['birthdate']不是时间戳 FIXME(HX):有问题
-            self.birthdate = time.strftime(kw['birthdate'], '%Y-%m-%d').time()
-            print self.birthdate
+            self.birthdate = ''.join(kw['birthdate'])
         if 'work_date' in kw:
-            self.work_date = time.strftime(kw['work_date'], '%Y-%m-%d').time()
+            self.work_date = ''.join(kw['work_date'])
         if 'origin' in kw:
-            self.origin = kw['origin']
+            self.origin = ''.join(kw['origin'])
         if 'phone1' in kw:
-            self.phone1 = kw['phone1']
+            self.phone1 = ''.join(kw['phone1'])
         if 'phone2' in kw:
-            self.phone2 = kw['phone2']
+            self.phone2 = ''.join(kw['phone2'])
         if 'address' in kw:
-            self.address = kw['address']
+            self.address = ''.join(kw['address'])
         if 'email' in kw:
-            self.email = kw['email']
+            self.email = ''.join(kw['email'])
         if 'techlevel_id' in kw:
-            self.techlevel_id = kw['techlevel_id']
+            self.techlevel_id = ''.join(kw['techlevel_id'])
         if 'others' in kw:
-            self.others = kw['others']
+            self.others = ''.join(kw['others'])
 
     def __repr__(self):
-        return u'<Employee {}>' .format(self.id)
+        return u'<Employee {} {}>' .format(self.id, self.name)
 
     @classmethod
     def list_all(cls):
@@ -165,10 +162,11 @@ class Employee(db.Model):
                     cur.nodes = cur.nodes + Employee.appendEmployee(cur.id)
                     #表示当前还有待寻亲的节点
                     if len(child_list) > 0 :
-                        cur.nodes = cur.nodes + cur.findChild(child_list)
+                        child = cur.findChild(child_list)
+                        cur.nodes = cur.nodes + child
                         #从待寻亲的节点中删除已经找到父亲的节点
-                        for child in cur.nodes:
-                            child_list.remove(child)
+                        for c in child:
+                            child_list.remove(c)
                     cur.convertToDict()
                 child_list = cur_list
                 cur_level -= 1
@@ -238,6 +236,69 @@ class Employee(db.Model):
     #         raise e            
     #     finally:
     #         return response
+
+    def insert(self):
+        result = 'success'
+        try:
+            db.session.add(self)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            print e
+            result = 'fail'
+            # raise e
+        finally:
+            return result
+
+    @classmethod
+    def removeEmployees(cls, id_list):
+        result = 'success'
+        try:
+            for x in id_list:
+                e = Employee.query.filter_by(id = x).first()
+                if (e is not None):
+                    db.session.delete(e)
+            db.session.commit()
+        except Exception as e:
+            print e
+            db.session.rollback()
+            result = 'fail'
+        finally:
+            return result
+
+    def update(self):
+        result = 'success'
+        try:
+            Employee.query.filter_by(id = self.id).update({
+                'name': self.name,
+                'old_name': self.old_name,
+                'photo_url': self.photo_url,
+                'emp_type': self.emp_type,
+                'sex': self.sex,
+                'org_id': self.org_id,
+                'status_id': self.status_id,
+                'position_id': self.position_id,
+                'id_num': self.id_num,
+                'political_status_id': self.political_status_id,
+                'nation_id': self.nation_id,
+                'degree_id': self.degree_id,
+                'birthdate': self.birthdate,
+                'work_date': self.work_date,
+                'origin': self.origin,
+                'phone1': self.phone1,
+                'phone2': self.phone2,
+                'address': self.address,
+                'email': self.email,
+                'techlevel_id': self.techlevel_id,
+                'others': self.others
+                });
+            db.session.commit()
+        except Exception as e:
+            print e
+            db.session.rollback()
+            result = 'fail'
+        finally:
+            return result
 
     @classmethod
     def getEmployeeById(cls, eid):

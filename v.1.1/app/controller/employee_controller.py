@@ -40,43 +40,30 @@ def treeAll():
     '''
     return json.dumps([employee.Employee.treeAll()])
 
-# @employeeBlueprint.route('/getemployeebyid', methods=['GET'])
-# def get_employeeByid():
-#     '''保存当前选中员工的id，并根据员工编号返回该员工的信息
-#     首先保存传来的员工id，用于单独标志图片上传
-#     然后根据id返回员工信息
-#     最后将一些外键从id转换成name
-#     Decorators:
-#         employeeBlueprint.route
-#     '''
-#     session['current_employee_id'] = request.args.get('id')
+@fresh_login_required
+@employeeBlueprint.route('/removeEmployee', methods=['POST'])
+def removeEmployee():
+    print request.form
+    result = employee.Employee.removeEmployees(request.form['id'].split(','))
+    return result
     
-#     obj = employee.Employee.getEmployeeById(session['current_employee_id'])
-#     if(obj is not None):
-#         temp = obj.__dict__
-#         del temp['_sa_instance_state']
 
-#         # temp['org_name'] = organization.Organization.getNameById(temp['org_id']); #所属部门id转name
-#         # temp['worktype'] = dictionary.Dictionary.getNameById(temp[''])
-#         return json.dumps(temp)
-#     return None,500
 
 @fresh_login_required
 @employeeBlueprint.route('/insertEmployee', methods=['POST'])
 def insertEmployee():
+    # print request.form
     e = employee.Employee(**request.form)
-    return 'hello'
+    result = e.insert()
+    print result
+    return result
 
 @fresh_login_required
-@employeeBlueprint.route('/updateemployee', methods=['POST'])
+@employeeBlueprint.route('/updateEmployee', methods=['POST'])
 def update_employee():
-    e = employee.Employee(request.form['id'], request.form['name'], request.form['sex'], 
-        request.form['org_id'])
-    response_code = e.update_employee()
-    if(response_code == 200 ):
-        return 'successfully'
-    else:
-        return 'fail'
+    e = employee.Employee(**request.form)
+    result = e.update()
+    return result
 
 @fresh_login_required
 @employeeBlueprint.route('/uploadPhoto', methods=['POST'])
@@ -112,10 +99,12 @@ def scan_list_all():
     employee_list = employee.Employee.list_all()
     result = []
     for x in employee_list:
-        temp = x.__dict__
+        temp = {}
+        temp.update(x.__dict__)
         del temp['_sa_instance_state']
         temp['org_name'] = organization.Organization.getNameById(temp['org_id'])
         temp['political_status'] = dictionary.Dictionary.getNameById(temp['political_status_id'])
+        temp['emp_type_name'] = dictionary.Dictionary.getNameById(temp['emp_type'])
         result.append(temp)
     print result
     return json.dumps(result)
@@ -165,18 +154,49 @@ def query_employee():
     Returns:
         [json] -- 查询结果
     '''
-    id_list = request.form['id'].split(',')
+    id_list = request.form['id'].split(',') #id的格式是1,3,4, 注意最后多余的逗号
     result = []
     if(id_list is not None):
         for item in id_list:
             e = employee.Employee.getEmployeeById(item)
-            temp = { 
-                'id': e.id, 
-                'name': e.name,
-                'emp_type': dictionary.Dictionary.getNameById(e.emp_type),
-                'org_name': organization.Organization.getNameById(e.org_id),
-                'position': dictionary.Dictionary.getNameById(e.position_id),
-                'status': dictionary.Dictionary.getNameById(e.status_id),
-                }
-            result.append(temp)
+            if e is not None:
+                temp = {}
+                temp.update(e.__dict__)
+                del temp['_sa_instance_state']
+                temp['emp_type_name'] = dictionary.Dictionary.getNameById(e.emp_type)
+                temp['org_name'] = organization.Organization.getNameById(e.org_id)
+                temp['position'] = dictionary.Dictionary.getNameById(e.position_id)
+                temp['status'] = dictionary.Dictionary.getNameById(e.status_id)
+                # temp = { 
+                #     'id': e.id, 
+                #     'name': e.name,
+                #     'emp_type': dictionary.Dictionary.getNameById(e.emp_type),
+                #     'org_name': organization.Organization.getNameById(e.org_id),
+                #     'position': dictionary.Dictionary.getNameById(e.position_id),
+                #     'status': dictionary.Dictionary.getNameById(e.status_id),
+                #     }
+                result.append(temp)
     return json.dumps(result) 
+
+
+
+# @employeeBlueprint.route('/getemployeebyid', methods=['GET'])
+# def get_employeeByid():
+#     '''保存当前选中员工的id，并根据员工编号返回该员工的信息
+#     首先保存传来的员工id，用于单独标志图片上传
+#     然后根据id返回员工信息
+#     最后将一些外键从id转换成name
+#     Decorators:
+#         employeeBlueprint.route
+#     '''
+#     session['current_employee_id'] = request.args.get('id')
+
+#     obj = employee.Employee.getEmployeeById(session['current_employee_id'])
+#     if(obj is not None):
+#         temp = obj.__dict__
+#         del temp['_sa_instance_state']
+
+#         # temp['org_name'] = organization.Organization.getNameById(temp['org_id']); #所属部门id转name
+#         # temp['worktype'] = dictionary.Dictionary.getNameById(temp[''])
+#         return json.dumps(temp)
+#     return None,500

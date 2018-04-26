@@ -36,7 +36,7 @@
                     <button id="btn_addSeg" class="btn btn-default" onclick="initInsertModel()">
                         <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>新增
                     </button>
-                    <button id="btn_removeSeg" class="btn btn-default" onclick="removeDictionarysFunc()">
+                    <button id="btn_removeSeg" class="btn btn-default" onclick="removeEmployees()">
                         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>删除
                     </button>
                     <!-- 批处理下拉按钮 -->
@@ -260,7 +260,7 @@
                             </table>
                             <div class="modal-footer">
                                 <input type="button" class="btn btn-default" data-dismiss="modal" value="取消">
-                                <input type="submit" class="btn btn-primary" id="detailModal-submit" name="submit" value="确认">
+                                <input type="button" class="btn btn-primary" id="detailModal-submit" name="submit" value="确认">
                             </div>
                         </div>
                     </div><!-- modal-content end -->
@@ -286,15 +286,7 @@
                 // $('#employee-detail-table').hide();
 
                 //请求treeview的数据，并加载、设置treeview的属性
-                $.ajax({
-                    type: 'get',
-                    url: '/employee/treeAll',
-                    success: function(data){
-                        var text = "";
-                        var dataObj=eval("("+data+")");// 转换为json对象
-                        initTreeview(dataObj);
-                    }
-                }); 
+                treeAllEmployeeRequest(); 
                 initEmployeeListTable();          
                 initPhotoSumbit();            
             });
@@ -366,7 +358,7 @@
                         title: '姓名',
                         sortable: true
                     }, {
-                        field: 'emp_type',
+                        field: 'emp_type_name',
                         title: '用工性质',
                         sortable: true
                     }, {
@@ -387,8 +379,8 @@
                         align: 'center',
                         valign: 'middle',
                         formatter: function(value, row, index){
-                            return "<a href='/employee/detail?id=" + row.id + "' target='_blank'>详情</a>" + " <a href='#' data-toggle='modal' onclick='initEditModalFunc(\""+row.id+"\")'>修改</a> " + 
-                            " <a href='#' onclick='removeRequest(\""+row.id+"\")' >删除</a>"
+                            return "<a href='/employee/detail?id=" + row.id + "' target='_blank'>详情</a>" + " <a href='#' data-toggle='modal' onclick='queryEmployeesRequest(\""+row.id+"\","+ false + ")'>修改</a> " + 
+                            " <a href='#' onclick='removeEmployeesRequest(\""+row.id+"\")' >删除</a>"
                         }
                     }],
                 });
@@ -403,22 +395,7 @@
                     event.preventDefault();
                     var form = $(this);
                     var formData = new FormData(this);
-                    $.ajax({
-                        type: 'post',
-                        url: '/employee/uploadPhoto',
-                        mimeType: 'multipart/form-data',
-                        data: formData,
-                        contentType: false,
-                        cache: false,
-                        processData: false,
-                        success: function(photourl){
-                            alert(photourl);
-                            $('#detailModal-photo').attr('src',photourl);
-                        },
-                        error: function(){
-                            alert('上传失败');
-                        }
-                    });
+                    uploadPhotoRequest(formData);
                 });
             }
 
@@ -426,13 +403,29 @@
              * 初始化新增员工信息模态框
              */
             function initInsertModel(){
-                var data = new Array(23);
-                data[0] = '新增员工信息';
+                var data = new Array();
+                data['title'] = '新增员工信息';
                 // data[22] = '../static/image/Avatar.jpg';
                 setDetailModelData(data);
+                $('#detailModal-id').attr('readonly',false);
+                $('#detailModal-worktype').attr('readonly',false);
+                $('#detailModal-position').attr('readonly',false);
+
                 $('#detailModal-submit').click(insertEmployeeRequest);
                 $('#detailModal').modal("show");
             }
+
+            function initEditModel(array){
+                array['title'] = '修改员工信息';
+                setDetailModelData(array);
+                console.log(array);
+                $('#detailModal-id').attr('readonly',true);
+                $('#detailModal-worktype').attr('readonly',true);
+                $('#detailModal-position').attr('readonly',true);
+                $('#detailModal-submit').click(updateEmployeeRequest);
+                $('#detailModal').modal("show");
+            }
+
         </script>
         <!-- 业务逻辑代码 -->
         <script>         
@@ -445,7 +438,7 @@
              */
             function reloadEmployeeListTable(nodes) {
                 var request_str = '';
-                //获得选中的组织下面的人员，并转换成人员工号字符串，格式为1,2,3
+                //获得选中的组织下面的人员，并转换成人员工号字符串，格式为1,2,3,
                 for (var i = 0; i < nodes.length; i++) {
                     if(nodes[i].icon == 'glyphicon glyphicon-user'){
                         request_str += nodes[i].id;
@@ -453,143 +446,132 @@
                             request_str += ',';
                     }
                 }
-                // console.log(request_str);
                 if(request_str.length > 0)
-                    $.ajax({
-                        type: 'post',
-                        url: '/employee/query',
-                        data: {
-                            id: request_str
-                        },
-                        success: function(data) {
-                            dataObj = eval("("+data+")");// 转换为json对象
-                            // console.log(data);
-                            $('#employeelist-table').bootstrapTable('load',dataObj);
-                        }
-                    });
+                    queryEmployeesRequest(request_str);
             }
 
             /**
              * 设置模态框的控件的值
-             * @param {array} array 数据数组
-             * 0-标题 1-工号 2-姓名 3-曾用名 4-性别
-             * 5-用工性质 6-所属部门 7-人员状态 8-职名 9-身份证号
-             * 10-政治面貌 11-民族 12-学历 13-出生日期 14-入职日期 
-             * 15-籍贯 16-电话1 17-电话2 18-住址 19-邮箱 
-             * 20-技能档次 21-备注 22-照片url
+             * @param {array} array 字典
+             * 所包含的字段有
+             * title, id, name, old_name, (sex还没用), emp_type
+             * org_id, status_id, position_id, id_num, political_status_id, nation_id,
+             * degree_id, birthdate, work_date, origin, phone1, phone2,
+             * address, email, techlevel_id, others
              */
             function setDetailModelData(array) {
-                $('#detailModal-title').html(array[0]);
-                if (typeof(array[1]) != "undefined")
-                    $('#detailModal-id').val(array[1]);
+                $('#detailModal-title').html(array['title']);
+                if (typeof(array['id']) != "undefined")
+                    $('#detailModal-id').val(array['id']);
                 else
                     $('#detailModal-id').val('');
                 
-                if (typeof(array[2]) != "undefined")
-                    $('#detailModal-name').val(array[2]);
+                if (typeof(array['name']) != "undefined")
+                    $('#detailModal-name').val(array['name']);
                 else
                     $('#detailModal-name').val('');
                 
-                if (typeof(array[3]) != "undefined")
-                    $('#detailModal-oldname').val(array[3]);
+                if (typeof(array['old_name']) != "undefined")
+                    $('#detailModal-oldname').val(array['old_name']);
                 else
                     $('#detailModal-oldname').val('');
 
                 //array[4] 对应 sex
                 
-                if (typeof(array[5]) != "undefined")
-                    setSelectData($('#detailModal-worktype'), array[5], '用工性质');
+                if (typeof(array['emp_type']) != "undefined")
+                    setSelectData($('#detailModal-worktype'), array['emp_type'], '用工性质');
                 else
                     setSelectData($('#detailModal-worktype'), undefined, '用工性质');
 
-                if (typeof(array[6]) != "undefined")
-                    setSelectData($('#detailModal-org'), array[6], '所属部门', false);
+                if (typeof(array['org_id']) != "undefined")
+                    setSelectData($('#detailModal-org'), array['org_id'], '所属部门', false);
                 else
                     setSelectData($('#detailModal-org'), undefined, '所属部门', false);
 
-                if (typeof(array[7]) != "undefined")
-                    setSelectData($('#detailModal-status'), array[7], '人员状态');
+                if (typeof(array['status_id']) != "undefined")
+                    setSelectData($('#detailModal-status'), array['status_id'], '人员状态');
                 else
                     setSelectData($('#detailModal-status'), undefined, '人员状态');
 
-                if (typeof(array[8]) != "undefined")
-                    setSelectData($('#detailModal-position'), array[8], '职名');
+                if (typeof(array['position_id']) != "undefined")
+                    setSelectData($('#detailModal-position'), array['position_id'], '职名');
                 else
                     setSelectData($('#detailModal-position'), undefined, '职名');
 
-                if (typeof(array[9]) != "undefined")
-                    $('#detailModal-id-num').val(array[9]);
+                if (typeof(array['id_num']) != "undefined")
+                    $('#detailModal-id-num').val(array['id_num']);
                 else
                     $('#detailModal-id-num').val('');
 
-                if (typeof(array[10]) != "undefined")
-                    setSelectData($('#detailModal-political'), array[10], '政治面貌');
+                if (typeof(array['political_status_id']) != "undefined")
+                    setSelectData($('#detailModal-political'), array['political_status_id'], '政治面貌');
                 else
                     setSelectData($('#detailModal-political'), undefined, '政治面貌');
 
-                if (typeof(array[11]) != "undefined")
-                    setSelectData($('#detailModal-nation'), array[11], '民族');
+                if (typeof(array['nation_id']) != "undefined")
+                    setSelectData($('#detailModal-nation'), array['nation_id'], '民族');
                 else
                     setSelectData($('#detailModal-nation'), undefined, '民族');
 
-                if (typeof(array[12]) != "undefined")
-                    setSelectData($('#detailModal-degree'), array[12], '学历');
+                if (typeof(array['degree_id']) != "undefined")
+                    setSelectData($('#detailModal-degree'), array['degree_id'], '学历');
                 else
                     setSelectData($('#detailModal-degree'), undefined, '学历');
 
-                if (typeof(array[13]) != "undefined")
-                    $('#detailModal-birthdate').val(array[13]);
+                if (typeof(array['birthdate']) != "undefined")
+                    $('#detailModal-birthdate').val(array['birthdate']);
                 else
-                    $('#detailModal-birthdate').val('2018-3-14');
+                    $('#detailModal-birthdate').val('');
 
-                if (typeof(array[14]) != "undefined")
-                    $('#detailModal-work-date').val(array[14]);
+                if (typeof(array['work_date']) != "undefined")
+                    $('#detailModal-work-date').val(array['work_date']);
                 else
-                    $('#detailModal-work-date').val(Math.round(new Date().getTime()/1000));
+                    $('#detailModal-work-date').val('');
 
-                if (typeof(array[15]) != "undefined")
-                    $('#detailModal-origin').val(array[15]);
+                if (typeof(array['origin']) != "undefined")
+                    $('#detailModal-origin').val(array['origin']);
                 else
                     $('#detailModal-origin').val('');
 
-                if (typeof(array[16]) != "undefined")
-                    $('#detailModal-phone1').val(array[16]);
+                if (typeof(array['phone1']) != "undefined")
+                    $('#detailModal-phone1').val(array['phone1']);
                 else
                     $('#detailModal-phone1').val('');
 
-                if (typeof(array[17]) != "undefined")
-                    $('#detailModal-phone2').val(array[17]);
+                if (typeof(array['phone2']) != "undefined")
+                    $('#detailModal-phone2').val(array['phone2']);
                 else
                     $('#detailModal-phone2').val('');
 
-                if (typeof(array[18]) != "undefined")
-                    $('#detailModal-address').val(array[18]);
+                if (typeof(array['address']) != "undefined")
+                    $('#detailModal-address').val(array['address']);
                 else
                     $('#detailModal-address').val('');
 
-                if (typeof(array[19]) != "undefined")
-                    $('#detailModal-email').val(array[19]);
+                if (typeof(array['email']) != "undefined")
+                    $('#detailModal-email').val(array['email']);
                 else
                     $('#detailModal-email').val('');
 
-                if (typeof(array[20]) != "undefined")
-                    setSelectData($('#detailModal-techlevel'), array[20], '技能档次');
+                if (typeof(array['techlevel_id']) != "undefined")
+                    setSelectData($('#detailModal-techlevel'), array['techlevel_id'], '技能档次');
                 else
                     setSelectData($('#detailModal-techlevel'), undefined, '技能档次');
 
-                if (typeof(array[21]) != "undefined")
-                    $('#detailModal-others').val(array[21]);
+                if (typeof(array['others']) != "undefined")
+                    $('#detailModal-others').val(array['others']);
                 else
                     $('#detailModal-others').val('');
 
-                $('#detailModal-photo').attr('src',array[22]);
+                if (typeof(array['photo_url']) != "undefined")
+                    $('#detailModal-photo').attr('src',array['photo_url']);
 
             }
 
             /**
              * 加载下拉框数据，以及默认选中值
              * @param {HTMLElementObject} obj 当前下拉框
-             * @param {str} selected_data 默认选中值
+             * @param {str} selected_data 默认选中值(id)
              * @param {str} type_name     字典数据类型名
              * @param {Boolean} query_type    查询方式，分为字典数据(true)和组织数据(false)
              */
@@ -607,7 +589,7 @@
                         var text = '';
                         if(query_type){
                             for(var i in dataObj){
-                                if(typeof(selected_data) != "undefined" && selected_data == dataObj[i].name)
+                                if(typeof(selected_data) != "undefined" && selected_data == dataObj[i].id)
                                     text += '<option value="' + dataObj[i].id + '"selected>' + dataObj[i].name + '</option>';
                                 else
                                     text += '<option value="' + dataObj[i].id + '">' + dataObj[i].name + '</option>';
@@ -615,7 +597,7 @@
                         }
                         else{
                             for(var i in dataObj){
-                                if(typeof(selected_data) != "undefined" && selected_data == dataObj[i][1])
+                                if(typeof(selected_data) != "undefined" && selected_data == dataObj[i][0])
                                     text += '<option value="' + dataObj[i][0] + '"selected>' + dataObj[i][1] + '</option>';
                                 else
                                     text += '<option value="' + dataObj[i][0] + '">' + dataObj[i][1] + '</option>';
@@ -627,51 +609,18 @@
                 });
             }
 
-            /**
-             * 为table加载员工详细信息
-             * 当选中treeview中属于员工的选项时，右侧会显示员工详细信息
-             * TODO(HX):还有字段没有添加
-             * @param  {json} dataObj 员工详细信息
-             */
-            // function loadEmployeeTable(dataObj){
-            //     $('img').attr('src',dataObj['photo_url']);
-            //     $('#person-id').val(dataObj['id']);
-            //     $("#person-name").val(dataObj['name']);
-            //     //TODO(HX):性别的单选框有问题
-            //     console.log(dataObj['sex'] + "");
-            //     $('input:radio[name="sex-radio"]').attr('checked',dataObj['sex'] + "");
-            //     // if(dataObj['sex'] == 0){
-            //     //     $('#person-sex-man').attr('checked', true);
-            //     // }
-            //     // else{
-            //     //     $('#person-sex-woman').attr('checked', true);
-            //     // }
-            //     $.ajax({
-            //         type: 'get',
-            //         url: '/org/listall',
-            //         data: {type: 2},
-            //         success: function(data){
-            //             var array=eval("("+data+")");// 转换为json对象
-            //             // console.log(array);
-            //             //返回所有组织机构信息
-            //             $('#person-org').html('');
-            //             var text = "";
-            //             for (var i  = 0; i < array.length; i++) {
-            //                 id = array[i][0];
-            //                 name = array[i][1];
-            //                 if(id == dataObj['org_id'])
-            //                     text += '<option value="' + id + '" selected >' + name + '</option>'
-            //                 else
-            //                     text += '<option value="' + id + '">' + name + '</option>';
-            //             }
-            //             console.log(text);
-            //             $("#person-org").html(text);
-            //             $("#person-org").selectpicker('refresh');
-            //         }
-            //     });
 
-            // }
-
+            function removeEmployees(){
+                var array = $("#employeelist-table").bootstrapTable('getSelections');//返回所选的行，当没有选择任何行的时候返回一个空数组。
+                var target = "";
+                //将数组转换成字符串
+                for (var i = array.length - 1; i >= 0; i--) {
+                    target +=array[i].id;
+                    if(i > 0 )
+                        target +=",";
+                }
+                removeEmployeesRequest(target);
+            }
 
             /**
              * onchange响应函数
@@ -697,34 +646,7 @@
                 }]);
             }
 
-            /**
-             * 异步发送更新员工文本信息请求
-             * TODO(HX):还有字段没有添加
-             * @return {[type]} [description]
-             */
-            // function updateEmployeeRequest(){
-            //     var id = $('#person-id').val();
-            //     var name = $('#person-name').val();
-            //     var sex = $('input:radio[name="sex-radio"]:checked').val();
-            //     var worktype_id = $('#person-worktype').val();
-            //     var org_id = $('#person-org').val();
-            //     // console.log(id + name + sex + worktype_id + org_id);
-            //     $.ajax({
-            //         type: 'post',
-            //         url: '/employee/updateemployee',
-            //         data:{
-            //             id: id,
-            //             name: name,
-            //             sex: sex,
-            //             org_id: org_id
-            //         },
-            //         success: function(code){
-            //             //返回响应码
-            //             alert('update :' + code);
-            //         }
-            //     });
-            // }
-            // 
+            
             /**
              * 获得模态框中的信息
              * @return {json} 模态框中所有控件的数据 或者 null
@@ -768,20 +690,123 @@
 
         <!-- 发送响应代码 -->
         <script>
+            /**
+             * 发送请求所有员工数据
+             * 数据格式是treeview的数据结构
+             * 用于加载trreview数据
+             * @return {[type]} [description]
+             */
+            var treeAllEmployeeRequest = function(){
+                $.ajax({
+                    type: 'get',
+                    url: '/employee/treeAll',
+                    success: function(data){
+                        var text = "";
+                        var dataObj=eval("("+data+")");// 转换为json对象
+                        initTreeview(dataObj);
+                    }
+                });
+            };
+
+            /**
+             * 查询员工详细信息请求
+             * @param  {str} request_str 待查询员工的工号字符串，格式为1,3,4,
+             * @param  {Boolean} async       是否异步查询，true-异步，false-同步
+             * @return {[type]}             [description]
+             */
+            var queryEmployeesRequest = function(request_str, async = true){
+                async = new Boolean(async);
+                $.ajax({
+                        type: 'post',
+                        url: '/employee/query',
+                        async: async,
+                        data: {
+                            id: request_str
+                        },
+                        success: function(data) {
+                            dataObj = eval("("+data+")");// 转换为json对象
+                            console.log(dataObj[0]);
+                            console.log(async == false);
+                            if (async == true)//异步
+                                $('#employeelist-table').bootstrapTable('load',dataObj);
+                            else{//同步，代表此操作是修改操作之前读取员工详细信息
+                                console.log('hello');
+                                initEditModel(dataObj[0]);
+                            }
+                        }
+                    });
+            };
+
+            /**
+             * 新增员工信息请求
+             * FIXME(hx):还没能正确接受到响应
+             * @return {[type]} [description]
+             */
             var insertEmployeeRequest = function(){
                 var array = getModelData();
-                console.log(array);
+                // console.log(array);
                 if(array != null){
                     $.ajax({
                         url: '/employee/insertEmployee',
                         type: 'post',
-                        dataType: 'json',
                         data: array,
                         success: function(data){
-                            alert(data);
+                            // console.log(data);
+                            alert('新增员工：' + data);
+                            // location.reload();
+                            $('#detailModal-id').val('');
+                            $('#detailModal-name').val('');
                         }
                     });
                 }
+            };
+
+            var removeEmployeesRequest = function(request_str){
+                console.log(request_str);
+                $.ajax({
+                    url: '/employee/removeEmployee',
+                    type: 'post',
+                    data:{id : request_str},
+                    success: function(data){
+                        // console.log(data);
+                        alert('删除员工 ：' + data);
+                        location.reload();
+                    },
+                });
+            };
+
+            var updateEmployeeRequest = function(){
+                var array = getModelData();
+                console.log(array);
+                $.ajax({
+                    url: '/employee/updateEmployee',
+                    type: 'post',
+                    data: array,
+                    success: function(message){
+                        alert('更新员工信息：' + message);
+                        location.reload();
+                    }
+                });
+            }
+
+
+            var uploadPhotoRequest = function(formData){
+                $.ajax({
+                        type: 'post',
+                        url: '/employee/uploadPhoto',
+                        mimeType: 'multipart/form-data',
+                        data: formData,
+                        contentType: false,
+                        cache: false,
+                        processData: false,
+                        success: function(photourl){
+                            // alert(photourl);
+                            $('#detailModal-photo').attr('src',photourl);
+                        },
+                        error: function(){
+                            alert('上传失败');
+                        }
+                    });
             };
         </script>
     {% endblock body %}
