@@ -6,6 +6,7 @@ from flask import Flask,Blueprint,render_template,request,redirect,url_for,sessi
 from flask_login import login_required,fresh_login_required,current_user
 from flask_uploads import UploadSet,IMAGES,configure_uploads
 import json
+import flask_excel as excel #excel操作工具包
 from extensions import photos
 
 employeeBlueprint = Blueprint('employeeBlueprint', __name__,template_folder = '../templates', 
@@ -26,6 +27,11 @@ def index():
 @employeeBlueprint.route('/scan/')
 def scan_index():
     return render_template('employee_query.html')
+
+@fresh_login_required
+@employeeBlueprint.route('/change/')
+def change_index():
+    return render_template('employee_change.html')
 
 @fresh_login_required
 @employeeBlueprint.route('/treeAll')
@@ -62,8 +68,21 @@ def insertEmployee():
 @employeeBlueprint.route('/updateEmployee', methods=['POST'])
 def update_employee():
     e = employee.Employee(**request.form)
+    print e.__dict__
     result = e.update()
     return result
+
+@fresh_login_required
+@employeeBlueprint.route('/change/inside', methods=['POST'])
+def insideChange():
+    # print request.form['id']
+    # id_string = request.form['id']
+    # org_id = request.form['org_id']
+    # position_id = request.form['position_id']
+    # change_date = request.form['change_date']
+    # id_list = id_string.split(',')
+
+    return employee.Employee.insideChange(**request.form)
 
 @fresh_login_required
 @employeeBlueprint.route('/uploadPhoto', methods=['POST'])
@@ -99,14 +118,18 @@ def scan_list_all():
     employee_list = employee.Employee.list_all()
     result = []
     for x in employee_list:
-        temp = {}
-        temp.update(x.__dict__)
-        del temp['_sa_instance_state']
-        temp['org_name'] = organization.Organization.getNameById(temp['org_id'])
-        temp['political_status'] = dictionary.Dictionary.getNameById(temp['political_status_id'])
-        temp['emp_type_name'] = dictionary.Dictionary.getNameById(temp['emp_type'])
-        result.append(temp)
-    print result
+        print x
+        if x is not None:
+            # print x.__dict__
+            temp = {}
+            temp.update(x.__dict__)
+            del temp['_sa_instance_state']
+            temp['org_name'] = organization.Organization.getNameById(x.org_id)
+            temp['political_status'] = dictionary.Dictionary.getNameById(x.political_status_id)
+            temp['emp_type_name'] = dictionary.Dictionary.getNameById(x.emp_type)
+            temp['position'] = dictionary.Dictionary.getNameById(x.position_id)
+            result.append(temp)
+    # print result
     return json.dumps(result)
 
 @fresh_login_required
@@ -115,6 +138,10 @@ def show_detail():
     e = employee.Employee.getEmployeeById(request.args.get('id'))
     # print e.political_status_id
     if( e is not None ):
+        if e.sex == 1:
+            e.sex = '男'
+        else:
+            e.sex = '女'
         cur_employee = {
             'id': e.id, 
             'name': e.name, 
@@ -177,6 +204,21 @@ def query_employee():
                 #     }
                 result.append(temp)
     return json.dumps(result) 
+
+@employeeBlueprint.route('/download',methods = ['GET'])
+def employeeDownload():
+    id = request.args['id']
+    type_name = dictionary.DictionaryType.getNameById(id)
+    #这个sheet名很重要，必须是类名，否则上传就会报错
+    response = excel.make_response_from_array([[
+        u'工号(必填)', 
+        u'名称(必填)',
+        u'曾用名',
+        u'所属部门(必填)',
+        u'用工性质(必填)']], 
+        "xls",file_name= type_name + u"信息批量导入表",sheet_name='Dictionary')
+    # print response;
+    return response;
 
 
 

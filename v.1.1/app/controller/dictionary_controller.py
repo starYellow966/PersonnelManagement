@@ -20,7 +20,6 @@ dictionaryBlueprint = Blueprint('dictionaryBlueprint', __name__, template_folder
 '''
 @dictionaryBlueprint.route('/')
 @fresh_login_required
-# @login_required
 def index():
     return render_template('dictionaryindex.html');
 
@@ -30,8 +29,8 @@ def index():
 :return : json,字段有{id, name}
 :date : 2018/3/17
 '''
-@dictionaryBlueprint.route('/listAll', methods = ['GET'])
 @fresh_login_required
+@dictionaryBlueprint.route('/listAll', methods = ['GET'])
 def listAllType():
     '''返回dictionaryindex.html中侧方菜单的数据
     
@@ -47,9 +46,8 @@ def listAllType():
     '''
     data = dictionary.DictionaryType.listAll();#listAll()失败时返回None
     if (data == None):
-        return json.dumps([]),200;
-    else:
-        return json.dumps(data),200;
+        data = []
+    return json.dumps(data),200;
 
 '''根据字典类型id返回同类型的所有字典数据
 用于页面表格数据
@@ -91,15 +89,15 @@ def listDictByTypeName():
 @dictionaryBlueprint.route('/remove', methods = ['GET'])
 @fresh_login_required
 def removeDict():
-    response_code = 'success';
-    try:
-        if (dictionary.Dictionary.remove(request.args['target_string']) ==500):
-            response_code = 'failure';
-    except Exception as e:
-        raise e;
-        response_code = 'failure';
-    finally:
-        return response_code;
+    # response_code = 'success'
+    # try:
+    #     if (dictionary.Dictionary.remove(request.args['target_string'])['message'] ==500):
+    #         response_code = 'failure'
+    # except Exception as e:
+    #     response_code = 'failure'
+    #     raise e
+    # finally:
+    return dictionary.Dictionary.remove(request.args['target_string'])['data']
 
 '''更新字典数据
 
@@ -110,16 +108,17 @@ def removeDict():
 @fresh_login_required
 def updateDict():
     # print "reach middle level";
-    response_code = 'success';
-    try:
-        d = dictionary.Dictionary(request.form['id'], request.form['name'], None);
-        if(d.updateDictionary() == 500):
-            response_code = 'failure';
-    except Exception as e:
-        raise e;
-        response_code = 'failure';
-    finally:
-        return response_code;
+    # response_code = 'success';
+    # try:
+    #     d = dictionary.Dictionary(request.form['id'], request.form['name'], None)
+    #     if(d.update()['message'] == 500):
+    #         response_code = 'failure';
+    # except Exception as e:
+    #     raise e
+    #     response_code = 'failure'
+    # finally:
+    #     return response_code
+    return dictionary.Dictionary(request.form['id'], request.form['name'], None).update()['data']
 
 '''插入字典数据
 
@@ -129,19 +128,20 @@ def updateDict():
 @dictionaryBlueprint.route('/insert', methods = ['GET'])
 @fresh_login_required
 def insertDict():
-    response_code = 'success';
-    try:
-        d = dictionary.Dictionary(request.args['id'], request.args['name'], request.args['type_id']);
-        response = d.insertDictionary();
-        if(response == 500):
-            response_code = 'failure';
-        elif (response == 300):
-            response_code = 'id_error';
-    except Exception as e:
-        raise e;
-        response_code = 'failure';
-    finally:
-        return response_code;
+    # response_code = 'success';
+    # try:
+    #     d = dictionary.Dictionary(request.args['id'], request.args['name'], request.args['type_id']);
+    #     response = d.insert();
+    #     if(response == 500):
+    #         response_code = 'failure';
+    #     elif (response == 300):
+    #         response_code = 'id_error';
+    # except Exception as e:
+    #     raise e;
+    #     response_code = 'failure';
+    # finally:
+    #     return response_code;
+    return dictionary.Dictionary(request.args['id'], request.args['name'], request.args['type_id']).insert()['data']
 
 '''下载一个excel文件，是批量导入时指定文件
 

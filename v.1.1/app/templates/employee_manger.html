@@ -57,8 +57,8 @@
             
             <!-- 员工信息模态框 -->
             <div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
+                <div class="modal-dialog" >
+                    <div class="modal-content" style="width: 120%;align-content: center;">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal"
                             aria-hidden="true">&times;</button>
@@ -67,7 +67,7 @@
                         <div id="tableview">
                             <table id="employee-detail-table" class="table-setting">
                                 <!-- TODO(HX):还有字段没有添加 -->
-                                <tbody style="display: table-row-group;vertical-align: middle;padding: 10px;">
+                                <tbody style="display: table-row-group;vertical-align: middle;">
                                     <tr>
                                         <td>
                                             <div class="avatar">
@@ -88,6 +88,12 @@
                                         <td>
                                             <input type="text" class="form-control" id="detailModal-id">
                                         </td>
+                                        <td class="setting-title">
+                                            职名
+                                        </td>
+                                        <td>
+                                            <select class="selectpicker" id="detailModal-position"></select>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="setting-title">
@@ -96,13 +102,26 @@
                                         <td>
                                             <input type="text" class="form-control" id="detailModal-name">
                                         </td>
+                                        <td class="setting-title">
+                                            用工性质
+                                        </td>
+                                        <td>
+                                            <select class="selectpicker" id="detailModal-worktype"></select>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="setting-title">
-                                            曾姓名
+                                            曾用名
                                         </td>
                                         <td>
                                             <input type="text" class="form-control" id="detailModal-oldname">
+                                        </td>
+                                        
+                                        <td class="setting-title">
+                                            所属部门
+                                        </td>
+                                        <td>
+                                            <select class="selectpicker" id="detailModal-org"></select>
                                         </td>
                                     </tr>
                                     <tr>
@@ -119,54 +138,13 @@
                                                 <span>女</span>
                                             </div>
                                         </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="setting-title">
-                                            用工性质
-                                        </td>
-                                        <td>
-                                            <select class="selectpicker" id="detailModal-worktype"></select>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="setting-title">
-                                            所属部门
-                                        </td>
-                                        <td>
-                                            <select class="selectpicker" id="detailModal-org"></select>
-                                        </td>
-                                    </tr>
-                                    <tr>
                                         <td class="setting-title">
                                             人员状态
                                         </td>
                                         <td>
                                             <select class="selectpicker" id="detailModal-status"></select>
                                         </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="setting-title">
-                                            职名
-                                        </td>
-                                        <td>
-                                            <select class="selectpicker" id="detailModal-position"></select>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="setting-title">
-                                            身份证号
-                                        </td>
-                                        <td>
-                                            <input type="text" class="form-control" id="detailModal-id-num">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="setting-title">
-                                            政治面貌
-                                        </td>
-                                        <td>
-                                            <select class="selectpicker" id="detailModal-political"></select>
-                                        </td>
+                                        
                                     </tr>
                                     <tr>
                                         <td class="setting-title">
@@ -175,8 +153,22 @@
                                         <td>
                                             <select class="selectpicker" id="detailModal-nation"></select>
                                         </td>
+                                        <td class="setting-title">
+                                            技能档次
+                                        </td>
+                                        <td>
+                                            <select class="selectpicker" id="detailModal-techlevel"></select>
+                                        </td>
+                                        
                                     </tr>
                                     <tr>
+                                        <td class="setting-title">
+                                            籍贯
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control" id="detailModal-origin">
+                                        </td>
+                                        
                                         <td class="setting-title">
                                             学历
                                         </td>
@@ -186,26 +178,17 @@
                                     </tr>
                                     <tr>
                                         <td class="setting-title">
-                                            出生日期
+                                            身份证号
                                         </td>
                                         <td>
-                                            <input type="date" class="form-control" id="detailModal-birthdate">
+                                            <input type="text" class="form-control" id="detailModal-id-num">
                                         </td>
-                                    </tr>
-                                    <tr>
+
                                         <td class="setting-title">
-                                            入职日期
+                                            政治面貌
                                         </td>
                                         <td>
-                                            <input type="date" class="form-control" id="detailModal-work-date">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="setting-title">
-                                            籍贯
-                                        </td>
-                                        <td>
-                                            <input type="text" class="form-control" id="detailModal-origin">
+                                            <select class="selectpicker" id="detailModal-political"></select>
                                         </td>
                                     </tr>
                                     <tr>
@@ -215,6 +198,12 @@
                                         <td>
                                             <input type="number" class="form-control" id="detailModal-phone1">
                                         </td>
+                                        <td class="setting-title">
+                                            出生日期
+                                        </td>
+                                        <td>
+                                            <input type="date" class="form-control" id="detailModal-birthdate">
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="setting-title">
@@ -223,13 +212,11 @@
                                         <td>
                                             <input type="text" class="form-control" id="detailModal-phone2">
                                         </td>
-                                    </tr>
-                                    <tr>
                                         <td class="setting-title">
-                                            家庭住址
+                                            入职日期
                                         </td>
                                         <td>
-                                            <input type="text" class="form-control" id="detailModal-address">
+                                            <input type="date" class="form-control" id="detailModal-work-date">
                                         </td>
                                     </tr>
                                     <tr>
@@ -239,20 +226,18 @@
                                         <td>
                                             <input type="email" class="form-control" id="detailModal-email">
                                         </td>
-                                    </tr>
-                                    <tr>
                                         <td class="setting-title">
-                                            技能档次
+                                            家庭住址
                                         </td>
                                         <td>
-                                            <select class="selectpicker" id="detailModal-techlevel"></select>
+                                            <input type="text" class="form-control" id="detailModal-address">
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="setting-title">
                                             备注
                                         </td>
-                                        <td>
+                                        <td colspan="3">
                                             <input type="text" class="form-control" id="detailModal-others">
                                         </td>
                                     </tr>
@@ -408,8 +393,10 @@
                 // data[22] = '../static/image/Avatar.jpg';
                 setDetailModelData(data);
                 $('#detailModal-id').attr('readonly',false);
-                $('#detailModal-worktype').attr('readonly',false);
-                $('#detailModal-position').attr('readonly',false);
+                $('#detailModal-worktype').removeAttr('disabled');
+                $('#detailModal-position').removeAttr('disabled');
+                $('#detailModal-org').removeAttr('disabled');
+                $('#detailModal-status').removeAttr('disabled');
 
                 $('#detailModal-submit').click(insertEmployeeRequest);
                 $('#detailModal').modal("show");
@@ -420,8 +407,10 @@
                 setDetailModelData(array);
                 console.log(array);
                 $('#detailModal-id').attr('readonly',true);
-                $('#detailModal-worktype').attr('readonly',true);
-                $('#detailModal-position').attr('readonly',true);
+                $('#detailModal-worktype').attr('disabled',true);
+                $('#detailModal-position').attr('disabled',true);
+                $('#detailModal-org').attr('disabled',true);
+                $('#detailModal-status').attr('disabled',true);
                 $('#detailModal-submit').click(updateEmployeeRequest);
                 $('#detailModal').modal("show");
             }
@@ -777,7 +766,7 @@
 
             var updateEmployeeRequest = function(){
                 var array = getModelData();
-                console.log(array);
+                console.log(array['political_status_id']);
                 $.ajax({
                     url: '/employee/updateEmployee',
                     type: 'post',

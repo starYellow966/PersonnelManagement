@@ -80,13 +80,6 @@
                     fileName: '操作日志表'
                 },
                 columns: [{
-                    field: 'id',
-                    title: '编号',
-                    sortable: true,
-                    formatter: function(value, row, index){
-                        return new Number(value);
-                    }
-                }, {
                     field: 'user_name',
                     title: '操作者',
                     sortable: true
@@ -115,6 +108,13 @@
                     field: 'info',
                     title: '操作详情',
                     sortable: true
+                }, {
+                    field: 'result',
+                    title: '操作结果',
+                    sortable: true,
+                    formatter: function(value, row, index){
+                        return value == 1 ? 'success':'fail';
+                    }
                 }, {
                     field: 'operate',
                     title: '详情',

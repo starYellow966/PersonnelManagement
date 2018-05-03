@@ -40,6 +40,7 @@ class Employee(db.Model):
         email {str} -- 邮箱
         techlevel_id {str} -- 技能等级编号，来源于Dictionary表
         others {str} -- 备注
+        isUse {boolean} -- 是否在使用，1-是；0-否
     '''
 
     __tablename__ = 'Employee'
@@ -89,14 +90,26 @@ class Employee(db.Model):
 
     others = db.Column(db.String(40), nullable = True)
 
-    def __init__(self, id, name, sex, org_id, **kw):
+    isUse = db.Column(db.Integer(), default = 1)
+
+    def __init__(self, id, name, **kw):
         self.id = ''.join(id)
         self.name = ''.join(name)
-        self.sex = ''.join(sex)
-        self.org_id = ''.join(org_id)
+        # self.sex = ''.join(sex)
+        # self.org_id = ''.join(org_id)
+        # kw的值都是list类型，需要转换成str
+        # for x in kw.itervalues():
+        #     x = str(x)
+        # print [type(x) for x in kw.itervalues()]
         self.setOption(kw)
 
     def setOption(self, kw):
+        # if 'name' in kw:
+        #     self.name = ''.join(kw['name'])
+        if 'sex' in kw:
+            self.sex = ''.join(kw['sex'])
+        if 'org_id' in kw:
+            self.org_id = ''.join(kw['org_id'])
         if 'old_name' in kw:
             self.old_name = ''.join(kw['old_name'])
         if 'photo_url' in kw:
@@ -105,6 +118,8 @@ class Employee(db.Model):
             self.emp_type = ''.join(kw['emp_type'])
         if 'status_id' in kw:
             self.status_id = ''.join(kw['status_id'])
+        if 'political_status_id' in kw:
+            self.political_status_id = ''.join(kw['political_status_id'])
         if 'position_id' in kw:
             self.position_id = ''.join(kw['position_id'])
         if 'nation_id' in kw:
@@ -135,11 +150,11 @@ class Employee(db.Model):
 
     @classmethod
     def list_all(cls):
-        return Employee.query.order_by(Employee.id).all()
+        return Employee.query.filter_by(isUse = 1).order_by(Employee.id).all()
 
     @classmethod
     def getEmployeeById(cls, eid):
-        return Employee.query.filter_by(id = eid).first();
+        return Employee.query.filter_by(id = eid, isUse = 1).first();
 
     @classmethod
     def treeAll(cls):
@@ -198,7 +213,7 @@ class Employee(db.Model):
         '''
         result = [];
         try:
-            Employee_list = Employee.query.with_entities(Employee.id, Employee.name, Employee.org_id).filter_by(org_id = node_id).all() #获得属于当前节点的员工信息
+            Employee_list = Employee.query.with_entities(Employee.id, Employee.name, Employee.org_id).filter_by(org_id = node_id, isUse = 1).all() #获得属于当前节点的员工信息
             if Employee_list is not None:
                 for x in Employee_list:
                     node = TreeNode(x.id, "", x.name)
@@ -211,31 +226,6 @@ class Employee(db.Model):
             return result
 
 
-    # @classmethod
-    # def updatePhoto(cls, eid, photo_url):
-    #     '''根据员工id更新图片
-        
-    #     Arguments:
-    #         eid {str} -- 员工id
-    #         photo_url {str} -- 图片路径
-        
-    #     Returns:
-    #         [int] -- 响应码。200-成功，500-失败
-        
-    #     Raises:
-    #         e -- 更新异常
-    #     '''
-    #     response = 200
-    #     try:
-    #         Employee.query.filter_by(id = eid).update({'photo_url': photo_url})
-    #         db.session.commit()
-    #     except Exception as e:
-    #         print e
-    #         db.session.rollback()
-    #         response = 500
-    #         raise e            
-    #     finally:
-    #         return response
 
     def insert(self):
         result = 'success'
@@ -255,9 +245,9 @@ class Employee(db.Model):
         result = 'success'
         try:
             for x in id_list:
-                e = Employee.query.filter_by(id = x).first()
-                if (e is not None):
-                    db.session.delete(e)
+                e = Employee.query.filter_by(id = x).update({'isUse': 0})
+                # if (e is not None):
+                #     db.session.delete(e)
             db.session.commit()
         except Exception as e:
             print e
@@ -330,3 +320,50 @@ class Employee(db.Model):
             raise e
         else:
             return response_code
+
+    @classmethod
+    def insideChange(cls, id, org_id, position_id, change_date):
+        result = 'success'
+        try:
+            id_list = ''.join(id).split(',')
+            for x in id_list:
+                Employee.query.filter_by(id = x).update({
+                    'org_id': ''.join(org_id),
+                    'position_id': ''.join(position_id)
+                    })
+            db.session.commit()
+        except Exception as e:
+            print e
+            db.session.rollback()
+            result = fail
+        finally:
+            return result
+
+
+
+
+# @classmethod
+    # def updatePhoto(cls, eid, photo_url):
+    #     '''根据员工id更新图片
+        
+    #     Arguments:
+    #         eid {str} -- 员工id
+    #         photo_url {str} -- 图片路径
+        
+    #     Returns:
+    #         [int] -- 响应码。200-成功，500-失败
+        
+    #     Raises:
+    #         e -- 更新异常
+    #     '''
+    #     response = 200
+    #     try:
+    #         Employee.query.filter_by(id = eid).update({'photo_url': photo_url})
+    #         db.session.commit()
+    #     except Exception as e:
+    #         print e
+    #         db.session.rollback()
+    #         response = 500
+    #         raise e            
+    #     finally:
+    #         return response
