@@ -272,7 +272,7 @@ class Organization(db.Model):
         '''
         result = None
         try:
-            result = Organization.query.with_entities(Organization.id, Organization.name).order_by(Organization.level, Organization.num).all()
+            result = Organization.query.with_entities(Organization.id, Organization.name).filter_by(status = 1).order_by(Organization.level, Organization.num).all()
         except Exception as e:
             print e
             db.session.rollback()

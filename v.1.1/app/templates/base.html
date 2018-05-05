@@ -58,18 +58,8 @@
                         <!-- <li class="header" style="color: white;font-size: 180%"><strong>人事管理系统</strong></li> -->
                         <li class="treeview">
                             <a href="#">
-                                <i class="fa fa-dashboard"></i> <span>人员管理</span> <i class="fa fa-angle-left pull-right"></i>
-                            </a>
-                            <ul class="treeview-menu">
-                                <li><a href="/employee"><i class="fa fa-circle-o"></i> 人员信息管理</a></li>
-                                <li><a href="/employee/scan"><i class="fa fa-circle-o"></i> 人员信息浏览</a></li>
-                                <li><a href="/employee/change"><i class="fa fa-circle-o"></i> 人员变动管理</a></li>
-                            </ul>
-                        </li>
-                        <li class="treeview">
-                            <a href="#">
                                 <i class="fa fa-laptop"></i>
-                                <span>数据管理</span>
+                                <span>数据标准管理</span>
                                 <i class="fa fa-angle-left pull-right"></i>
                             </a>
                             <ul class="treeview-menu">
@@ -79,22 +69,50 @@
                         </li>
                         <li class="treeview">
                             <a href="#">
-                                <i class="fa fa-pie-chart"></i>
-                                <span>统计分析</span>
-                                <i class="fa fa-angle-left pull-right"></i>
+                                <i class="fa fa-book"></i> <span>人员信息浏览</span> <i class="fa fa-angle-left pull-right"></i>
                             </a>
                             <ul class="treeview-menu">
-                                <li><a href="#"><i class="fa fa-circle-o"></i> 人员信息统计</a></li>
-                                <li><a href="#"><i class="fa fa-circle-o"></i> 人员变动统计</a></li>
+                                <li><a href="/employee/scan"><i class="fa fa-circle-o"></i> 人员信息浏览</a></li>
                             </ul>
                         </li>
                         <li class="treeview">
                             <a href="#">
-                                <i class="fa fa-edit"></i> <span>系统管理</span>
+                                <i class="fa fa-dashboard"></i> <span>人员信息管理</span> <i class="fa fa-angle-left pull-right"></i>
+                            </a>
+                            <ul class="treeview-menu">
+                                <li><a href="/employee"><i class="fa fa-circle-o"></i> 基本信息管理</a></li>
+                            </ul>
+                        </li> 
+                        <li class="treeview">
+                            <a href="#">
+                                <i class="fa fa-edit"></i> <span>人员变动管理</span> <i class="fa fa-angle-left pull-right"></i>
+                            </a>
+                            <ul class="treeview-menu">
+                                <li><a href="/employee/change/insert"><i class="fa fa-circle-o"></i> 新增人员</a></li>
+                                <li><a href="/employee/change/batch"><i class="fa fa-circle-o"></i> 批量新增人员</a></li>
+                                <li><a href="#"><i class="fa fa-circle-o"></i> 批量修改人员</a></li>
+                                <li><a href="/employee/change"><i class="fa fa-circle-o"></i> 人员内部变动</a></li>
+                                <li><a href="/employee/formal"><i class="fa fa-circle-o"></i> 人员定职管理</a></li>
+
+                            </ul>
+                        </li>
+                        <li class="treeview">
+                            <a href="#">
+                                <i class="fa fa-pie-chart"></i>
+                                <span>人员统计管理</span>
                                 <i class="fa fa-angle-left pull-right"></i>
                             </a>
                             <ul class="treeview-menu">
-                                <li><a href="/log"><i class="fa fa-circle-o"></i> 系统日志管理</a></li>
+                                <li><a href="/statistics"><i class="fa fa-circle-o"></i> 人员信息统计</a></li>
+                            </ul>
+                        </li>
+                        <li class="treeview">
+                            <a href="#">
+                                <i class="fa fa-table"></i> <span>系统信息管理</span>
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </a>
+                            <ul class="treeview-menu">
+                                <li><a href="/log"><i class="fa fa-circle-o"></i> 操作日志管理</a></li>
                                 <li><a href="#"><i class="fa fa-circle-o"></i> 登录用户管理</a></li>
                             </ul>
                         </li>

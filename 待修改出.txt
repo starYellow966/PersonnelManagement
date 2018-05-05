@@ -3,3 +3,5 @@ models中的mysql url 从ip改成localhost
 尝试用WTF修改模态框的表单
 
 json的js使用
+
+字典/组织数据删除前提示用户，因为有外键约束

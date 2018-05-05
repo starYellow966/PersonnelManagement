@@ -7,7 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager,login_user,login_required,logout_user,current_user
 import flask_excel as excel
 from extensions import db, login_manager, bootstrap, photos
-from controller import organizationBlueprint,dictionaryBlueprint,logBlueprint,employeeBlueprint
+from controller import organizationBlueprint,dictionaryBlueprint,logBlueprint,employeeBlueprint,statisticsBlueprint
 from models import users,redirectForm
 
 # bootstrap = Bootstrap()
@@ -80,6 +80,7 @@ def init_blueprint(app):
     app.register_blueprint(dictionaryBlueprint)
     app.register_blueprint(logBlueprint)
     app.register_blueprint(employeeBlueprint)
+    app.register_blueprint(statisticsBlueprint)
 
 def init_route(app):
     @app.route('/')

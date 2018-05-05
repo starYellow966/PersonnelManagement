@@ -33,9 +33,9 @@
             <div class="col-sm-8">
                 <!-- 表格的工具栏 -->
                 <div id="table_toolbar" class="btn-group">
-                    <button id="btn_addSeg" class="btn btn-default" onclick="initInsertModel()">
+                    <!-- <button id="btn_addSeg" class="btn btn-default" onclick="initInsertModel()">
                         <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>新增
-                    </button>
+                    </button> -->
                     <button id="btn_removeSeg" class="btn btn-default" onclick="removeEmployees()">
                         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>删除
                     </button>
@@ -129,14 +129,10 @@
                                             性别
                                         </td>
                                         <td>
-                                            <div class="col-xs-6">
-                                                <input type="radio" name="sex-radio" id="detailModal-sex-man" value="1" checked> 
-                                                <span>男</span>
-                                            </div>
-                                            <div class="col-xs-6">
-                                                <input type="radio" name="sex-radio" id="detailModal-sex-woman" value="0"> 
-                                                <span>女</span>
-                                            </div>
+                                            <select class="selectpicker" id="detailModal-sex">
+                                                <option value='1'>男</option>
+                                                <option value=0>女</option>
+                                            </select>
                                         </td>
                                         <td class="setting-title">
                                             人员状态
@@ -443,7 +439,7 @@
              * 设置模态框的控件的值
              * @param {array} array 字典
              * 所包含的字段有
-             * title, id, name, old_name, (sex还没用), emp_type
+             * title, id, name, old_name, sex, emp_type
              * org_id, status_id, position_id, id_num, political_status_id, nation_id,
              * degree_id, birthdate, work_date, origin, phone1, phone2,
              * address, email, techlevel_id, others
@@ -465,7 +461,8 @@
                 else
                     $('#detailModal-oldname').val('');
 
-                //array[4] 对应 sex
+                if(typeof(array['sex']) != 'undefined')
+                    $('#detailModal-sex').selectpicker('val', array['sex']);
                 
                 if (typeof(array['emp_type']) != "undefined")
                     setSelectData($('#detailModal-worktype'), array['emp_type'], '用工性质');
@@ -653,7 +650,7 @@
                     return null;
                 }
                 array['old_name'] = $('#detailModal-oldname').val();
-                array['sex'] = $('input:radio[name="sex-radio"]:checked').val();
+                array['sex'] = $('#detailModal-sex').val();
                 array['emp_type'] = $('#detailModal-worktype').val();
                 array['org_id'] = $('#detailModal-org').val();
                 array['status_id'] = $('#detailModal-status').val();

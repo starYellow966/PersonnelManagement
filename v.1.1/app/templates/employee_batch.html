@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% extends "base.html" %}
+    {% block head %}
+        {{ super() }}
+    {% endblock head %} 
+</head>
+<body>
+    {% block body %}
+        {% block top_nav %}
+            {{ super() }}
+        {% endblock top_nav %}
+
+        {% block left_nav %}
+            {{ super() }}
+        {% endblock left_nav %}
+        
+        <div id="tableview" class="container">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        选择字段
+                    </h3>
+                </div>
+                <div class="panel-body">
+                    
+                </div>
+                <div class="panel-footer">
+                    <button class="btn btn-default">取消</button>
+                    <button class="btn btn-primary" id="submit">创建模板</button>
+                </div>
+            </div>
+        </div>
+        {% block base_script %}
+            {{ super() }}
+            <script src="../static/js/bootstrap-select.js"></script>
+        {% endblock base_script %}
+    {% endblock body %}
+</body>
+</html>

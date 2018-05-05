@@ -11,6 +11,7 @@ from flask_sqlalchemy import SQLAlchemy
 from operate_log import Log
 from flask_login import current_user
 from extensions import db
+from response_object import ResponseObject
 
 class DictionaryType(db.Model):
     
@@ -46,37 +47,39 @@ class DictionaryType(db.Model):
         '''返回所有字典类型
         
         Returns:
-            [list<dict>] -- None 或者 所有字典类型
+            [dict] -- 提示信息，有2个字段
+                      message {str} -- 操作结果，200-成功；500-失败
+                      data    {str} -- 详细的数据,默认[]
         
         Raises:
             e -- 发生异常时，返回None代表服务器内部错误
         '''
-        typelist = [];
+        response = ResponseObject(data = [])
         try:
             results = DictionaryType.query.filter_by(isUse = 1).order_by(DictionaryType.id).all();
             # print results
             for x in results:
                 temp = x.__dict__;
                 del temp['_sa_instance_state'];
-                typelist.append(temp);
+                response.data.append(temp);
         except Exception as e:
             db.session.rollback()
-            typelist = []
+            response.set_fail()
             raise e
         finally:
-            return typelist;
+            return response
 
 
     @classmethod
-    def getNameById(cls, id):
-        name = None;
+    def get_name_by_id(cls, id):
+        response = ResponseObject()
         try:
-            name = DictionaryType.query.filter_by(id = id).first().name;
+            response.data = DictionaryType.query.filter_by(id = id).first().name;
         except Exception as e:
-            name = None;
-            raise e;
+            response.set_fail()
+            raise e
         finally:
-            return name;
+            return response
 
 class Dictionary(db.Model):
 
@@ -106,14 +109,18 @@ class Dictionary(db.Model):
         '''根据type_id返回同类型的所有字典数据
 
         Arguments:
-            type_id {int} -- 字典类型编号
+            id_string {string} -- 待删除id串，格式1,2,3
+        
         Returns:
-            [list<dict>] -- None 或者 同类型的所有字典数据
+            [dict] -- 提示信息，有2个字段
+                      message {str} -- 操作结果，200-成功；500-失败
+                      data    {str} -- 详细的数据
         
         Raises:
-            e -- 所有异常
+            e -- 数据库操作异常
         '''
-        dictlist = []
+        response = ResponseObject(data = [])
+        # dictlist = []
         try:
             results = Dictionary.query.filter_by(isUse = 1, type_id = type_id).order_by(Dictionary.id).all();
             # print results
@@ -121,39 +128,43 @@ class Dictionary(db.Model):
                 temp = {}
                 temp.update(x.__dict__)
                 del temp['_sa_instance_state']
-                dictlist.append(temp)
+                response.data.append(temp)
         except Exception as e:
             print e
             db.session.rollback()
-            dictlist = None
+            response.set_fail()
             # raise e
         finally:
-            return dictlist
+            # print response.data
+            return response
 
     @classmethod
     def listDictByTypeName(cls, type_name):
         '''根据type_name返回同组的所有字典数据
         
         Arguments:
-            type_name {string} -- 字典类型名称
+            id_string {string} -- 待删除id串，格式1,2,3
         
         Returns:
-            [list<dict>] -- None 或者 根据type_name返回同组的所有字典数据
+            [dict] -- 提示信息，有2个字段
+                      message {str} -- 操作结果，200-成功；500-失败
+                      data    {str} -- 详细的数据,默认[]
         
         Raises:
-            e -- 所有异常
+            e -- 数据库操作异常
         '''
-        dictlist = None
+        response = ResponseObject(data = [])
         try:
             type_id = DictionaryType.query.filter_by(isUse = 1, name = type_name).first().id
-            dictlist = Dictionary.listDictByTypeId(type_id)
+            if type_id is not None:
+                response = Dictionary.listDictByTypeId(type_id)
         except Exception as e:
             db.session.rollback()
-            dictlist = None
+            response.set_fail()
             print e
-            # raise e
+            raise e
         finally:
-            return dictlist
+            return response
     
     
     @classmethod
@@ -173,20 +184,18 @@ class Dictionary(db.Model):
         Raises:
             e -- 数据库操作异常
         '''
-        response = {'message': 200, 'data':'success'}
+        response = ResponseObject()
         try:
             for id in id_string.split(','):
                 # d = Dictionary.query.filter_by(id = id).update({'isUse': 0})
                 db.session.delete(Dictionary.query.filter_by(id = id).first())
             db.session.commit()
         except Exception as e:
-            db.session.rollback()
-            response['message'] = 500
-            response['data'] = 'fail'
+            response.set_fail()
             print e
             raise e
         finally:
-            Log.createLog('Delete', u'删除字典数据id{' + id_string + u"}").insertLog(1 if response['message'] == 200 else 0)
+            Log.createLog('Delete', u'删除字典数据id{' + id_string + u"}").insertLog(1 if response.message == 200 else 0)
             return response
 
     def update(self):
@@ -200,17 +209,16 @@ class Dictionary(db.Model):
         Raises:
             e -- 数据库操作异常
         '''
-        response = {'message': 200, 'data': 'success'}
+        response = ResponseObject()
         try:
             Dictionary.query.filter_by(id = self.id).update({'name': self.name})
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            response['message'] = 500
-            response['data'] = 'fail'
+            response.set_fail()
             raise e
         finally:
-            Log.createLog('Delete', u'修改后的字典数据为{ id:' + self.id + ',name:' + self.name + '}').insertLog(1 if response['message'] == 200 else 0)
+            Log.createLog('Delete', u'修改后的字典数据为{ id:' + self.id + ',name:' + self.name + '}').insertLog(1 if response.message == 200 else 0)
             return response
 
 
@@ -225,22 +233,20 @@ class Dictionary(db.Model):
         Raises:
             e -- 数据库操作异常
         '''
-        response = {'message': 200, 'data': 'success'}
+        response = ResponseObject()
         try:
             if(Dictionary.query.filter_by(id = self.id).first() != None):
-                response['message'] = 500
-                response['data'] = 'id_error'
+                response.set_fail('id_error')
             else:
                 db.session.add(self)
                 db.session.commit()
         except Exception as e:
             db.session.rollback()
-            response['message'] = 500
-            response['data'] = 'fail'
+            response.set_fail()
             raise e
         finally:
-            Log.createLog('Delete', u'插入数据{id:' + self.id + ',name:' + self.name + ',type:' + DictionaryType.getNameById(self.type_id) + '}'
-                ).insertLog(1 if response['message'] == 200 else 0)
+            Log.createLog('Delete', u'插入数据{id:' + self.id + ',name:' + self.name + ',type:' + DictionaryType.get_name_by_id(self.type_id).data + '}'
+                ).insertLog(1 if response.message == 200 else 0)
             return response
 
     @classmethod
@@ -255,16 +261,15 @@ class Dictionary(db.Model):
         Raises:
             e -- 数据库操作异常
         '''
-        response = {'message': 200, 'data': None}
+        response = ResponseObject(data = [])
         try:
-            response['data'] = Dictionary.query.filter_by(id = id).first()
+            response.data = Dictionary.query.filter_by(id = id).first()
         except Exception as e:
-            response['message'] = 500
-            response['data'] = None
+            response.set_fail(None)
             db.session.rollback()
             raise e
         finally:
-            return response['data']
+            return response.data
 
     @classmethod
     def getNameById(cls, id):
@@ -278,13 +283,12 @@ class Dictionary(db.Model):
         Raises:
             e -- 数据库操作异常
         '''
-        response = {'message': 200, 'data': None}
+        response = ResponseObject()
         try:
-            response['data'] = Dictionary.query.filter_by(id = id).first().name
+            response.data = Dictionary.query.filter_by(id = id).first().name
         except Exception as e:
-            response['data'] = None
-            response['message'] = 500
+            response.set_fail(None)
             db.session.rollback()
             raise e
         finally:
-            return response['data']
+            return response

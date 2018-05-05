@@ -58,36 +58,38 @@
                       <tr>
                           <td height="28" bgcolor="#F0F9FB">&nbsp;民&nbsp;&nbsp;&nbsp;族</td> 
                           <td height="28" bgcolor="#ffffff">&nbsp;{{ user.nation }}</td> 
-                          
-                          <td height="28" bgcolor="#F0F9FB">&nbsp;技能档次</td> 
-                          <td height="28" bgcolor="#ffffff">&nbsp;{{ user.techlevel }}</td>                    
+
+                          <td height="28" bgcolor="#F0F9FB">&nbsp;是否实习</td> 
+                          <td height="28" bgcolor="#ffffff">&nbsp;{{ user.is_Practice }}</td>                 
                       </tr> 
                       <tr>
                           <td height="28" bgcolor="#F0F9FB">&nbsp;籍贯</td> 
                           <td height="28" bgcolor="#ffffff">&nbsp;{{ user.origin }}</td> 
 
-                          <td height="28" bgcolor="#F0F9FB">&nbsp;学&nbsp;&nbsp;&nbsp;历</td> 
-                          <td height="28" bgcolor="#ffffff">&nbsp;{{ user.degree }}</td> 
-                           
+                          <td height="28" bgcolor="#F0F9FB">&nbsp;技能档次</td> 
+                          <td height="28" bgcolor="#ffffff">&nbsp;{{ user.techlevel }}</td>
                       </tr> 
                       <tr>
                           <td bgcolor="#F0F9FB">&nbsp;身份证号</td> 
                           <td bgcolor="#ffffff">&nbsp;{{ user.id_num }}</td> 
+                          
+                          <td height="28" bgcolor="#F0F9FB">&nbsp;学&nbsp;&nbsp;&nbsp;历</td> 
+                          <td height="28" bgcolor="#ffffff" colspan="2">&nbsp;{{ user.degree }}</td> 
 
-                          <td height="28" bgcolor="#F0F9FB">&nbsp;政治面貌</td> 
-                          <td height="28" bgcolor="#ffffff" colspan="2">&nbsp;{{ user.political_status }}</td> 
+                          
                       </tr> 
                       <tr>
                           <td height="28" bgcolor="#F0F9FB">&nbsp;联系电话1</td> 
                           <td height="28" bgcolor="#ffffff" >&nbsp;{{ user.phone1 }}</td>
-
-                          <td height="28" bgcolor="#F0F9FB">&nbsp;出生日期</td> 
-                          <td height="28" bgcolor="#ffffff" colspan="2">&nbsp;{{ user.birthdate }}</td>
+                          
+                          <td height="28" bgcolor="#F0F9FB">&nbsp;政治面貌</td> 
+                          <td height="28" bgcolor="#ffffff" colspan="2">&nbsp;{{ user.political_status }}</td> 
+                          
                       </tr> 
                       <tr> 
-                          <td height="28" bgcolor="#F0F9FB">&nbsp;联系电话2</td> 
-                          <td height="28" bgcolor="#ffffff">&nbsp;{{ user.phone2 }}</td> 
-                           
+                          <td height="28" bgcolor="#F0F9FB">&nbsp;家庭住址</td> 
+                          <td height="28" bgcolor="#ffffff">&nbsp;{{ user.address }}</td>
+
                           <td height="28" bgcolor="#F0F9FB">&nbsp;入职时间</td> 
                           <td height="28" colspan="2" bgcolor="#ffffff">&nbsp;{{ user.work_date }}</td> 
                       </tr> 
@@ -95,9 +97,8 @@
                           <td height="28" bgcolor="#F0F9FB">&nbsp;电子邮件</td> 
                           <td height="28" bgcolor="#ffffff">&nbsp;{{ user.email }} </td> 
 
-                          <td height="28" bgcolor="#F0F9FB">&nbsp;家庭住址</td> 
-                          <td height="28" bgcolor="#ffffff" colspan="2">&nbsp;{{ user.address }}</td>
-                           
+                          <td height="28" bgcolor="#F0F9FB">&nbsp;出生日期</td> 
+                          <td height="28" bgcolor="#ffffff" colspan="2">&nbsp;{{ user.birthdate }}</td> 
                       </tr> 
                       <tr> 
                           <td height="28" bgcolor="#F0F9FB">&nbsp;备注</td> 

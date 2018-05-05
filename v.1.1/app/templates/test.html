@@ -1,256 +1,153 @@
 <!DOCTYPE html>
 <html>
 <head>
+    {% block head %}
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>客运段人事管理系统</title>
+    <link rel="stylesheet" href="../static/css/style.css" /> 
     <link rel="stylesheet" href="../static/css/bootstrap.min.css" /> 
     <link rel="stylesheet" href="../static/css/bootstrap-table.css">
     <link rel="stylesheet" href="../static/css/bootstrap-select.css">
     <link rel="stylesheet" href="../static/css/bootstrap-datetimepicker.min.css" media="screen">
-    <link rel="stylesheet" href="../static/css/style.css" /> 
     <link rel="stylesheet" href="../static/css/sidebar-menu.css">
     <link rel="stylesheet" href="http://cdn.bootcss.com/font-awesome/4.6.0/css/font-awesome.min.css">
+    <!--[if IE]>
+    <script src="http://libs.useso.com/js/html5shiv/3.7/html5shiv.min.js"></script>
+    <![endif]-->
+    {% endblock head %}
 </head>
 <body>
-
-    <div class="container">
-        <!-- Main hero unit for a primary marketing message or call to action -->
-        <div class="leaderboard">
-            <h1>w3cschool Web Store</h1>
-            <p>Try and purchase HTML5, JS, Ruby, PHP-MySQL based web apps to enhance your productivity at affordable price.</p>
-            <p>
-                <a class="btn btn-success btn-large">Sign Up for a 30 day free trial</a></p>
-        </div>
-        <!-- Example row of columns -->
-        <div class="row">
-            <div class="col-xs-4">
-                <h2>HTML5 and JS Apps</h2>
-                <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh,ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.</p>
-                <p>
-                    <a class="btn btn-success btn-large" href="#">View apps</a></p>
-            </div>
-            <div class="col-xs-4">
-                <h2>Ruby Apps</h2>
-                <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh,ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.</p>
-                <p>
-                    <a class="btn btn-success btn-large" href="#">View apps</a></p>
-            </div>
-            <div class="col-xs-4">
-                <h2>PHP MySQL Apps</h2>
-                <p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
-                <p>
-                    <a class="btn btn-success btn-large" href="#">View apps</a></p>
-            </div>
-        </div>
-        <hr>
-        <footer>
-            <p>&copy; Company 2012</p>
-        </footer>
-    </div>
-    <!-- /container -->
-    <button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#detailModal">开始演示模态框</button>
-    <!-- 员工信息模态框 -->
-    <div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" >
-            <div class="modal-content" style="width: 110%;align-content: center;">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal"
-                    aria-hidden="true">&times;</button>
-                    <h4 class="modal-title" id="detailModal-title"></h4>
-                </div> <!-- modal.header -->
-                <div id="tableview">
-                    <table id="employee-detail-table" class="table-setting">
-                        <!-- TODO(HX):还有字段没有添加 -->
-                        <tbody style="display: table-row-group;vertical-align: middle;">
-                            <tr>
-                                <td>
-                                    <div class="avatar">
-                                        <img id="detailModal-photo" src="" >
-                                    </div>
-                                </td>
-                                <td>
-                                    <form id="photo-form" class="btn btn-hollow" action="/upload" method='post' enctype='multipart/form-data'>
-                                        <input type="file" id="photo" name="photo" class="hide" onchange="UploadPhoto(this)" accept="image/*">
-                                        更换头像
-                                    </form>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="setting-title">
-                                    工号<span style="color: red;">*</span>
-                                </td>
-                                <td>
-                                    <input type="text" class="form-control" id="detailModal-id">
-                                </td>
-                                <td class="setting-title">
-                                    职名
-                                </td>
-                                <td>
-                                    <select class="selectpicker" id="detailModal-position"></select>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="setting-title">
-                                    姓名<span style="color: red;">*</span>
-                                </td>
-                                <td>
-                                    <input type="text" class="form-control" id="detailModal-name">
-                                </td>
-                                <td class="setting-title">
-                                    用工性质
-                                </td>
-                                <td>
-                                    <select class="selectpicker" id="detailModal-worktype"></select>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="setting-title">
-                                    曾用名
-                                </td>
-                                <td>
-                                    <input type="text" class="form-control" id="detailModal-oldname">
-                                </td>
-                                
-                                <td class="setting-title">
-                                    所属部门
-                                </td>
-                                <td>
-                                    <select class="selectpicker" id="detailModal-org"></select>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="setting-title">
-                                    性别
-                                </td>
-                                <td>
-                                    <div class="col-xs-6">
-                                        <input type="radio" name="sex-radio" id="detailModal-sex-man" value="1" checked> 
-                                        <span>男</span>
-                                    </div>
-                                    <div class="col-xs-6">
-                                        <input type="radio" name="sex-radio" id="detailModal-sex-woman" value="0"> 
-                                        <span>女</span>
-                                    </div>
-                                </td>
-                                <td class="setting-title">
-                                    人员状态
-                                </td>
-                                <td>
-                                    <select class="selectpicker" id="detailModal-status"></select>
-                                </td>
-                                
-                            </tr>
-                            <tr>
-                                <td class="setting-title">
-                                    民族
-                                </td>
-                                <td>
-                                    <select class="selectpicker" id="detailModal-nation"></select>
-                                </td>
-                                <td class="setting-title">
-                                    技能档次
-                                </td>
-                                <td>
-                                    <select class="selectpicker" id="detailModal-techlevel"></select>
-                                </td>
-                                
-                            </tr>
-                            <tr>
-                                <td class="setting-title">
-                                    籍贯
-                                </td>
-                                <td>
-                                    <input type="text" class="form-control" id="detailModal-origin">
-                                </td>
-                                
-                                <td class="setting-title">
-                                    学历
-                                </td>
-                                <td>
-                                    <select class="selectpicker" id="detailModal-degree"></select>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="setting-title">
-                                    身份证号
-                                </td>
-                                <td>
-                                    <input type="text" class="form-control" id="detailModal-id-num">
-                                </td>
-
-                                <td class="setting-title">
-                                    政治面貌
-                                </td>
-                                <td>
-                                    <select class="selectpicker" id="detailModal-political"></select>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="setting-title">
-                                    联系电话1
-                                </td>
-                                <td>
-                                    <input type="number" class="form-control" id="detailModal-phone1">
-                                </td>
-                                <td class="setting-title">
-                                    出生日期
-                                </td>
-                                <td>
-                                    <input type="date" class="form-control" id="detailModal-birthdate">
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="setting-title">
-                                    联系电话2
-                                </td>
-                                <td>
-                                    <input type="text" class="form-control" id="detailModal-phone2">
-                                </td>
-                                <td class="setting-title">
-                                    入职日期
-                                </td>
-                                <td>
-                                    <input type="date" class="form-control" id="detailModal-work-date">
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="setting-title">
-                                    电子邮箱
-                                </td>
-                                <td>
-                                    <input type="email" class="form-control" id="detailModal-email">
-                                </td>
-                                <td class="setting-title">
-                                    家庭住址
-                                </td>
-                                <td>
-                                    <input type="text" class="form-control" id="detailModal-address">
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="setting-title">
-                                    备注
-                                </td>
-                                <td colspan="3">
-                                    <input type="text" class="form-control" id="detailModal-others">
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div class="modal-footer">
-                        <input type="button" class="btn btn-default" data-dismiss="modal" value="取消">
-                        <input type="button" class="btn btn-primary" id="detailModal-submit" name="submit" value="确认">
+    {% block body%}
+        {# 头部导航栏 #}
+        {% block top_nav%}
+            <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+                <div class="container-fluid"> 
+                    <div class="navbar-header">
+                        <a class="navbar-brand" href="/" >客运段人事管理系统</a>
+                    </div>
+                    <div>
+                        <ul class="nav navbar-nav navbar-right ">
+                            {% if current_user.is_authenticated -%}
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                    <span class="glyphicon glyphicon-user"></span>
+                                    {{ current_user.name }} 
+                                    <b class="caret"></b>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="#">浏览操作日志</a></li>
+                                    <li><a href="/logout">注销</a></li>
+                                </ul>
+                            </li>
+                            {% else %}
+                            <li><a href="/login"><span class="glyphicon glyphicon-log-in"></span> 登录</a></li> 
+                            {%- endif %}
+                        </ul>
                     </div>
                 </div>
-            </div><!-- modal-content end -->
-        </div><!-- modal-dialog end -->
-    </div><!-- 员工信息模态框end -->
-    <!-- 修工信息表 -->
+            </nav>
+        {% endblock top_nav%}
 
-    <script src="../static/js/jquery-2.1.1.min.js"></script>
+        {# 左侧导航栏 #}
+        {% block left_nav %}
+            <aside class="main-sidebar">
+                <section  class="sidebar">
+                    <ul class="sidebar-menu">
+                        <!-- <li class="header" style="color: white;font-size: 180%"><strong>人事管理系统</strong></li> -->
+                        <li class="treeview">
+                            <a href="#">
+                                <i class="fa fa-laptop"></i>
+                                <span>数据标准管理</span>
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </a>
+                            <ul class="treeview-menu">
+                                <li><a href="/dict"><i class="fa fa-circle-o"></i> 数据字典管理</a></li>
+                                <li><a href="/org"><i class="fa fa-circle-o"></i> 组织机构管理</a></li>
+                            </ul>
+                        </li>
+                        <li class="treeview">
+                            <a href="#">
+                                <i class="fa fa-dashboard"></i> <span>人员信息管理</span> <i class="fa fa-angle-left pull-right"></i>
+                            </a>
+                            <ul class="treeview-menu">
+                                <li><a href="/employee"><i class="fa fa-circle-o"></i> 基本信息管理</a></li>
+                                
+                            </ul>
+                        </li>
+                        <li class="treeview">
+                            <a href="#">
+                                <i class="fa fa-dashboard"></i> <span>人员信息浏览</span> <i class="fa fa-angle-left pull-right"></i>
+                            </a>
+                            <ul class="treeview-menu">
+                                <li><a href="/employee/scan"><i class="fa fa-circle-o"></i> 人员信息浏览</a></li>
+                            </ul>
+                        </li>
+                        <li class="treeview">
+                            <a href="#">
+                                <i class="fa fa-dashboard"></i> <span>人员变动管理</span> <i class="fa fa-angle-left pull-right"></i>
+                            </a>
+                            <ul class="treeview-menu">
+                                <li>
+                                    <a href="#">
+                                        <i class="fa fa-circle-o">新进人员</i>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#">
+                                        <i class="fa fa-circle-o">批量新进人员</i>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#">
+                                        <i class="fa fa-circle-o">批量修改人员</i>
+                                    </a>
+                                </li>
+                                <li><a href="/employee/change"><i class="fa fa-circle-o"></i> 人员内部变动</a></li>
+                                <li><a href="/employee/formal"><i class="fa fa-circle-o"></i> 人员定职管理</a></li>
+
+                            </ul>
+                        </li>
+                        <li class="treeview">
+                            <a href="#">
+                                <i class="fa fa-pie-chart"></i>
+                                <span>人员信息统计</span>
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </a>
+                            <ul class="treeview-menu">
+                                <li><a href="/statistics"><i class="fa fa-circle-o"></i> 人员信息统计</a></li>
+                            </ul>
+                        </li>
+                        <li class="treeview">
+                            <a href="#">
+                                <i class="fa fa-edit"></i> <span>系统信息管理</span>
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </a>
+                            <ul class="treeview-menu">
+                                <li><a href="/log"><i class="fa fa-circle-o"></i> 系统日志管理</a></li>
+                                <li><a href="#"><i class="fa fa-circle-o"></i> 登录用户管理</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </section>
+            </aside>
+        {% endblock left_nav%}
+        
+        <div class="container">
+            <iframe src="ok.html"></iframe>
+        </div>
+
+        {# 基础引用的包 #}
+        {% block base_script%}
+            <script src="../static/js/jquery-2.1.1.min.js"></script>
             <script src="../static/js/bootstrap.min.js"></script>
             <script src="../static/js/sidebar-menu.js"></script>
+            <script>
+                $.sidebarMenu($('.sidebar-menu'))
+            </script>
+            
+        {% endblock base_script %}
+    {% endblock body%}
 </body>
 </html>

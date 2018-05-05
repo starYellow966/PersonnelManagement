@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    {% extends "base.html" %}
+    {% block head %}
+        {{ super() }}
+        <link rel="stylesheet" href="../static/css/icharts.css" type="text/css" />
+    {% endblock head %} 
+</head>
+<body>
+    {% block body %}
+        {% block top_nav %}
+            {{ super() }}
+        {% endblock top_nav %}
+
+        {% block left_nav %}
+            {{ super() }}
+        {% endblock left_nav %}
+        
+        <div class="container">
+            <ul class="nav nav-tabs" id="myTab">
+                <li class="active"><a href="#" data-toggle="tab" onclick="setCharts('sex')">性别</a></li>
+                <li><a href="#" data-toggle="tab" onclick="setCharts('org_id')">组织机构</a></li>
+                <li><a href="#" data-toggle="tab" onclick="setCharts('emp_type')">用工性质</a></li>
+                <li><a href="#" data-toggle="tab" onclick="setCharts('status_id')">人员状态</a></li>
+                <li><a href="#" data-toggle="tab" onclick="setCharts('position_id')">职名</a></li>
+                <li><a href="#" data-toggle="tab" onclick="setCharts('political_status_id')">政治面貌</a></li>
+                <li><a href="#" data-toggle="tab" onclick="setCharts('degree_id')">学位</a></li>
+                <li><a href="#" data-toggle="tab" onclick="setCharts('techlevel_id')">技能等级</a></li>
+            </ul>
+            <div class="row">
+                <div id="canvasDiv_column3d"></div>
+                <div id="canvasDiv_pie3d"></div>
+            </div>
+            
+        </div>
+        {% block base_script %}
+            {{ super() }}
+            <script src="../static/js/jquery.form.js"></script>
+            <script src="../static/js/ichart.1.2.1.min.js"></script>
+            
+        {% endblock base_script %}
+
+        <!-- 初始化函数 -->
+        <script type="text/javascript">
+            $(document).ready(function(){
+                setCharts('sex');
+            });
+
+            function initColumnChart(data, title){
+                var chart = new iChart.Column3D({
+                    render : 'canvasDiv_column3d',
+                    data: data,
+                    title : {
+                        text : title,
+                        color : '#3e576f'
+                    },
+                    width : 800,
+                    height : 400,
+                    padding: 20,
+                    shadow: true,
+                    shadow_color:'#080808',
+                    background_color:'#eceeef',
+                    sub_option:{
+                        label : {
+                            color : '#2c2e2a',
+                            padding : 10
+                        }
+                    },
+                    coordinate:{
+                        left_board:false,
+                        scale:[{
+                             position:'left',
+                             start_scale:0,
+                             end_scale:50,
+                             scale_space:5,
+                             listeners:{
+                                    parseText:function(t,x,y){
+                                        return {text:t+"%  "}
+                                    }
+                                }
+                        }]
+                    },
+                    legend: {
+                        background_color:iChart.toRgba('#213e49',0.6),
+                        border:{radius:5},
+                        enable: true,
+                        align: 'right',
+                        valign: 'top',
+                        row: 'max',
+                        color:'#fefefe',
+                        column: 1,
+                        line_height: 15
+                    },
+                    tip : {
+                        enable : true
+                    }
+                });
+                chart.draw();
+            }
+
+            function initPieChart(data, title){
+            
+                var chart = new iChart.Pie3D({
+                    render : 'canvasDiv_pie3d',
+                    data: data,
+                    title : {
+                        text : title,
+                        height:40,
+                        fontsize : 30,
+                        color : '#282828'
+                    },
+                    sub_option : {
+                        mini_label_threshold_angle : 40,//迷你label的阀值,单位:角度
+                        mini_label:{//迷你label配置项
+                            fontsize:20,
+                            fontweight:600,
+                            color : '#ffffff'
+                        },
+                        label : {
+                            background_color:null,
+                            sign:false,//设置禁用label的小图标
+                            padding:'0 4',
+                            border:{
+                                enable:false,
+                                color:'#666666'
+                            },
+                            fontsize:9,
+                            fontweight:600,
+                            color : '#4572a7'
+                        },
+                        border : {
+                            width : 2,
+                            color : '#ffffff'
+                        },
+                        listeners:{
+                            parseText:function(d, t){
+                                return d.get('value')+"%";//自定义label文本
+                            }
+                        } 
+                    },
+                    legend:{
+                        enable:true,
+                        padding:0,
+                        offsetx:120,
+                        offsety:50,
+                        color:'#3e576f',
+                        fontsize:20,//文本大小
+                        sign_size:20,//小图标大小
+                        line_height:28,//设置行高
+                        sign_space:10,//小图标与文本间距
+                        border:false,
+                        align:'left',
+                        background_color : null//透明背景
+                    }, 
+                    shadow : true,
+                    shadow_blur : 6,
+                    shadow_color : '#aaaaaa',
+                    shadow_offsetx : 0,
+                    shadow_offsety : 0,
+                    background_color:'#f1f1f1',
+                    align:'right',//右对齐
+                    offsetx:-100,//设置向x轴负方向偏移位置60px
+                    offset_angle:-90,//逆时针偏移120度
+                    width : 800,
+                    height : 400,
+                    radius:150
+                });
+                //利用自定义组件构造右侧说明文本
+                // chart.plugin(new iChart.Custom({
+                //         drawFn:function(){
+                //             //在右侧的位置，渲染说明文字
+                //             chart.target.textAlign('start')
+                //             .textBaseline('top')
+                //             .textFont('600 20px Verdana')
+                //             .fillText('Market Fragmentation:\nTop Mobile\nOperating Systems',120,80,false,'#be5985',false,24)
+                //             .textFont('600 12px Verdana')
+                //             .fillText('Source:ComScore,2012',120,160,false,'#999999');
+                //         }
+                // }));
+                
+                chart.draw();
+            }
+        </script>
+        <!-- 功能函数 -->
+        <script type="text/javascript">
+            function setCharts(type){
+                var title = new Array(2);
+                switch (type) {
+                    case 'sex':
+                        title[0] = '成都客运段职工性别组成'
+                        title[1] = '成都客运段职工性别比例'
+                        break;
+                    case 'org_id':
+                        title[0] = '成都客运段所有部门职工组成'
+                        title[1] = '成都客运段所有部门职工比例'
+                        break;
+                    case 'emp_type':
+                        title[0] = '成都客运段用工性质组成'
+                        title[1] = '成都客运段用工性质比例'
+                        break;
+                    case 'status_id':
+                        title[0] = '成都客运段人员状态组成'
+                        title[1] = '成都客运段人员状态比例'
+                        break;
+                    case 'position_id':
+                        title[0] = '成都客运段职位组成'
+                        title[1] = '成都客运段职位比例'
+                        break;
+                    case 'political_status_id':
+                        title[0] = '成都客运段全体职工政治面貌组成'
+                        title[1] = '成都客运段全体职工政治面貌比例'
+                        break;
+                    case 'degree_id':
+                        title[0] = '成都客运段职工学位组成'
+                        title[1] = '成都客运段职工学位比例'
+                        break;
+                    case 'techlevel_id':
+                        title[0] = '成都客运段职工技能等级组成'
+                        title[1] = '成都客运段职工技能等级比例'
+                        break;
+                    default:
+                        break;
+                }
+                queryColumnDataRequest(type, title[0]);
+                queryPieDataRequest(type, title[1]);
+            }
+
+        </script>
+        <!-- 发送请求函数 -->
+        <script type="text/javascript">
+            function queryColumnDataRequest(type, title){
+                $.ajax({
+                    url: '/statistics/column',
+                    type: 'get',
+                    // async: false,
+                    data: {type : type},
+                    success: function(data){
+                        var dataObj=eval("("+data+")");
+                        initColumnChart(dataObj, title);
+                    }
+                });
+            }
+
+            function queryPieDataRequest(type, title){
+                $.ajax({
+                    url: '/statistics/pie',
+                    type: 'get',
+                    // async: false,
+                    data: {type : type},
+                    success: function(data){
+                        var dataObj=eval("("+data+")");
+                        initPieChart(dataObj, title);
+                    }
+                });
+            }
+        </script>
+    
+    {% endblock body %}
+    
+</body>
+</html>

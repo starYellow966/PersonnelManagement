@@ -19,7 +19,7 @@
         <div class="container">
             <!-- 待选人员面板 -->
             <div class="row">
-                <div class="panel panel-default col-xs-5" style="margin: 5px;">
+                <div class="panel panel-default col-xs-5" style="margin: 10px;">
                     <div class="panel-heading">待选人员</div>
                     <div class="panel-body">
                         <table id="left-table"></table>
@@ -33,7 +33,7 @@
                 <!-- 中间的操作按钮end -->
 
                 <!-- 已选人员面板 -->
-                <div class="panel panel-default col-xs-5" style="margin: 5px;">
+                <div class="panel panel-default col-xs-5" style="margin: 10px;">
                     <div class="panel-heading">已选人员</div>
                     <div class="panel-body">
                         <table id="right-table"></table>
@@ -42,23 +42,31 @@
 
             </div>
 
-            <div >
-                <form id="inside-form" action="/employee/change/inside" method="post">
+            <!-- <ul id="myTab" class="nav nav-tabs">
+                <li class="active">
+                    <a href="#formal-form" data-toggle="tab">内部变动</a>
+                </li>
+                <li>
+                    <a href="#formal-form" data-toggle="tab">定职管理</a>
+                </li>
+            </ul> -->
+            <div>
+                <form id="formal-form">
                     <div class="row">
-                        <label style="margin: 20px;">新部门&nbsp;</label>
-                        <select class="selectpicker" id="org_select" style="margin: 10%;" required></select>
-                        <label style="margin: 20px;">新职名</label>
-                        <select class="selectpicker" id="position_select" required></select>
-                        <label style="margin: 20px;">报到日期</label>
-                        <input type="date" id="report_date" class="form-control" style="width: 20%;display: inline;" required>
-                        <input type="submit" class="btn btn-primary" style="margin: 5px;" value="确认"> 
-                        <button class="btn" style="margin: 5px;">取消</button>
-                    </div>
-                    <div class="row">
-                        <label style="margin: 20px;">变动日期</label>
+                        <label style="margin: 20px;">定职日期</label>
                         <input type="date" id="change_date" class="form-control" style="width: 20%;display: inline;" required>
                         <label style="margin: 20px;">执行人</label>
                         <input type="text" name="" class="form-control" style="width: 20%;display: inline;" value="{% if current_user.is_authenticated -%}{{ current_user.name }}{%- endif %}" required>
+                        <label style="margin: 20px;">报到日期</label>
+                        <input type="date" id="report_date" class="form-control" style="width: 20%;display: inline;" required>
+                        <input type="submit" class="btn btn-primary" style="margin: 5px;" value="确认">
+                        <button class="btn" style="margin: 5px;">取消</button>
+                    </div>
+                    <div class="row">
+                        <label style="margin: 20px;">新部门&nbsp;</label>
+                        <select class="selectpicker" id="org_select" style="margin: 10%;"></select>
+                        <label style="margin: 20px;">新职名</label>
+                        <select class="selectpicker" id="position_select"></select>
                     </div>
                     <div class="row">
                         <label style="margin: 20px;">备注&nbsp;&nbsp;&nbsp;</label>
@@ -122,6 +130,13 @@
                             field: 'position',
                             title: '职名',
                             sortable: true
+                        }, {
+                            field: 'is_Practice',
+                            title: '是否实习',
+                            sortable: true,
+                            formatter: function(value, row, index){
+                                return value == 1 ? '是'?'否'
+                            }
                         }],
                     });
 
@@ -158,6 +173,13 @@
                             field: 'position',
                             title: '职名',
                             sortable: true
+                        }, {
+                            field: 'is_Practice',
+                            title: '是否实习',
+                            sortable: true,
+                            formatter: function(value, row, index){
+                                return value == 1 ? '是'?'否'
+                            }
                         }],
                     });
                 }
@@ -167,21 +189,18 @@
                 }
 
                 function initSubmit(){
-                    $('#inside-form').submit(function(e){
+                    $('#formal-form').submit(function(e){
                         $(this).ajaxSubmit({
-                            url: '/employee/change/inside',
+                            url: '/employee/formal/update',
                             type: 'post',
                             data:{
                                 org_id: $('#org_select').val(),
                                 position_id: $('#position_select').val(),
                                 id: getRightTableData(),
-                                change_date: $('#change_date').val(),
-                                report_date: $('#report_date').val()
+                                change_date: $('#change_date').val()
                             },
                             success: function(message){
-                                alert('定职变动 ：' + message);
-                                $('#left-table').bootstrapTable('refresh', {url: '/employee/scan/list_all'});
-                                $('#right-table').bootstrapTable('removeAll');
+                                alert('内部变动 ：' + message);
                             },
                             // complete: function(){
                             //     alert('内部变动 ：');
@@ -203,7 +222,7 @@
                         if(i < array.length - 1)
                             id_string += ',';
                     }
-                    // console.log(id_string);
+                    console.log(id_string);
                     return id_string;
                 }
             </script>

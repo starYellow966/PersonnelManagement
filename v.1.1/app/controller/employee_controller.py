@@ -24,14 +24,40 @@ def index():
     return render_template('employee_manger.html')
 
 @fresh_login_required
-@employeeBlueprint.route('/scan/')
+@employeeBlueprint.route('/scan')
 def scan_index():
     return render_template('employee_query.html')
 
 @fresh_login_required
-@employeeBlueprint.route('/change/')
+@employeeBlueprint.route('/change')
 def change_index():
     return render_template('employee_change.html')
+
+@fresh_login_required
+@employeeBlueprint.route('/formal')
+def formal_index():
+    return render_template('employee_formal.html')
+
+@fresh_login_required
+@employeeBlueprint.route('/formal')
+def formal_update():
+    return employee.Employee.formal_update(**request.form).data
+
+@fresh_login_required
+@employeeBlueprint.route('/change/insert')
+def insert_index():
+    return render_template('employee_insert.html')
+
+@fresh_login_required
+@employeeBlueprint.route('/change/batch')
+def batch_index():
+    return render_template('employee_batch.html')
+
+@fresh_login_required
+@employeeBlueprint.route('/change/batch/download')
+def batch_download():
+    print request.args
+    return 'hello'
 
 @fresh_login_required
 @employeeBlueprint.route('/treeAll')
@@ -48,41 +74,29 @@ def treeAll():
 
 @fresh_login_required
 @employeeBlueprint.route('/removeEmployee', methods=['POST'])
-def removeEmployee():
-    print request.form
-    result = employee.Employee.removeEmployees(request.form['id'].split(','))
-    return result
+def remove():
+    return employee.Employee.remove(request.form['id'].split(',')).data
     
 
 
 @fresh_login_required
 @employeeBlueprint.route('/insertEmployee', methods=['POST'])
-def insertEmployee():
+def insert():
     # print request.form
     e = employee.Employee(**request.form)
-    result = e.insert()
-    print result
-    return result
+    return e.insert().data
 
 @fresh_login_required
 @employeeBlueprint.route('/updateEmployee', methods=['POST'])
-def update_employee():
+def update():
     e = employee.Employee(**request.form)
-    print e.__dict__
-    result = e.update()
-    return result
+    # print e.__dict__
+    return e.update().data
 
 @fresh_login_required
 @employeeBlueprint.route('/change/inside', methods=['POST'])
-def insideChange():
-    # print request.form['id']
-    # id_string = request.form['id']
-    # org_id = request.form['org_id']
-    # position_id = request.form['position_id']
-    # change_date = request.form['change_date']
-    # id_list = id_string.split(',')
-
-    return employee.Employee.insideChange(**request.form)
+def inside_change():
+    return employee.Employee.inside_change(**request.form).data
 
 @fresh_login_required
 @employeeBlueprint.route('/uploadPhoto', methods=['POST'])
@@ -107,8 +121,6 @@ def upload_photo():
         file_name = str(current_user.id) + "_" + str(time.time()).split('.')[0] + "." + request.files['photo'].filename.split('.')[1]
         filename = photos.save(file, name = file_name)
         file_url = photos.url(filename)
-        # session['photo_url'] = file_url
-        # employee.Employee.updatePhoto(session['current_employee_id'], file_url)
     return file_url
 
 
@@ -118,16 +130,16 @@ def scan_list_all():
     employee_list = employee.Employee.list_all()
     result = []
     for x in employee_list:
-        print x
+        # print x
         if x is not None:
             # print x.__dict__
             temp = {}
             temp.update(x.__dict__)
             del temp['_sa_instance_state']
             temp['org_name'] = organization.Organization.getNameById(x.org_id)
-            temp['political_status'] = dictionary.Dictionary.getNameById(x.political_status_id)
-            temp['emp_type_name'] = dictionary.Dictionary.getNameById(x.emp_type)
-            temp['position'] = dictionary.Dictionary.getNameById(x.position_id)
+            temp['political_status'] = dictionary.Dictionary.getNameById(x.political_status_id).data
+            temp['emp_type_name'] = dictionary.Dictionary.getNameById(x.emp_type).data
+            temp['position'] = dictionary.Dictionary.getNameById(x.position_id).data
             result.append(temp)
     # print result
     return json.dumps(result)
@@ -138,33 +150,29 @@ def show_detail():
     e = employee.Employee.getEmployeeById(request.args.get('id'))
     # print e.political_status_id
     if( e is not None ):
-        if e.sex == 1:
-            e.sex = '男'
-        else:
-            e.sex = '女'
         cur_employee = {
             'id': e.id, 
             'name': e.name, 
             'old_name': e.old_name,
             'photo_url': e.photo_url,
-            'sex': e.sex,
+            'sex': u'男' if e.sex == 1 else u'女',
             'id_num': e.id_num,
             'birthdate': e.birthdate,
             'work_date': e.work_date,
             'origin': e.origin,
             'phone1': e.phone1,
-            'phone2': e.phone2,
             'address': e.address,
             'email': e.email,
             'others': e.others,
-            'emp_type': dictionary.Dictionary.getNameById(e.emp_type),
+            'emp_type': dictionary.Dictionary.getNameById(e.emp_type).data,
             'org_name': organization.Organization.getNameById(e.org_id),
-            'status': dictionary.Dictionary.getNameById(e.status_id),
-            'political_status': dictionary.Dictionary.getNameById(e.political_status_id),
-            'position': dictionary.Dictionary.getNameById(e.position_id),
-            'nation': dictionary.Dictionary.getNameById(e.nation_id),
-            'degree': dictionary.Dictionary.getNameById(e.degree_id),
-            'techlevel': dictionary.Dictionary.getNameById(e.techlevel_id)}
+            'status': dictionary.Dictionary.getNameById(e.status_id).data,
+            'political_status': dictionary.Dictionary.getNameById(e.political_status_id).data,
+            'position': dictionary.Dictionary.getNameById(e.position_id).data,
+            'nation': dictionary.Dictionary.getNameById(e.nation_id).data,
+            'degree': dictionary.Dictionary.getNameById(e.degree_id).data,
+            'techlevel': dictionary.Dictionary.getNameById(e.techlevel_id).data,
+            'is_Practice': u'是' if e.is_Practice == 1 else u'否'}
         # print cur_employee
         return render_template('employee_detail.html',user = cur_employee)
     return 'error'
@@ -190,18 +198,10 @@ def query_employee():
                 temp = {}
                 temp.update(e.__dict__)
                 del temp['_sa_instance_state']
-                temp['emp_type_name'] = dictionary.Dictionary.getNameById(e.emp_type)
+                temp['emp_type_name'] = dictionary.Dictionary.getNameById(e.emp_type).data
                 temp['org_name'] = organization.Organization.getNameById(e.org_id)
-                temp['position'] = dictionary.Dictionary.getNameById(e.position_id)
-                temp['status'] = dictionary.Dictionary.getNameById(e.status_id)
-                # temp = { 
-                #     'id': e.id, 
-                #     'name': e.name,
-                #     'emp_type': dictionary.Dictionary.getNameById(e.emp_type),
-                #     'org_name': organization.Organization.getNameById(e.org_id),
-                #     'position': dictionary.Dictionary.getNameById(e.position_id),
-                #     'status': dictionary.Dictionary.getNameById(e.status_id),
-                #     }
+                temp['position'] = dictionary.Dictionary.getNameById(e.position_id).data
+                temp['status'] = dictionary.Dictionary.getNameById(e.status_id).data
                 result.append(temp)
     return json.dumps(result) 
 

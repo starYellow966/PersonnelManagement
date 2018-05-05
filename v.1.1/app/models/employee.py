@@ -6,7 +6,8 @@
 from extensions import db
 # from db_helper import db
 from organization import TreeNode,Organization
-from dictionary import Dictionary     
+from dictionary import Dictionary   
+from response_object import ResponseObject  
 
 class Employee(db.Model):
     '''员工信息表
@@ -92,6 +93,9 @@ class Employee(db.Model):
 
     isUse = db.Column(db.Integer(), default = 1)
 
+    is_Practice = db.Column(db.Integer(), default = 1)
+
+
     def __init__(self, id, name, **kw):
         self.id = ''.join(id)
         self.name = ''.join(name)
@@ -144,6 +148,8 @@ class Employee(db.Model):
             self.techlevel_id = ''.join(kw['techlevel_id'])
         if 'others' in kw:
             self.others = ''.join(kw['others'])
+        if 'is_Practice' in kw:
+            self.is_Practice = ''.join(kw['is_Practice'])
 
     def __repr__(self):
         return u'<Employee {} {}>' .format(self.id, self.name)
@@ -154,7 +160,7 @@ class Employee(db.Model):
 
     @classmethod
     def getEmployeeById(cls, eid):
-        return Employee.query.filter_by(id = eid, isUse = 1).first();
+        return Employee.query.filter_by(id = eid, isUse = 1).first()
 
     @classmethod
     def treeAll(cls):
@@ -228,36 +234,37 @@ class Employee(db.Model):
 
 
     def insert(self):
-        result = 'success'
+        response = ResponseObject()
         try:
             db.session.add(self)
             db.session.commit()
         except Exception as e:
             db.session.rollback()
             print e
-            result = 'fail'
-            # raise e
+            response.set_fail()
+            raise e
         finally:
-            return result
+            return response
 
     @classmethod
-    def removeEmployees(cls, id_list):
-        result = 'success'
+    def remove(cls, id_list):
+        response = ResponseObject()
         try:
             for x in id_list:
-                e = Employee.query.filter_by(id = x).update({'isUse': 0})
-                # if (e is not None):
-                #     db.session.delete(e)
+                e = Employee.query.filter_by(id = x).first()
+                if (e is not None):
+                    db.session.delete(e)
             db.session.commit()
         except Exception as e:
             print e
             db.session.rollback()
-            result = 'fail'
+            response.set_fail()
+            raise e
         finally:
-            return result
+            return response
 
     def update(self):
-        result = 'success'
+        response = ResponseObject()
         try:
             Employee.query.filter_by(id = self.id).update({
                 'name': self.name,
@@ -286,44 +293,46 @@ class Employee(db.Model):
         except Exception as e:
             print e
             db.session.rollback()
-            result = 'fail'
+            response.set_fail()
+            raise e
         finally:
-            return result
+            return response
+
+    # @classmethod
+    # def getEmployeeById(cls, eid):
+    #     # print eid
+    #     response = ResponseObject(data = [])
+    #     # result = None
+    #     try:
+    #         response.data = Employee.query.filter_by(id = eid).first()
+    #     except Exception as e:
+    #         print e
+    #         db.session.rollback()
+    #         response.set_fail(None)
+    #         raise e
+    #     finally:
+    #         return response
+
+
+    # def update_employee(self):
+    #     response_code = 200
+    #     try:
+    #         Employee.query.filter_by(id = self.id).update({
+    #             'name': self.name,
+    #             'sex': self.sex,
+    #             'org_id': self.org_id});
+    #         db.session.commit()
+    #     except Exception as e:
+    #         print e
+    #         response_code = 500
+    #         db.session.rollback()
+    #         raise e
+    #     else:
+    #         return response_code
 
     @classmethod
-    def getEmployeeById(cls, eid):
-        # print eid
-        result = None
-        try:
-            result = Employee.query.filter_by(id = eid).first()
-        except Exception as e:
-            print e
-            raise e
-            db.session.rollback()
-            result = None
-        finally:
-            return result
-
-
-    def update_employee(self):
-        response_code = 200
-        try:
-            Employee.query.filter_by(id = self.id).update({
-                'name': self.name,
-                'sex': self.sex,
-                'org_id': self.org_id});
-            db.session.commit()
-        except Exception as e:
-            print e
-            response_code = 500
-            db.session.rollback()
-            raise e
-        else:
-            return response_code
-
-    @classmethod
-    def insideChange(cls, id, org_id, position_id, change_date):
-        result = 'success'
+    def inside_change(cls, id, org_id, position_id, change_date, **kw):
+        response = ResponseObject()
         try:
             id_list = ''.join(id).split(',')
             for x in id_list:
@@ -335,9 +344,97 @@ class Employee(db.Model):
         except Exception as e:
             print e
             db.session.rollback()
-            result = fail
+            response.set_fail()
+            raise e
         finally:
-            return result
+            return response
+
+    @classmethod
+    def formal_update(cls, id, change_date, report_date, is_Practice, **kw):
+        response = ResponseObject()
+        update_dict = {'is_Practice': ''.join(is_Practice)}
+        if 'org_id' in kw:
+            update_dict['org_id'] = ''.join(kw['org_id'])
+        if 'position_id' in kw:
+            update_dict['position_id'] = ''.join(kw['position_id'])
+        try:
+            id_list = ''.join(id).split(',')
+            for x in id_list:
+                Employee.query.filter_by(id = x).update(update_dict)
+            db.session.commit()
+        except Exception as e:
+            print e
+            db.session.rollback()
+            response.set_fail()
+            raise e
+        finally:
+            return response
+
+    @classmethod
+    def statistics_column(cls, column_name):
+        '''查询柱状图统计数据
+        
+        Arguments:
+            column_name {str} -- Employee表字段名
+        
+        Returns:
+            [ResponseObject] -- message代表操作码
+                                data代表数据，data包含name,value,color三个字段
+        
+        Raises:
+            e -- [description]
+        '''
+        response = ResponseObject(data = [])
+        color = ['#3A68D3', '#9F2626', '#2A962A', '#3895BF', '#4267BE', '#4F7DE7', '#7A3C9C', '#B97944', 
+            '#782A56', '#484848', '#FFFF33', '#FF3333', '#FFCC33', '#009966', '#99CC00']
+        try:
+            sql = 'select {0}, count(*) from Employee group by {0} order by count(*) desc'.format(column_name)
+            result = db.session.execute(sql).fetchall()
+            index = 0
+            for x in result:
+                temp = {'name':'', 'value':'', 'color':color[index]}
+                index = (index + 1) % len(color)
+                if column_name == 'sex':
+                    temp['name'] = u'男' if x[0] == 1 else u'女'
+                elif column_name == 'org_id':
+                    temp['name'] = Organization.getNameById(x[0])
+                else:
+                    temp['name'] = Dictionary.getNameById(x[0]).data
+                temp['value'] = x[1]
+                response.data.append(temp)
+            # print response.data
+        except Exception as e:
+            print e
+            response.set_fail(None)
+            raise e
+        finally:
+            return response
+
+    @classmethod
+    def statistics_pie(cls, column_name):
+        '''查询柱状图统计数据
+        
+        Arguments:
+            column_name {str} -- 字段名
+        
+        Returns:
+            [] -- [description]
+        
+        Raises:
+            e -- [description]
+        '''
+        response = ResponseObject(data = [])
+        try:
+            response = Employee.statistics_column(column_name)
+            total_count = db.session.execute('select count(1) from Employee').fetchall()[0][0]
+            for x in response.data:
+                x['value'] = round(x['value']* 100.0 / total_count, 1)
+        except Exception as e:
+            print e
+            response.set_fail(None)
+            raise e
+        finally:
+            return response
 
 
 
