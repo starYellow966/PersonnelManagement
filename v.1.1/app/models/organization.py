@@ -8,6 +8,7 @@
 # from flask_sqlalchemy import SQLAlchemy
 import json
 from extensions import db
+from response_object import ResponseObject  
 # from db_helper import db
 
 class TreeNode:
@@ -336,3 +337,30 @@ class Organization(db.Model):
             raise e
         finally:
             return result
+
+    @classmethod
+    def get_id_by_name(cls, name):
+        '''根据名字获得他的id
+        
+        Arguments:
+            name {str} -- 字典数据的名字
+        
+        Returns:
+            [ResponseObject] -- 提示信息，有2个字段
+                                message {str} -- 操作结果，200-成功；500-失败
+                                data    {str} -- 详细的提示信息，默认是''
+        
+        Raises:
+            e -- [description]
+        '''
+        response = ResponseObject(data = '')
+        try:
+            result = Organization.query.filter_by(name = name).first()
+            if result is not None:
+                response.data = result.id
+        except Exception as e:
+            response.set_fail(None)
+            db.session.rollback()
+            raise e
+        finally:
+            return response

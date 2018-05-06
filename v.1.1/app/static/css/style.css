@@ -18,7 +18,7 @@
 }
 .hide{
     position: absolute;
-    display: block!important;
+    display: block !important;
     width: 82px;
     opacity: 0;
 }

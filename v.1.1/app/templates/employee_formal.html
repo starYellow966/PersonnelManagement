@@ -42,31 +42,24 @@
 
             </div>
 
-            <!-- <ul id="myTab" class="nav nav-tabs">
-                <li class="active">
-                    <a href="#formal-form" data-toggle="tab">内部变动</a>
-                </li>
-                <li>
-                    <a href="#formal-form" data-toggle="tab">定职管理</a>
-                </li>
-            </ul> -->
             <div>
                 <form id="formal-form">
                     <div class="row">
                         <label style="margin: 20px;">定职日期</label>
                         <input type="date" id="change_date" class="form-control" style="width: 20%;display: inline;" required>
                         <label style="margin: 20px;">执行人</label>
-                        <input type="text" name="" class="form-control" style="width: 20%;display: inline;" value="{% if current_user.is_authenticated -%}{{ current_user.name }}{%- endif %}" required>
+                        <input type="text" name="" class="form-control" style="width: 20%;display: inline;" value="{% if current_user.is_authenticated -%}{{ current_user.name }}{%- endif %}" id="exectuor" required>
                         <label style="margin: 20px;">报到日期</label>
                         <input type="date" id="report_date" class="form-control" style="width: 20%;display: inline;" required>
                         <input type="submit" class="btn btn-primary" style="margin: 5px;" value="确认">
                         <button class="btn" style="margin: 5px;">取消</button>
                     </div>
                     <div class="row">
-                        <label style="margin: 20px;">新部门&nbsp;</label>
-                        <select class="selectpicker" id="org_select" style="margin: 10%;"></select>
+                        <input type="checkbox" style="margin: 15px;" id="is_Change" onchange="isChange()" checked>是否进行内部变动<br>
+                        <label style="margin: 20px;" >新部门&nbsp;</label>
+                        <select class="selectpicker" id="org_select" style="margin: 10%;" ></select>
                         <label style="margin: 20px;">新职名</label>
-                        <select class="selectpicker" id="position_select"></select>
+                        <select class="selectpicker" id="position_select" ></select>
                     </div>
                     <div class="row">
                         <label style="margin: 20px;">备注&nbsp;&nbsp;&nbsp;</label>
@@ -96,12 +89,11 @@
 
                 function initEmplpoyeeTable(){
                     $('#left-table').bootstrapTable({
-                        url: '/employee/scan/list_all',
+                        url: '/employee/formal/list/practice',
                         search: true, //是否显示 搜索框
                         showColumns: true, //是否显示 选择显示列按钮
                         pagination: true, //设置分页
-                        pageList: [25,50,100],
-                        pageSize: 25,
+                        pageSize: 7,
                         idField: 'id', //重要,可设置checkbox的值为指定字段
                         selectItemName: 'id', //设置checkbox name属性，可用于遍历获取选中值
                         clickToSelect: true, //将在点击行时，自动选择checkbox
@@ -111,6 +103,8 @@
                             $('#right-table').bootstrapTable('append', row);
                         },
                         columns: [{
+                            checkbox: true
+                        }, {
                             field: 'id',
                             title: '工号',
                             sortable: true
@@ -130,22 +124,14 @@
                             field: 'position',
                             title: '职名',
                             sortable: true
-                        }, {
-                            field: 'is_Practice',
-                            title: '是否实习',
-                            sortable: true,
-                            formatter: function(value, row, index){
-                                return value == 1 ? '是'?'否'
-                            }
-                        }],
+                        }]
                     });
 
                     $('#right-table').bootstrapTable({
                         // search: true, //是否显示 搜索框
                         showColumns: true, //是否显示 选择显示列按钮
                         pagination: true, //设置分页
-                        pageList: [25,50,100],
-                        pageSize: 25,
+                        pageSize: 7,
                         idField: 'id', //重要,可设置checkbox的值为指定字段
                         selectItemName: 'id', //设置checkbox name属性，可用于遍历获取选中值
                         clickToSelect: true, //将在点击行时，自动选择checkbox
@@ -154,6 +140,8 @@
                             $('#left-table').bootstrapTable('append', row);
                         },
                         columns: [{
+                            checkbox: true
+                        }, {
                             field: 'id',
                             title: '工号',
                             sortable: true
@@ -173,14 +161,7 @@
                             field: 'position',
                             title: '职名',
                             sortable: true
-                        }, {
-                            field: 'is_Practice',
-                            title: '是否实习',
-                            sortable: true,
-                            formatter: function(value, row, index){
-                                return value == 1 ? '是'?'否'
-                            }
-                        }],
+                        }]
                     });
                 }
 
@@ -189,26 +170,20 @@
                 }
 
                 function initSubmit(){
-                    $('#formal-form').submit(function(e){
-                        $(this).ajaxSubmit({
-                            url: '/employee/formal/update',
-                            type: 'post',
-                            data:{
-                                org_id: $('#org_select').val(),
-                                position_id: $('#position_select').val(),
-                                id: getRightTableData(),
-                                change_date: $('#change_date').val()
-                            },
-                            success: function(message){
-                                alert('内部变动 ：' + message);
-                            },
-                            // complete: function(){
-                            //     alert('内部变动 ：');
-                            // }
-                        });
-                    // always return false to prevent standard browser submit and page navigation 
-                    return false;//阻止表单默认提交
-                });
+                    $('#formal-form').submit(function(event){
+                        event.preventDefault();
+                        var data = {};
+                        if($("#is_Change").is(':checked')){
+                            data['org_id'] = $('#org_select').val();
+                            data['position_id'] = $('#position_select').val();
+                        }
+                        data['id'] = getRightTableData();
+                        data['change_date'] = $('#change_date').val();
+                        data['exectuor'] = $('#exectuor').val();
+                        data['report_date'] = $('#report_date').val();
+                        console.log(data);
+                        formalRequest(data);
+                    });
                 }
             </script>
 
@@ -225,6 +200,20 @@
                     console.log(id_string);
                     return id_string;
                 }
+
+                function isChange(){
+                    // console.log($("#is_Change").is(':checked'));
+                    if ($("#is_Change").is(':checked')) {
+                        console.log('true');
+                        $('#org_select').prop('disabled', false);
+                        $('#position_select').prop('disabled',false);
+                    }
+                    else{
+                        console.log('false');
+                        $('#org_select').prop('disabled','disabled');
+                        $('#position_select').prop('disabled','disabled');
+                    }
+                }
             </script>
 
             <!-- 发送请求 -->
@@ -237,37 +226,51 @@
                  */
                 function queryRequest(obj, type_name, query_type=true){
                     $.ajax({
-                    type: 'get',
-                    url: query_type ? '/dict/listDictByTypeName' : '/org/listall',
-                    data:{
-                        type: query_type ? type_name : 2
-                    },
-                    success: function(data){
-                        // 转换为json对象
-                        var dataObj=eval("("+data+")");
-                        // console.log(dataObj);
-                        var text = '';
-                        if(query_type){
-                            for(var i in dataObj){
-                                if(typeof(selected_data) != "undefined" && selected_data == dataObj[i].id)
-                                    text += '<option value="' + dataObj[i].id + '"selected>' + dataObj[i].name + '</option>';
-                                else
-                                    text += '<option value="' + dataObj[i].id + '">' + dataObj[i].name + '</option>';
+                        type: 'get',
+                        url: query_type ? '/dict/listDictByTypeName' : '/org/listall',
+                        data:{
+                            type: query_type ? type_name : 2
+                        },
+                        success: function(data){
+                            // 转换为json对象
+                            var dataObj=eval("("+data+")");
+                            // console.log(dataObj);
+                            var text = '';
+                            if(query_type){
+                                for(var i in dataObj){
+                                    if(typeof(selected_data) != "undefined" && selected_data == dataObj[i].id)
+                                        text += '<option value="' + dataObj[i].id + '"selected>' + dataObj[i].name + '</option>';
+                                    else
+                                        text += '<option value="' + dataObj[i].id + '">' + dataObj[i].name + '</option>';
+                                }
                             }
-                        }
-                        else{
-                            for(var i in dataObj){
-                                if(typeof(selected_data) != "undefined" && selected_data == dataObj[i][0])
-                                    text += '<option value="' + dataObj[i][0] + '"selected>' + dataObj[i][1] + '</option>';
-                                else
-                                    text += '<option value="' + dataObj[i][0] + '">' + dataObj[i][1] + '</option>';
+                            else{
+                                for(var i in dataObj){
+                                    if(typeof(selected_data) != "undefined" && selected_data == dataObj[i][0])
+                                        text += '<option value="' + dataObj[i][0] + '"selected>' + dataObj[i][1] + '</option>';
+                                    else
+                                        text += '<option value="' + dataObj[i][0] + '">' + dataObj[i][1] + '</option>';
+                                }
                             }
+                            obj.html(text);
+                            obj.selectpicker('refresh');
                         }
-                        obj.html(text);
-                        obj.selectpicker('refresh');
-                    }
-                });
+                    });
                 }
+                function formalRequest(array){
+                    $.ajax({
+                        url: '/employee/formal/update',
+                        type: 'post',
+                        data: array,
+                        async: false,
+                        success: function(message){
+                            alert('定职管理 ：' + message);
+                            $('#left-table').bootstrapTable('refresh', {url: '/employee/scan/list_all'});
+                            $('#right-table').bootstrapTable('removeAll');
+                        }
+                    });
+                }
+
             </script>
     {% endblock body %}
 </body>

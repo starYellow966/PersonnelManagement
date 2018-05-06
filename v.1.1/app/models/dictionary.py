@@ -8,7 +8,7 @@
 
 from flask import Flask,request
 from flask_sqlalchemy import SQLAlchemy
-from operate_log import Log
+from operate_log import Log,logged
 from flask_login import current_user
 from extensions import db
 from response_object import ResponseObject
@@ -195,7 +195,7 @@ class Dictionary(db.Model):
             print e
             raise e
         finally:
-            Log.createLog('Delete', u'删除字典数据id{' + id_string + u"}").insertLog(1 if response.message == 200 else 0)
+            Log.createLog('Delete', u'删除字典数据id{' + id_string + u"}").insertLog(response.message)
             return response
 
     def update(self):
@@ -218,10 +218,10 @@ class Dictionary(db.Model):
             response.set_fail()
             raise e
         finally:
-            Log.createLog('Delete', u'修改后的字典数据为{ id:' + self.id + ',name:' + self.name + '}').insertLog(1 if response.message == 200 else 0)
+            Log.createLog('Update', u'修改后的字典数据为{ id:' + self.id + ',name:' + self.name + '}').insertLog(response.message)
             return response
 
-
+    # @logged('Insert', u'插入字典数据{id:' + self.id + ',name:' + self.name + ',type:' + DictionaryType.get_name_by_id(self.type_id).data + '}')
     def insert(self):
         '''id查重并插入，返回响应码
         
@@ -245,8 +245,8 @@ class Dictionary(db.Model):
             response.set_fail()
             raise e
         finally:
-            Log.createLog('Delete', u'插入数据{id:' + self.id + ',name:' + self.name + ',type:' + DictionaryType.get_name_by_id(self.type_id).data + '}'
-                ).insertLog(1 if response.message == 200 else 0)
+            Log.createLog('Insert', u'插入字典数据{id:' + self.id + ',name:' + self.name + ',type:' + DictionaryType.get_name_by_id(self.type_id).data + '}'
+                ).insertLog(response.message)
             return response
 
     @classmethod
@@ -278,14 +278,41 @@ class Dictionary(db.Model):
         Returns:
             [dict] -- 提示信息，有2个字段
                       message {str} -- 操作结果，200-成功；500-失败
-                      data    {str} -- 详细的提示信息，默认是success
+                      data    {str} -- 详细的提示信息，默认是''
         
         Raises:
             e -- 数据库操作异常
         '''
-        response = ResponseObject()
+        response = ResponseObject('')
         try:
             response.data = Dictionary.query.filter_by(id = id).first().name
+        except Exception as e:
+            response.set_fail(None)
+            db.session.rollback()
+            raise e
+        finally:
+            return response
+
+    @classmethod
+    def get_id_by_name(cls, name):
+        '''根据名字获得他的id
+        
+        Arguments:
+            name {str} -- 字典数据的名字
+        
+        Returns:
+            [ResponseObject] -- 提示信息，有2个字段
+                                message {str} -- 操作结果，200-成功；500-失败
+                                data    {str} -- 详细的提示信息，默认是''
+        
+        Raises:
+            e -- [description]
+        '''
+        response = ResponseObject(data = '')
+        try:
+            result = Dictionary.query.filter_by(name = name).first()
+            if result is not None:
+                response.data = result.id
         except Exception as e:
             response.set_fail(None)
             db.session.rollback()

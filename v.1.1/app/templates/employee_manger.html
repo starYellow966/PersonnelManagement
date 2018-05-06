@@ -32,14 +32,13 @@
             <!-- 表格区域 -->
             <div class="col-sm-8">
                 <!-- 表格的工具栏 -->
-                <div id="table_toolbar" class="btn-group">
-                    <!-- <button id="btn_addSeg" class="btn btn-default" onclick="initInsertModel()">
+                <!-- <div id="table_toolbar" class="btn-group">
+                    <button id="btn_addSeg" class="btn btn-default" onclick="initInsertModel()">
                         <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>新增
-                    </button> -->
+                    </button>
                     <button id="btn_removeSeg" class="btn btn-default" onclick="removeEmployees()">
                         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>删除
                     </button>
-                    <!-- 批处理下拉按钮 -->
                     <div class="btn-group">
                         <button id="btn_batch" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
                             <span class="glyphicon glyphicon-import" aria-hidden="true"></span>批处理
@@ -49,7 +48,7 @@
                             <li><a href="#unloadModal" data-toggle="modal">批量导入数据</a></li>
                         </ul>
                     </div>
-                </div><!-- 表格的工具栏end -->
+                </div> --><!-- 表格的工具栏end -->
 
                 <table id="employeelist-table"></table>
 
@@ -75,9 +74,8 @@
                                             </div>
                                         </td>
                                         <td>
-                                            <form id="photo-form" class="btn btn-hollow" action="/upload" method='post' enctype='multipart/form-data'>
-                                                <input type="file" id="photo" name="photo" class="hide" onchange="UploadPhoto(this)" accept="image/*">
-                                                更换头像
+                                            <form id="photo-form" action="/upload" method='post' enctype='multipart/form-data'>
+                                                <input type="file" id="photo" name="photo" onchange="UploadPhoto(this)" accept="image/*">
                                             </form>
                                         </td>
                                     </tr>
@@ -311,7 +309,7 @@
              */
             function initEmployeeListTable(){
                 $('#employeelist-table').bootstrapTable({
-                    toolbar:'#table_toolbar',
+                    // toolbar:'#table_toolbar',
                     search: true, //是否显示 搜索框
                     showColumns: true, //是否显示 选择显示列按钮
                     pagination: true, //设置分页
@@ -326,7 +324,7 @@
                     Icon: 'glyphicon-export', //导出的图标设置
                     exportOptions:{ //导出文件格式设置
                         ignoreColumn: [0,5],
-                        fileName: '客运段信息表'+new Date().getFullYear() + (new Date().getMonth() + 1) + new Date().getDate()
+                        fileName: '成都客运段人员信息表'+new Date().getFullYear() + (new Date().getMonth() + 1) + new Date().getDate()
                     },
                     columns: [{
                         checkbox: true,
@@ -355,13 +353,22 @@
                         title: '人员状态',
                         sortable: true
                     }, {
+                        field: 'is_Practice',
+                        title: '是否实习',
+                        formatter: function(value, row, index){
+                            if( value == 1)
+                                return '是';
+                            else
+                                return '否';
+                        }
+                    }, {
                         field: 'operation',
                         title: '操作',
                         align: 'center',
                         valign: 'middle',
                         formatter: function(value, row, index){
-                            return "<a href='/employee/detail?id=" + row.id + "' target='_blank'>详情</a>" + " <a href='#' data-toggle='modal' onclick='queryEmployeesRequest(\""+row.id+"\","+ false + ")'>修改</a> " + 
-                            " <a href='#' onclick='removeEmployeesRequest(\""+row.id+"\")' >删除</a>"
+                            return "<a href='/employee/detail?id=" + row.id + "' target='_blank'>详情</a>" + " <a href='#' data-toggle='modal' onclick='queryEmployeesRequest(\""+row.id+"\","+ false + ")'>修改</a> "; 
+                            // +" <a href='#' onclick='removeEmployeesRequest(\""+row.id+"\")' >删除</a>"
                         }
                     }],
                 });
@@ -748,7 +755,7 @@
             };
 
             var removeEmployeesRequest = function(request_str){
-                console.log(request_str);
+                // console.log(request_str);
                 $.ajax({
                     url: '/employee/removeEmployee',
                     type: 'post',

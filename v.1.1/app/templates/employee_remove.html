@@ -17,60 +17,11 @@
         {% endblock left_nav %}
 
         <div class="container">
-            <!-- 高级查询栏 -->
-            <div class="panel-group" id="query-panel">
-                <div class="panel panel-default">
-                    <div class="panel-heading" data-toggle="collapse" data-parent='query-panel' href='#query-panel-body'>高级查询条件</div>
-                    <div id="query-panel-body">
-                        <div class="panel-body">
-                            <div id="formSearch" class="form-horizontal">
-                                <label class="control-label col-sm-3" style="text-align: center;">属性</label>
-                                <label class="control-label col-sm-3" style="text-align: center;">运算符</label>
-                                <label class="control-label col-sm-3" style="text-align: center;">值</label>
-                                <label class="control-label col-sm-3" style="text-align: center;">连接符</label>
-                                <br>
-                                <br>
-                                <div class="col-sm-3" >
-                                    <select class="selectpicker " id="proprity" onchange="proprityChange(this)">
-                                        <option value="id" selected>工号</option>
-                                        <option value="name">名称</option>
-                                        <option value="type">类型</option>
-                                        <option value="dep_name">部门名称</option>
-                                        <option value="seg_date">成立时间</option>
-                                        <option value="railway">所属路局</option>
-                                    </select>
-                                </div>
-                                <div class="col-sm-3">
-                                    <select class="selectpicker " id="operator">
-                                        <option value="like" selected>like</option>
-                                        <option value="<"><</option>
-                                        <option value=">">></option>
-                                        <option value="=">=</option>
-                                    </select>
-                                </div>                  
-                                <div class="col-sm-3">
-                                    <input type="text" class="form-control" id="value">
-                                </div>
-                                <div class="col-sm-3">
-                                    <select class="selectpicker" id="joinOperator">
-                                        <option value="and" selected>and</option>
-                                        <option value="or">or</option>
-                                    </select>
-                                </div>
-                                <br>
-                                <br>
-                                <textarea id="search_sqltext" class="form-control col-sm-12" rows="5" style="overflow-x: hidden;overflow-y: auto;resize: none;"></textarea>
-                            </div>
-                        </div>
-                        <div class="panel panel-footer" align="right">
-                          <input type="button" class="btn btn-primary" name="insert" value="添加" onclick="insertSqlQuery()">
-                          <input type="submit" class="btn btn-success" name="submit" value="查询" onclick="queryRequest()">
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- 高级查询栏end -->
-
+            <div id="table_toolbar" class="btn-group">
+                    <button id="btn_removeSeg" class="btn btn-default" onclick="removeEmployees()">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>批量删除
+                    </button>
+                </div><!-- 表格的工具栏end -->
             <table id="table"></table>
         </div>
 
@@ -89,6 +40,7 @@
 
                 function initEmplpoyeeTable(){
                     $('#table').bootstrapTable({
+                        toolbar: '#table_toolbar',
                         url: '/employee/scan/list_all',
                         search: true, //是否显示 搜索框
                         showColumns: true, //是否显示 选择显示列按钮
@@ -99,13 +51,13 @@
                         selectItemName: 'id', //设置checkbox name属性，可用于遍历获取选中值
                         clickToSelect: true, //将在点击行时，自动选择checkbox
                         striped: true, //是否显示 表格条纹
-                        showExport: true, //是否显示导出按钮
-                        exportDataType: 'all',
-                        Icon: 'glyphicon-export', //导出的图标设置
-                        exportOptions:{ //导出文件格式设置
-                            //ignoreColumn: [0,3],
-                            fileName: '人员信息表'+new Date().getFullYear() + (new Date().getMonth() + 1) + new Date().getDate()
-                        },
+                        // showExport: true, //是否显示导出按钮
+                        // exportDataType: 'all',
+                        // Icon: 'glyphicon-export', //导出的图标设置
+                        // exportOptions:{ //导出文件格式设置
+                        //     //ignoreColumn: [0,3],
+                        //     fileName: '人员信息表'+new Date().getFullYear() + (new Date().getMonth() + 1) + new Date().getDate()
+                        // },
                         columns: [{
                             checkbox: true
                         }, {
@@ -146,25 +98,25 @@
                             title: '人员状态',
                             sortable: true
                         }, {
-                            field: 'political_status',
-                            title: '政治面貌',
-                            sortable: true
-                        }, {
                             field: 'is_Practice',
                             title: '是否实习',
                             formatter: function(value, row, index){
-                                if(value == 1)
+                                if( value == 1)
                                     return '是';
                                 else
                                     return '否';
                             }
+                        }, {
+                            field: 'political_status',
+                            title: '政治面貌',
+                            sortable: true
                         }, {
                             field: 'operation',
                             title: '操作',
                             align: 'center',
                             valign: 'middle',
                             formatter: function(value, row, index){
-                                return "<a href='/employee/detail?id=" + row.id + "' target='_blank'>详情</a>" ;
+                                return "<a href='/employee/detail?id=" + row.id + "' target='_blank'>详情</a>" + " <a href='#' onclick='removeEmployeesRequest(\""+row.id+"\")' >删除</a>"
                             }
                         }],
                     });
@@ -173,6 +125,38 @@
                 function initDetailModalFunc(id){
                     window.open('/employee/detail?id=' + id);
                 }
+
+                function removeEmployees(){
+                    var array = $('#table').bootstrapTable('getAllSelections');
+                    if(array.length > 0){
+                        var request_str = ''
+                        for (var i = array.length - 1; i >= 0; i--) {
+                            request_str += array[i]['id']
+                            if(i > 0)
+                                request_str += ','
+                        }
+                        // alert(request_str);
+                        removeEmployeesRequest(request_str);
+                    }
+                    else
+                        alert('请先选择需要删除的数据');
+                }
+
+                function removeEmployeesRequest(request_str){
+                    $.ajax({
+                        url: '/employee/removeEmployee',
+                        type: 'post',
+                        data:{id : request_str},
+                        success: function(message){
+                            if(message == 200){
+                                alert('删除员工成功');
+                                $('#table').bootstrapTable('remove', {field: 'id', values: request_str.split(',')});
+                            }
+                            else
+                                alert('删除员工失败')
+                        },
+                    });
+                };
             </script>
         {% endblock base_script %}
     {% endblock body %}

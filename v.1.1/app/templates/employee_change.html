@@ -58,7 +58,7 @@
                         <label style="margin: 20px;">变动日期</label>
                         <input type="date" id="change_date" class="form-control" style="width: 20%;display: inline;" required>
                         <label style="margin: 20px;">执行人</label>
-                        <input type="text" name="" class="form-control" style="width: 20%;display: inline;" value="{% if current_user.is_authenticated -%}{{ current_user.name }}{%- endif %}" required>
+                        <input type="text" name="" class="form-control" style="width: 20%;display: inline;" value="{% if current_user.is_authenticated -%}{{ current_user.name }}{%- endif %}" id="executor" required>
                     </div>
                     <div class="row">
                         <label style="margin: 20px;">备注&nbsp;&nbsp;&nbsp;</label>
@@ -176,7 +176,8 @@
                                 position_id: $('#position_select').val(),
                                 id: getRightTableData(),
                                 change_date: $('#change_date').val(),
-                                report_date: $('#report_date').val()
+                                report_date: $('#report_date').val(),
+                                executor: $('#executor').val()
                             },
                             success: function(message){
                                 alert('定职变动 ：' + message);

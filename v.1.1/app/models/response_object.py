@@ -1,6 +1,6 @@
 class ResponseObject(object):
 
-    def __init__(self, message = 200, data = 'success'):
+    def __init__(self, message = '200', data = 'success'):
         self.message = message
         self.data = data
 
@@ -10,4 +10,4 @@ class ResponseObject(object):
 
     def set_fail(self, data = 'fail'):
         self.data = data
-        self.message = 500
+        self.message = '500'

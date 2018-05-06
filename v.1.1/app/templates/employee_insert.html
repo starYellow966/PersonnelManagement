@@ -18,7 +18,7 @@
         
         <div id="tableview" class="container">
             <table id="employee-detail-table" class="table-setting">
-                <tbody >
+                <tbody>
                     <tr>
                         <td>
                             <div class="avatar">
@@ -26,190 +26,367 @@
                             </div>
                         </td>
                         <td>
-                            <form id="photo-form" class="btn btn-hollow" action="/upload" method='post' enctype='multipart/form-data'>
-                                <input type="file" id="photo" name="photo" class="hide" onchange="UploadPhoto(this)" accept="image/*">
-                                更换头像
+                            <form id="photo-form">
+                                <input type="file" id="photo" name="photo" onchange="UploadPhoto(this)" accept="image/*">
                             </form>
                         </td>
                     </tr>
-                    <tr>
-                        <td class="setting-title">
-                            工号<span style="color: red;">*</span>
-                        </td>
-                        <td>
-                            <input type="text" class="form-control" id="detailModal-id">
-                        </td>
-                        <td class="setting-title">
-                            职名
-                        </td>
-                        <td>
-                            <select class="selectpicker" id="detailModal-position"></select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="setting-title">
-                            姓名<span style="color: red;">*</span>
-                        </td>
-                        <td>
-                            <input type="text" class="form-control" id="detailModal-name">
-                        </td>
-                        <td class="setting-title">
-                            用工性质
-                        </td>
-                        <td>
-                            <select class="selectpicker" id="detailModal-worktype"></select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="setting-title">
-                            曾用名
-                        </td>
-                        <td>
-                            <input type="text" class="form-control" id="detailModal-oldname">
-                        </td>
+                    <form id="detailModal-form">
+                        <tr>
+                            <td class="setting-title">
+                                工号<span style="color: red;">*</span>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" id="detailModal-id"  name="id" required>
+                            </td>
+                            <td class="setting-title">
+                                职名
+                            </td>
+                            <td>
+                                <select class="selectpicker" id="detailModal-position" ></select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="setting-title">
+                                姓名<span style="color: red;">*</span>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" id="detailModal-name" required>
+                            </td>
+                            <td class="setting-title">
+                                用工性质
+                            </td>
+                            <td>
+                                <select class="selectpicker" id="detailModal-worktype"></select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="setting-title">
+                                曾用名
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" id="detailModal-oldname">
+                            </td>
 
-                        <td class="setting-title">
-                            所属部门
-                        </td>
-                        <td>
-                            <select class="selectpicker" id="detailModal-org"></select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="setting-title">
-                            性别
-                        </td>
-                        <td>
-                            <select class="selectpicker" id="detailModal-sex">
-                                <option value='1'>男</option>
-                                <option value=0>女</option>
-                            </select>
-                        </td>
-                        <td class="setting-title">
-                            人员状态
-                        </td>
-                        <td>
-                            <select class="selectpicker" id="detailModal-status"></select>
-                        </td>
+                            <td class="setting-title">
+                                所属部门
+                            </td>
+                            <td>
+                                <select class="selectpicker" id="detailModal-org"></select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="setting-title">
+                                性别
+                            </td>
+                            <td>
+                                <select class="selectpicker" id="detailModal-sex">
+                                    <option value='1'>男</option>
+                                    <option value=0>女</option>
+                                </select>
+                            </td>
+                            <td class="setting-title">
+                                人员状态
+                            </td>
+                            <td>
+                                <select class="selectpicker" id="detailModal-status"></select>
+                            </td>
 
-                    </tr>
-                    <tr>
-                        <td class="setting-title">
-                            民族
-                        </td>
-                        <td>
-                            <select class="selectpicker" id="detailModal-nation"></select>
-                        </td>
-                        <td class="setting-title">
-                            是否实习
-                        </td>
-                        <td>
-                            <select class="selectpicker" id="detailModal-isPractice">
-                                <option value="1">是</option>
-                                <option value="0">否</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="setting-title">
-                            籍贯
-                        </td>
-                        <td>
-                            <input type="text" class="form-control" id="detailModal-origin">
-                        </td>
-                        
-                        <td class="setting-title">
-                            技能档次
-                        </td>
-                        <td>
-                            <select class="selectpicker" id="detailModal-techlevel"></select>
-                        </td>
+                        </tr>
+                        <tr>
+                            <td class="setting-title">
+                                民族
+                            </td>
+                            <td>
+                                <select class="selectpicker" id="detailModal-nation"></select>
+                            </td>
+                            <td class="setting-title">
+                                是否实习
+                            </td>
+                            <td>
+                                <select class="selectpicker" id="detailModal-isPractice">
+                                    <option value="1">是</option>
+                                    <option value="0">否</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="setting-title">
+                                籍贯
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" id="detailModal-origin">
+                            </td>
+                            
+                            <td class="setting-title">
+                                技能档次
+                            </td>
+                            <td>
+                                <select class="selectpicker" id="detailModal-techlevel"></select>
+                            </td>
 
-                        
-                    </tr>
-                    <tr>
-                        <td class="setting-title">
-                            身份证号
-                        </td>
-                        <td>
-                            <input type="text" class="form-control" id="detailModal-id-num">
-                        </td>
+                            
+                        </tr>
+                        <tr>
+                            <td class="setting-title">
+                                身份证号
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" id="detailModal-id-num">
+                            </td>
 
-                        <td class="setting-title">
-                            学历
-                        </td>
-                        <td>
-                            <select class="selectpicker" id="detailModal-degree"></select>
-                        </td>
-                        
-                    </tr>
-                    <tr>
-                        <td class="setting-title">
-                            联系电话
-                        </td>
-                        <td>
-                            <input type="number" class="form-control" id="detailModal-phone1">
-                        </td>
+                            <td class="setting-title">
+                                学历
+                            </td>
+                            <td>
+                                <select class="selectpicker" id="detailModal-degree"></select>
+                            </td>
+                            
+                        </tr>
+                        <tr>
+                            <td class="setting-title">
+                                联系电话
+                            </td>
+                            <td>
+                                <input type="number" class="form-control" id="detailModal-phone1">
+                            </td>
 
-                        <td class="setting-title">
-                            政治面貌
-                        </td>
-                        <td>
-                            <select class="selectpicker" id="detailModal-political"></select>
-                        </td>
-                        
-                    </tr>
-                    <tr>
-                        <td class="setting-title">
-                            家庭住址
-                        </td>
-                        <td>
-                            <input type="text" class="form-control" id="detailModal-address">
-                        </td>
+                            <td class="setting-title">
+                                政治面貌
+                            </td>
+                            <td>
+                                <select class="selectpicker" id="detailModal-political"></select>
+                            </td>
+                            
+                        </tr>
+                        <tr>
+                            <td class="setting-title">
+                                家庭住址
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" id="detailModal-address">
+                            </td>
 
-                        <td class="setting-title">
-                            出生日期
-                        </td>
-                        <td>
-                            <input type="date" class="form-control" id="detailModal-birthdate">
-                        </td>
-                        
-                    </tr>
-                    <tr>
-                        <td class="setting-title">
-                            电子邮箱
-                        </td>
-                        <td>
-                            <input type="email" class="form-control" id="detailModal-email">
-                        </td>
+                            <td class="setting-title">
+                                出生日期
+                            </td>
+                            <td>
+                                <input type="date" class="form-control" id="detailModal-birthdate">
+                            </td>
+                            
+                        </tr>
+                        <tr>
+                            <td class="setting-title">
+                                电子邮箱
+                            </td>
+                            <td>
+                                <input type="email" class="form-control" id="detailModal-email">
+                            </td>
 
-                        <td class="setting-title">
-                            入职日期
-                        </td>
-                        <td>
-                            <input type="date" class="form-control" id="detailModal-work-date">
-                        </td>
-                        
-                    </tr>
-                    <tr>
-                        <td class="setting-title">
-                            备注
-                        </td>
-                        <td colspan="3">
-                            <input type="text" class="form-control" id="detailModal-others">
-                        </td>
-                    </tr>
+                            <td class="setting-title">
+                                入职日期
+                            </td>
+                            <td>
+                                <input type="date" class="form-control" id="detailModal-work-date">
+                            </td>
+                            
+                        </tr>
+                        <tr>
+                            <td class="setting-title">
+                                备注
+                            </td>
+                            <td colspan="3">
+                                <input type="text" class="form-control" id="detailModal-others">
+                            </td>
+                        </tr>
+                        <tr></tr>
+                        <tr>
+                            <td colspan="3"></td>
+                            <td align="right">
+                                <input type="button" class="btn btn-default" value="取消">
+                                <input type="submit" class="btn btn-primary" id="detailModal-submit" name="submit" value="确认">
+                            </td>
+                        </tr>
+                    </form>
                 </tbody>
             </table>
-            <div >
-                <input type="button" class="btn btn-default" value="取消">
-                <input type="button" class="btn btn-primary" id="detailModal-submit" name="submit" value="确认">
-            </div>
         </div>
         {% block base_script %}
             {{ super() }}
             <script src="../static/js/bootstrap-select.js"></script>
         {% endblock base_script %}
+        <script type="text/javascript">
+            $(document).ready(function(){
+                initSelectData();
+                initPhotoSubmit();
+                initInsertSubmit();
+            });
+
+            /**
+             * 初始化select控件的值
+             */
+            function initSelectData() {
+                setSelectData($('#detailModal-worktype'), undefined, '用工性质');
+                setSelectData($('#detailModal-org'), undefined, '所属部门', false);
+
+                setSelectData($('#detailModal-status'), undefined, '人员状态');
+
+                setSelectData($('#detailModal-position'), undefined, '职名');
+
+                setSelectData($('#detailModal-political'), undefined, '政治面貌');
+
+                setSelectData($('#detailModal-nation'), undefined, '民族');
+
+                setSelectData($('#detailModal-degree'), undefined, '学历');
+
+                setSelectData($('#detailModal-techlevel'), undefined, '技能档次');
+
+            }
+
+            /**
+             * 初始化自定义图片异步上传请求
+             */
+            function initPhotoSubmit(){
+                //设置表单的异步图片上传
+                $('#photo-form').submit(function(event){
+                    event.preventDefault();
+                    var form = $(this);
+                    var formData = new FormData(this);
+                    uploadPhotoRequest(formData);
+                });
+            }
+
+            function initInsertSubmit(){
+                $('#detailModal-form').submit(function(event){
+                    event.preventDefault();
+                    var array = getModelData();
+                    insertEmployeeRequest(array);
+                });
+            }
+
+            /**
+             * 加载下拉框数据，以及默认选中值
+             * @param {HTMLElementObject} obj 当前下拉框
+             * @param {str} selected_data 默认选中值(id)
+             * @param {str} type_name     字典数据类型名
+             * @param {Boolean} query_type    查询方式，分为字典数据(true)和组织数据(false)
+             */
+            function setSelectData(obj, selected_data, type_name, query_type=true){
+                $.ajax({
+                    type: 'get',
+                    url: query_type ? '/dict/listDictByTypeName' : '/org/listall',
+                    data:{
+                        type: query_type ? type_name : 2
+                    },
+                    success: function(data){
+                        // 转换为json对象
+                        var dataObj=eval("("+data+")");
+                        // console.log(dataObj);
+                        var text = '';
+                        if(query_type){
+                            for(var i in dataObj){
+                                text += '<option value="' + dataObj[i].id + '">' + dataObj[i].name + '</option>';
+                            }
+                        }
+                        else{
+                            for(var i in dataObj){
+                                text += '<option value="' + dataObj[i][0] + '">' + dataObj[i][1] + '</option>';
+                            }
+                        }
+                        obj.html(text);
+                        obj.selectpicker('refresh');
+                    }
+                });
+            }
+
+
+            /**
+             * onchange响应函数
+             * 负责异步发送上传图片请求
+             * @param {HTMLElementObject} obj  this
+             */
+            function UploadPhoto(obj) {
+                if( obj.value != "")//只有选中文件才能上传
+                    $('#photo-form').submit();//自定义异步上传
+                return false;  
+            }
+
+            /**
+             * 获得模态框中的信息
+             * @return {json} 模态框中所有控件的数据 或者 null
+             */
+            function getModelData(){
+                var array = {};
+                array['id'] = $('#detailModal-id').val();
+                // if(array['id'] == ""){
+                //     alert("工号不能为空");
+                //     return null;
+                // }
+                array['name'] = $('#detailModal-name').val();
+                // if(array['name'] == ''){
+                //     alert('姓名不能为空');
+                //     return null;
+                // }
+                array['old_name'] = $('#detailModal-oldname').val();
+                array['sex'] = $('#detailModal-sex').val();
+                array['emp_type'] = $('#detailModal-worktype').val();
+                array['org_id'] = $('#detailModal-org').val();
+                array['status_id'] = $('#detailModal-status').val();
+                array['position_id'] = $('#detailModal-position').val();
+                array['id_num'] = $('#detailModal-id-num').val();
+                array['political_status_id'] = $('#detailModal-political').val();
+                array['nation_id'] = $('#detailModal-nation').val();
+                array['degree_id'] = $('#detailModal-degree').val();
+                array['birthdate'] = $('#detailModal-birthdate').val();
+                array['work_date'] = $('#detailModal-work-date').val();
+                array['origin'] = $('#detailModal-origin').val();
+                array['phone1'] = $('#detailModal-phone1').val();
+                array['phone2'] = $('#detailModal-phone2').val();
+                array['address'] = $('#detailModal-address').val();
+                array['email'] = $('#detailModal-email').val();
+                array['techlevel_id'] = $('#detailModal-techlevel').val();
+                array['others'] = $('#detailModal-others').val();
+                array['photo_url'] = $('#detailModal-photo').attr('src');
+
+                return array;
+            }
+        </script>
+        <script type="text/javascript">
+            function uploadPhotoRequest(formData){
+                $.ajax({
+                        type: 'post',
+                        url: '/employee/uploadPhoto',
+                        mimeType: 'multipart/form-data',
+                        data: formData,
+                        contentType: false,
+                        cache: false,
+                        processData: false,
+                        success: function(photourl){
+                            // alert(photourl);
+                            $('#detailModal-photo').attr('src',photourl);
+                        },
+                        error: function(){
+                            alert('上传失败');
+                        }
+                    });
+            }
+
+            function insertEmployeeRequest(array){
+                if(array != null){
+                    $.ajax({
+                        url: '/employee/insertEmployee',
+                        type: 'post',
+                        data: array,
+                        success: function(data){
+                            alert('新增员工：' + data);
+                            $('#detailModal-id').val('');
+                            $('#detailModal-name').val('');
+                            $('#detailModal-photo').attr('src','');
+                        }
+                    });
+                }
+            }
+        </script>
     {% endblock body %}
 </body>
 </html>

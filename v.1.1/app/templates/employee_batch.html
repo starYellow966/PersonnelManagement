@@ -24,18 +24,122 @@
                     </h3>
                 </div>
                 <div class="panel-body">
-                    
+                    <table id="table"></table>
                 </div>
                 <div class="panel-footer">
                     <button class="btn btn-default">取消</button>
-                    <button class="btn btn-primary" id="submit">创建模板</button>
+                    <button class="btn btn-primary" onclick="createTemplate()">创建模板</button>
                 </div>
             </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        导入文件（仅支持后缀为xls, xlsx文件）
+                    </h3>
+                </div>
+                <div class="panel-body">
+                    <form id="unload_form" class="row" >
+                        <input type='file' class="btn btn-default" name='file'>
+                        <input type="button" class="btn btn-default"  value="取消">
+                        <input type="submit" class="btn btn-primary" id="unload_submit" name="submit" value="导入">
+                    </form><!-- modal-body -->
+                </div>
+            </div>
+            
         </div>
         {% block base_script %}
             {{ super() }}
             <script src="../static/js/bootstrap-select.js"></script>
+            <script src="../static/js/bootstrap-table.js"></script>
         {% endblock base_script %}
+        <script type="text/javascript">
+            $(document).ready(function () {
+                initTable();
+                initSubmit();
+            });
+
+            function initTable(){
+                var data = [{'0':true, 'id': '工号'},
+                            {'0':true, 'id':'姓名'},
+                            {'id': '曾用名'},
+                            {'id': '用工性质'},
+                            {'id': '职名'},
+                            {'id': '所属部门'},
+                            {'id': '性别'},
+                            {'id': '人员状态'},
+                            {'id': '民族'},
+                            {'id': '是否实习'},
+                            {'id': '籍贯'},
+                            {'id': '技能等级'},
+                            {'id': '身份证号'},
+                            {'id': '学历'},
+                            {'id': '联系电话'},
+                            {'id': '政治面貌'},
+                            {'id': '家庭住址'},
+                            {'id': '出生日期'},
+                            {'id': '电子邮箱'},
+                            {'id': '入职日期'},
+                            {'id': '备注'}]
+                $('#table').bootstrapTable({
+                    data: data,
+                    idField: 'id', //重要,可设置checkbox的值为指定字段
+                    selectItemName: 'id', //设置checkbox name属性，可用于遍历获取选中值
+                    clickToSelect: true, //将在点击行时，自动选择checkbox
+                    pageSize: 7,
+                    pagination: true, //设置分页
+                    columns: [{
+                        checkbox: true,
+                    }, {
+                        field: 'id',
+                        title: '字段',
+                        sortable: true
+                    }],
+                });
+            }
+
+            function initSubmit(){
+                $('#unload_form').submit(function(event){
+                    event.preventDefault();
+                    alert('请确保浏览器关闭迅雷插件，同时上传文件的sheet名是Employee');
+                    var formData = new FormData(this);
+                    // console.log( 'ready');
+                    $.ajax({
+                        type: 'post',
+                        url: '/employee/change/batch/upload',
+                        mimeType: 'multipart/form-data',
+                        data: formData,
+                        contentType: false,
+                        cache: false,
+                        processData: false,
+                        async: false,
+                        success: function(message){
+                            alert('上传:' + message);
+                        },
+                        error: function(){
+                            alert('上传失败');
+                        }
+                    });
+                });
+            }
+        </script>
+        <!-- 业务逻辑 -->
+        <script type="text/javascript">
+            function createTemplate(){
+                var selected_array = $('#table').bootstrapTable('getAllSelections');
+                if(selected_array.length < 2 || selected_array[0]['id'] != '工号' || selected_array[1]['id'] != '姓名')
+                    alert('工号和姓名字段必选');
+                else{
+                    var request_str = '工号,姓名';
+                    for (var i = 2; i < selected_array.length; i++) {
+                        request_str += ',' + selected_array[i]['id'];
+                    }
+                    window.location.href = '/employee/change/batch/download?request_str=' + request_str
+                }
+            }
+        </script>
+        <script type="text/javascript">
+            
+        </script>
     {% endblock body %}
 </body>
 </html>

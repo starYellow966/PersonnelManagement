@@ -40,7 +40,25 @@ $.ajax({
 还得了解flask的活动上下文
 
 
-### 异步上传文件
+### flask默认变量
+>current_app # 当前激活程序的程序实例
+>g # 处理请求时用作临时存储的对象。每次请求会重设这个变量
+>request # 请求对象，封装了客户端发出的http请求中的内容
+>session # 用户会话，用于存储请求之间需要‘记住‘的值的词典
+
+### JQuery 发送json
+```javascript
+var data = {};
+data['id'] = '11';
+$.ajax({
+    url: 'xxxx',
+    dataType: 'json',
+    data: data,
+    ....
+});
+```
+
+### 简单异步上传文件
 ```javascript
 <form id="photo-form" class="btn btn-hollow" action="/upload" method='post' enctype='multipart/form-data'>
     <input type="file" id="photo" name="photo" class="hide" onchange="UploadPhoto(this)" accept="image/*">
@@ -69,112 +87,49 @@ $('#photo-form').submit(function(event){
 });
 ```
 
-### flask默认变量
->current_app # 当前激活程序的程序实例
->g # 处理请求时用作临时存储的对象。每次请求会重设这个变量
->request # 请求对象，封装了客户端发出的http请求中的内容
->session # 用户会话，用于存储请求之间需要‘记住‘的值的词典
-
-### JQuery 发送json
-```javascript
-var data = {};
-data['id'] = '11';
-$.ajax({
-    url: 'xxxx',
-    dataType: 'json',
-    data: data,
-    ....
-});
-```
-
 ### 修改submit方式
 ```javascript
 $('#detailModal_form').submit(function(e){
-    if($('#detailModal_title').text() == '修改信息')
-        $(this).ajaxSubmit({
-            url: '/dict/update',
-            type: 'post',
-            data:{
-                id: $('#detailModal_id').val(),
-                name: $('#detailModal_name').val()
-            },
-            beforeSubmit: function(formData, jqForm, options){
-                //非空检查
-                var flag = true;//非空检查结果
-                name = formData[1].value;
-                if(name.trim() == ""){
-                    $('#detailModal_name_tip').text('必填');
-                    flag = false;
-                }
-                else if (name.length > 50){
-                    $('#detailModal_name_tip').text('长度不大于50');
-                    flag = false;
-                }
-                if(flag)
-                    $("#detailModal_submit").attr({ disabled: "disabled" });// 禁用按钮防止重复提交
-                return flag;
-            },
-            success: function(data){
-                alert("update : " + data);
-                if(data == 'success'){
-                    $("#detailModal").modal("hide");
-                    $('#table').bootstrapTable('refresh',{url:'/dict/listDictByTypeId?id=' + window.type_id});
-                }
-            },
-            complete: function(){
-                $("#detailModal_submit").removeAttr("disabled");
+    $(this).ajaxSubmit({
+        url: '/dict/update',
+        type: 'post',
+        data:{
+            id: $('#detailModal_id').val(),
+            name: $('#detailModal_name').val()
+        },
+        beforeSubmit: function(formData, jqForm, options){
+            //非空检查
+            var flag = true;//非空检查结果
+            name = formData[1].value;
+            if(name.trim() == ""){
+                $('#detailModal_name_tip').text('必填');
+                flag = false;
             }
-        });
-    else 
-        $(this).ajaxSubmit({
-            url: '/dict/insert',
-            type: 'get',
-            data:{
-                id: $('#detailModal_id').val(),
-                name: $('#detailModal_name').val(),
-                type_id: window.type_id
-            },
-            beforeSubmit: function(formData, jqForm, options){
-                //非空检查
-                var flag = true;//非空检查结果
-                //[0]---id,[1]---name
-                var id = formData[0].value;
-                var name = formData[1].value;
-                if(id.trim() == ""){
-                    $('#detailModal_id_tip').text('必填');
-                    flag = false;
-                }
-                else if(id.length > 30){
-                    $('#detailModal_name_tip').text('长度不大于30');
-                    flag = false;
-                }
-                if(name.trim() == ""){
-                    $('#detailModal_name_tip').text('必填');
-                    flag = false;
-                }
-                else if (name.length > 50){
-                    $('#detailModal_name_tip').text('长度不大于50');
-                    flag = false;
-                }
-                if(flag)
-                    $("#detailModal_submit").attr({ disabled: "disabled" });// 禁用按钮防止重复提交
-                return flag;
-            },
-            success: function(data){
-                alert("insert : " + data);
-                if(data == 'success'){
-                    $("#detailModal").modal("hide");
-                    $('#table').bootstrapTable('refresh',{url:'/dict/listDictByTypeId?id=' + window.type_id});
-                }
-                else if(data == 'id_error'){
-                    $('#detailModal_id_tip').text('此id已存在');
-                }
-            },
-            complete: function(){
-                $("#detailModal_submit").removeAttr("disabled");
+            else if (name.length > 50){
+                $('#detailModal_name_tip').text('长度不大于50');
+                flag = false;
             }
-        });
+            if(flag)
+                $("#detailModal_submit").attr({ disabled: "disabled" });// 禁用按钮防止重复提交
+            return flag;
+        },
+        success: function(data){
+            alert("update : " + data);
+            if(data == 'success'){
+                $("#detailModal").modal("hide");
+                $('#table').bootstrapTable('refresh',{url:'/dict/listDictByTypeId?id=' + window.type_id});
+            }
+        },
+        complete: function(){
+            $("#detailModal_submit").removeAttr("disabled");
+        }
+    });
     // always return false to prevent standard browser submit and page navigation 
     return false;//阻止表单默认提交
 });
 ```
+
+### form 与 input
+在 form 中的 input 控件，不指定 input 的 name属性，提交表单时时不读取它的数据，指定了 input 的 name 属性后，提交的数据key就是name的值。即name属性用于对提交到服务器后的表单数据进行标识，或者在客户端通过JavaScript引用表单数据。注释：只有设置了name属性的表单元素才能在提交表单时传递他们的值。
+
+> 引申一下 id 和 name 属性的区别

@@ -10,9 +10,28 @@ from users import User
 import time
 from flask_login import current_user
 from extensions import db
+from functools import wraps
 # app = Flask(__name__)
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://hx:huangxin123456@120.79.147.151/gdesignV1_1?charset=utf8'
 # db = SQLAlchemy(app)
+
+def logged(level, type=None, message=None):
+    """
+    Add logging to a function. level is the logging
+    level, name is the logger name, and message is the
+    log message. If name and message aren't specified,
+    they default to the function's module and name.
+    """
+    def decorate(func):
+        log = Log.createLog(type, message)
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            result = func(*args, **kwargs)
+            log.insertLog(result.message)
+            # log.log(level, logmsg)
+            return result
+        return wrapper
+    return decorate
 
 class Log(db.Model):
     '''操作日志表
@@ -40,7 +59,7 @@ class Log(db.Model):
 
     id = db.Column(db.Integer(),primary_key = True)
 
-    user_name = db.Column(db.String(50), nullable = False)
+    user_name = db.Column(db.String(50), nullable = True)
 
     ip_address = db.Column(db.String(20), nullable = False)
 
@@ -131,7 +150,7 @@ class Log(db.Model):
     def createLog(cls, event_type, info):
         return Log(event_type, info, current_user.name, request.remote_addr)
 
-    def insertLog(self, result):
+    def insertLog(self, message):
         '''插入一条日志信息到数据库
         TODO(HX):如果当前的日志信息与当前用户最近一条日志信息相同且相隔1s内，则不插入
         
@@ -141,7 +160,7 @@ class Log(db.Model):
         Raises:
             e -- 数据库插入异常，回滚事务
         '''
-        self.result = result
+        self.result = (1 if message == '200' else 0)
         response = {'message': 200, 'data': None}
         try:
             db.session.add(self)

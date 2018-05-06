@@ -19,18 +19,18 @@
         
         <div class="container">
             <ul class="nav nav-tabs" id="myTab">
-                <li class="active"><a href="#" data-toggle="tab" onclick="setCharts('sex')">性别</a></li>
+                <li class="active"><a href="#" data-toggle="tab" onclick="setCharts('position_id')">职名</a></li>
                 <li><a href="#" data-toggle="tab" onclick="setCharts('org_id')">组织机构</a></li>
                 <li><a href="#" data-toggle="tab" onclick="setCharts('emp_type')">用工性质</a></li>
                 <li><a href="#" data-toggle="tab" onclick="setCharts('status_id')">人员状态</a></li>
-                <li><a href="#" data-toggle="tab" onclick="setCharts('position_id')">职名</a></li>
+                <li ><a href="#" data-toggle="tab" onclick="setCharts('sex')">性别</a></li>
                 <li><a href="#" data-toggle="tab" onclick="setCharts('political_status_id')">政治面貌</a></li>
                 <li><a href="#" data-toggle="tab" onclick="setCharts('degree_id')">学位</a></li>
                 <li><a href="#" data-toggle="tab" onclick="setCharts('techlevel_id')">技能等级</a></li>
             </ul>
             <div class="row">
-                <div id="canvasDiv_column3d"></div>
                 <div id="canvasDiv_pie3d"></div>
+                <div id="canvasDiv_column3d"></div>
             </div>
             
         </div>
@@ -44,7 +44,7 @@
         <!-- 初始化函数 -->
         <script type="text/javascript">
             $(document).ready(function(){
-                setCharts('sex');
+                setCharts('position_id');
             });
 
             function initColumnChart(data, title){

@@ -7,7 +7,8 @@ from extensions import db
 # from db_helper import db
 from organization import TreeNode,Organization
 from dictionary import Dictionary   
-from response_object import ResponseObject  
+from response_object import ResponseObject 
+from operate_log import Log
 
 class Employee(db.Model):
     '''员工信息表
@@ -97,66 +98,76 @@ class Employee(db.Model):
 
 
     def __init__(self, id, name, **kw):
-        self.id = ''.join(id)
-        self.name = ''.join(name)
-        # self.sex = ''.join(sex)
-        # self.org_id = ''.join(org_id)
-        # kw的值都是list类型，需要转换成str
-        # for x in kw.itervalues():
-        #     x = str(x)
-        # print [type(x) for x in kw.itervalues()]
+        super(Employee, self).__init__()
+        self.id = (''.join(id) if isinstance(id, list) else id)
+        self.name = (''.join(name) if isinstance(name,list) else name)
         self.setOption(kw)
 
     def setOption(self, kw):
-        # if 'name' in kw:
-        #     self.name = ''.join(kw['name'])
+        # print 'enter setOption'
         if 'sex' in kw:
-            self.sex = ''.join(kw['sex'])
+            self.sex = (''.join(kw['sex']) if isinstance(kw['sex'],list) else kw['sex'])
         if 'org_id' in kw:
-            self.org_id = ''.join(kw['org_id'])
+            self.org_id = (''.join(kw['org_id']) if isinstance(kw['org_id'],list) else kw['org_id'])
         if 'old_name' in kw:
-            self.old_name = ''.join(kw['old_name'])
+            self.old_name = (''.join(kw['old_name']) if isinstance(kw['old_name'],list) else kw['old_name'])
         if 'photo_url' in kw:
-            self.photo_url = ''.join(kw['photo_url'])
+            self.photo_url = (''.join(kw['photo_url']) if isinstance(kw['photo_url'],list) else kw['photo_url'])
         if 'emp_type' in kw:
-            self.emp_type = ''.join(kw['emp_type'])
+            self.emp_type = (''.join(kw['emp_type']) if isinstance(kw['emp_type'],list) else kw['emp_type'])
         if 'status_id' in kw:
-            self.status_id = ''.join(kw['status_id'])
+            self.status_id = (''.join(kw['status_id']) if isinstance(kw['status_id'],list) else kw['status_id'])
         if 'political_status_id' in kw:
-            self.political_status_id = ''.join(kw['political_status_id'])
+            self.political_status_id = (''.join(kw['political_status_id']) if isinstance(kw['political_status_id'],list) else kw['political_status_id'])
+        # print 'finish political_status_id'
         if 'position_id' in kw:
-            self.position_id = ''.join(kw['position_id'])
+            self.position_id = (''.join(kw['position_id']) if isinstance(kw['position_id'],list) else kw['position_id'])
         if 'nation_id' in kw:
-            self.nation_id = ''.join(kw['nation_id'])
+            self.nation_id = (''.join(kw['nation_id']) if isinstance(kw['nation_id'],list) else kw['nation_id'])
         if 'degree_id' in kw:
-            self.degree_id = ''.join(kw['degree_id'])
+            self.degree_id = (''.join(kw['degree_id']) if isinstance(kw['degree_id'],list) else kw['degree_id'])
         if 'birthdate' in kw:
-            self.birthdate = ''.join(kw['birthdate'])
+            self.birthdate = (''.join(kw['birthdate']) if isinstance(kw['birthdate'],list) else kw['birthdate'])
         if 'work_date' in kw:
-            self.work_date = ''.join(kw['work_date'])
+            self.work_date = (''.join(kw['work_date']) if isinstance(kw['work_date'],list) else kw['work_date'])
         if 'origin' in kw:
-            self.origin = ''.join(kw['origin'])
+            self.origin = (''.join(kw['origin']) if isinstance(kw['origin'],list) else kw['origin'])
         if 'phone1' in kw:
-            self.phone1 = ''.join(kw['phone1'])
+            self.phone1 = (''.join(kw['phone1']) if isinstance(kw['phone1'],list) else kw['phone1'])
         if 'phone2' in kw:
-            self.phone2 = ''.join(kw['phone2'])
+            self.phone2 = (''.join(kw['phone2']) if isinstance(kw['phone2'],list) else kw['phone2'])
         if 'address' in kw:
-            self.address = ''.join(kw['address'])
+            self.address = (''.join(kw['address']) if isinstance(kw['address'],list) else kw['address'])
         if 'email' in kw:
-            self.email = ''.join(kw['email'])
+            self.email = (''.join(kw['email']) if isinstance(kw['email'],list) else kw['email'])
         if 'techlevel_id' in kw:
-            self.techlevel_id = ''.join(kw['techlevel_id'])
+            self.techlevel_id = (''.join(kw['techlevel_id']) if isinstance(kw['techlevel_id'],list) else kw['techlevel_id'])
         if 'others' in kw:
-            self.others = ''.join(kw['others'])
+            self.others = (''.join(kw['others']) if isinstance(kw['others'],list) else kw['others'])
         if 'is_Practice' in kw:
-            self.is_Practice = ''.join(kw['is_Practice'])
+            self.is_Practice = (''.join(kw['is_Practice']) if isinstance(kw['is_Practice'],list) else kw['is_Practice'])
+        # print 'finish setOption'
 
     def __repr__(self):
         return u'<Employee {} {}>' .format(self.id, self.name)
 
     @classmethod
     def list_all(cls):
-        return Employee.query.filter_by(isUse = 1).order_by(Employee.id).all()
+        response = ResponseObject(data = [])
+        try:
+            result = Employee.query.filter_by(isUse = 1).order_by(Employee.id).all()
+            for x in result:
+                temp = {}
+                temp.update(x.__dict__)
+                del temp['_sa_instance_state']
+                response.data.append(temp)
+        except Exception as e:
+            print e
+            response.set_fail(None)
+            raise e
+        finally:
+            return response
+        
 
     @classmethod
     def getEmployeeById(cls, eid):
@@ -231,7 +242,19 @@ class Employee(db.Model):
         finally:
             return result
 
-
+    @classmethod
+    def list_all_practice(cls):
+        response = ResponseObject(data = [])
+        try:
+            result = Employee.query.with_entities(Employee.id, Employee.name, Employee.org_id, Employee.position_id, Employee.emp_type).filter_by(is_Practice = 1, isUse = 1).all() #获得属于当前节点的员工信息
+            for x in result:
+                response.data.append({'id': x[0], 'name': x[1], 'org_id': x[2], 'position_id': x[3], 'emp_type': x[4]})
+        except Exception as e:
+            print e
+            response.set_fail([])
+            raise e
+        finally:
+            return response
 
     def insert(self):
         response = ResponseObject()
@@ -244,6 +267,8 @@ class Employee(db.Model):
             response.set_fail()
             raise e
         finally:
+            Log.createLog('Insert', u'插入员工数据{id:' + self.id + ',name:' + self.name + '}'
+                ).insertLog(response.message)
             return response
 
     @classmethod
@@ -251,9 +276,9 @@ class Employee(db.Model):
         response = ResponseObject()
         try:
             for x in id_list:
-                e = Employee.query.filter_by(id = x).first()
-                if (e is not None):
-                    db.session.delete(e)
+                e = Employee.query.filter_by(id = x).update({'isUse': 0})
+                # if (e is not None):
+                #     db.session.delete(e)
             db.session.commit()
         except Exception as e:
             print e
@@ -261,6 +286,8 @@ class Employee(db.Model):
             response.set_fail()
             raise e
         finally:
+            Log.createLog('Delete', u'删除员工数据id{' + ''.join(id_list) + u"}"
+                ).insertLog(response.message)
             return response
 
     def update(self):
@@ -296,39 +323,9 @@ class Employee(db.Model):
             response.set_fail()
             raise e
         finally:
+            Log.createLog('Update', u'修改{工号:' + self.id + ',名字:'+ self.name + '}员工数据'
+                ).insertLog(response.message)
             return response
-
-    # @classmethod
-    # def getEmployeeById(cls, eid):
-    #     # print eid
-    #     response = ResponseObject(data = [])
-    #     # result = None
-    #     try:
-    #         response.data = Employee.query.filter_by(id = eid).first()
-    #     except Exception as e:
-    #         print e
-    #         db.session.rollback()
-    #         response.set_fail(None)
-    #         raise e
-    #     finally:
-    #         return response
-
-
-    # def update_employee(self):
-    #     response_code = 200
-    #     try:
-    #         Employee.query.filter_by(id = self.id).update({
-    #             'name': self.name,
-    #             'sex': self.sex,
-    #             'org_id': self.org_id});
-    #         db.session.commit()
-    #     except Exception as e:
-    #         print e
-    #         response_code = 500
-    #         db.session.rollback()
-    #         raise e
-    #     else:
-    #         return response_code
 
     @classmethod
     def inside_change(cls, id, org_id, position_id, change_date, **kw):
@@ -350,9 +347,9 @@ class Employee(db.Model):
             return response
 
     @classmethod
-    def formal_update(cls, id, change_date, report_date, is_Practice, **kw):
+    def formal_update(cls, id, change_date, report_date, **kw):
         response = ResponseObject()
-        update_dict = {'is_Practice': ''.join(is_Practice)}
+        update_dict = {'is_Practice': 0}
         if 'org_id' in kw:
             update_dict['org_id'] = ''.join(kw['org_id'])
         if 'position_id' in kw:
@@ -436,6 +433,45 @@ class Employee(db.Model):
         finally:
             return response
 
+    @classmethod
+    def create_employee_cn(cls, **row):
+        '''专门针对批量新增功能，创建一个employee对象
+        
+        因为row中的key是字段名用中文表达，所以需要进行字段名转换
+        
+        Arguments:
+            **row {dict} -- excel文件的一行数据
+        '''
+        # 直接映射表，这些字段可以直接转换
+        direct_references = {u'工号': 'id', u'姓名': 'name', u'曾用名': 'old_name',u'籍贯': 'origin', 
+            u'身份证号': 'id_num', u'联系电话': 'phone1',u'家庭住址': 'address', u'出生日期': 'birthdate', 
+            u'电子邮箱':'email',u'入职日期': 'work_date', u'备注': 'others'}
+        # Dictionary类映射表，与字典数据有关的字段
+        dictionary_references = {u'用工性质': 'emp_type', u'职名': 'position_id', 
+            u'人员状态': 'status_id',u'民族': 'nation_id', u'技能等级': 'techlevel_id', 
+            u'学历': 'degree_id',u'政治面貌': 'political_status_id'}
+        data = {}
+        for x in row:
+            if x in direct_references:
+                data[direct_references[x]] = row[x]
+            elif x in dictionary_references:
+                d = Dictionary.get_id_by_name(row[x]).data
+                if d == '':
+                    d = None
+                data[dictionary_references[x]] = d
+            elif x == u'所属部门':
+                o = Organization.get_id_by_name(row[x]).data
+                if o == '':
+                    o = None
+                data['org_id'] = o
+            elif x == u'性别':
+                data['sex'] = (1 if row[x] == u'男' else 0)
+            # elif x == u'是否实习':
+            #     data['is_Practice'] = (1 if row[x] == u'是' else 0)
+        print data
+        e = Employee(**data)
+        print e
+        return e
 
 
 

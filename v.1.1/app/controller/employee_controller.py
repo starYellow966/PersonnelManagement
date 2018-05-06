@@ -7,7 +7,7 @@ from flask_login import login_required,fresh_login_required,current_user
 from flask_uploads import UploadSet,IMAGES,configure_uploads
 import json
 import flask_excel as excel #excel操作工具包
-from extensions import photos
+from extensions import photos,db
 
 employeeBlueprint = Blueprint('employeeBlueprint', __name__,template_folder = '../templates', 
     static_folder = '../static', url_prefix = '/employee')
@@ -24,29 +24,30 @@ def index():
     return render_template('employee_manger.html')
 
 @fresh_login_required
-@employeeBlueprint.route('/scan')
+@employeeBlueprint.route('/scan/')
 def scan_index():
     return render_template('employee_query.html')
 
 @fresh_login_required
-@employeeBlueprint.route('/change')
+@employeeBlueprint.route('/change/')
 def change_index():
     return render_template('employee_change.html')
 
 @fresh_login_required
-@employeeBlueprint.route('/formal')
+@employeeBlueprint.route('/formal/')
 def formal_index():
     return render_template('employee_formal.html')
 
-@fresh_login_required
-@employeeBlueprint.route('/formal')
-def formal_update():
-    return employee.Employee.formal_update(**request.form).data
+# @fresh_login_required
+# @employeeBlueprint.route('/formal')
+# def formal_update():
+#     return employee.Employee.formal_update(**request.form).data
 
 @fresh_login_required
 @employeeBlueprint.route('/change/insert')
 def insert_index():
     return render_template('employee_insert.html')
+
 
 @fresh_login_required
 @employeeBlueprint.route('/change/batch')
@@ -54,10 +55,20 @@ def batch_index():
     return render_template('employee_batch.html')
 
 @fresh_login_required
-@employeeBlueprint.route('/change/batch/download')
-def batch_download():
-    print request.args
-    return 'hello'
+@employeeBlueprint.route('/change/remove')
+def remove_index():
+    return render_template('employee_remove.html')
+
+@fresh_login_required
+@employeeBlueprint.route('/formal/list/practice')
+def list_all_practice():
+    data = employee.Employee.list_all_practice().data
+    for x in data:
+        x['org_name'] = organization.Organization.getNameById(x['org_id'])
+        x['position'] = dictionary.Dictionary.getNameById(x['position_id']).data
+        x['emp_type_name'] = dictionary.Dictionary.getNameById(x['emp_type']).data
+    return json.dumps(data)
+
 
 @fresh_login_required
 @employeeBlueprint.route('/treeAll')
@@ -75,7 +86,7 @@ def treeAll():
 @fresh_login_required
 @employeeBlueprint.route('/removeEmployee', methods=['POST'])
 def remove():
-    return employee.Employee.remove(request.form['id'].split(',')).data
+    return employee.Employee.remove(request.form['id'].split(',')).message
     
 
 
@@ -97,6 +108,12 @@ def update():
 @employeeBlueprint.route('/change/inside', methods=['POST'])
 def inside_change():
     return employee.Employee.inside_change(**request.form).data
+
+@fresh_login_required
+@employeeBlueprint.route('/formal/update', methods = ['POST'])
+def formal_update():
+    print request.form
+    return employee.Employee.formal_update(**request.form).data
 
 @fresh_login_required
 @employeeBlueprint.route('/uploadPhoto', methods=['POST'])
@@ -127,22 +144,15 @@ def upload_photo():
 @fresh_login_required
 @employeeBlueprint.route('/scan/list_all')
 def scan_list_all():
-    employee_list = employee.Employee.list_all()
-    result = []
+    employee_list = employee.Employee.list_all().data
     for x in employee_list:
-        # print x
-        if x is not None:
-            # print x.__dict__
-            temp = {}
-            temp.update(x.__dict__)
-            del temp['_sa_instance_state']
-            temp['org_name'] = organization.Organization.getNameById(x.org_id)
-            temp['political_status'] = dictionary.Dictionary.getNameById(x.political_status_id).data
-            temp['emp_type_name'] = dictionary.Dictionary.getNameById(x.emp_type).data
-            temp['position'] = dictionary.Dictionary.getNameById(x.position_id).data
-            result.append(temp)
-    # print result
-    return json.dumps(result)
+        x['org_name'] = organization.Organization.getNameById(x['org_id'])
+        x['political_status'] = dictionary.Dictionary.getNameById(x['political_status_id']).data
+        x['emp_type_name'] = dictionary.Dictionary.getNameById(x['emp_type']).data
+        x['position'] = dictionary.Dictionary.getNameById(x['position_id']).data
+        x['degree'] = dictionary.Dictionary.getNameById(x['degree_id']).data
+        x['status'] = dictionary.Dictionary.getNameById(x['status_id']).data
+    return json.dumps(employee_list)
 
 @fresh_login_required
 @employeeBlueprint.route('/detail', methods=['GET'])
@@ -205,20 +215,42 @@ def query_employee():
                 result.append(temp)
     return json.dumps(result) 
 
-@employeeBlueprint.route('/download',methods = ['GET'])
-def employeeDownload():
-    id = request.args['id']
-    type_name = dictionary.DictionaryType.getNameById(id)
+
+@employeeBlueprint.route('/change/batch/download',methods = ['GET'])
+def batch_download():
+    array = request.args['request_str'].split(',')
     #这个sheet名很重要，必须是类名，否则上传就会报错
-    response = excel.make_response_from_array([[
-        u'工号(必填)', 
-        u'名称(必填)',
-        u'曾用名',
-        u'所属部门(必填)',
-        u'用工性质(必填)']], 
-        "xls",file_name= type_name + u"信息批量导入表",sheet_name='Dictionary')
-    # print response;
-    return response;
+    response = excel.make_response_from_array([array], 
+        "xls",file_name= u"人员信息批量导入表",sheet_name='Employee')
+    return response
+
+@employeeBlueprint.route('/change/batch/upload', methods = ['POST'])
+@fresh_login_required
+def batch_unload():
+    '''上传excel文件
+    
+    Decorators:
+        dictionaryBlueprint.route
+        fresh_login_required
+    
+    Raises:
+        e -- 所有异常
+    '''
+    message = 'success'
+    def employee_init_func(row):
+        # print type(row)
+        #当创建失败seg==None
+        return employee.Employee.create_employee_cn(**row)
+    try:
+        request.save_book_to_database(field_name='file',session=db.session,
+            tables=[employee.Employee],initializers=[employee_init_func]);
+    except Exception as e:
+        #FIXME：当sheet名不等于表名时，会报‘No suitable database adapter found!’
+        message = 'fail,请检查excel文件，其中不能修改sheet名，工号不能重复'
+        print e
+        raise e
+    finally:
+        return message
 
 
 
