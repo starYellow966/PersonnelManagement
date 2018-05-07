@@ -8,12 +8,10 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from wtforms import StringField,SubmitField,PasswordField,BooleanField
-from wtforms.validators import  Required
+from wtforms.validators import  Required, ValidationError
 from flask_wtf import FlaskForm
 from extensions import db
-# app = Flask(__name__);
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://hx:huangxin123456@120.79.147.151/gdesignV1_1?charset=utf8';
-# db = SQLAlchemy(app);
+from werkzeug.security import generate_password_hash, check_password_hash
 
 class User(UserMixin,db.Model):
 
@@ -24,20 +22,33 @@ class User(UserMixin,db.Model):
 
     name = db.Column(db.String(64), unique = True)
 
-    password = db.Column(db.String(64), nullable = False)
+    pw_hash = db.Column(db.String(100), nullable = False)
 
     def __init__(self, name, password):
         self.name = name;
-        self.password = password
+        self.set_password(password)
 
 
     def __repr__(self):
         return '<User {0}>' .format(self.name)
 
+    def set_password(self, password):
+        self.pw_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.pw_hash, password) 
+
 
 #登录表单
 class Login_Form(FlaskForm):
-    name=StringField(u'用户名',validators=[Required(message=u'用户名不能为空')])
-    pwd=PasswordField(u'密码',validators=[Required(message=u'密码不能为空')])
-    remember_me = BooleanField('Remember_me', default = False)
+    name = StringField(u'用户名',validators=[Required(message=u'用户名不能为空')])
+    pwd = PasswordField(u'密码',validators=[Required(message=u'密码不能为空')])
+    # remember_me = BooleanField('Remember_me', default = False)
     submit=SubmitField(u'登录')
+
+    def validate_name(self, field):
+        print 'validate_name'
+        name = field.data
+        user = User.query.filter_by(name = name).count()
+        if user == 0 :
+            raise ValidationError("此用户不存在")

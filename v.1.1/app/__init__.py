@@ -22,6 +22,7 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://hx:huangxin123456@120.79.147.151/gdesignV1_1?charset=utf8';
     app.config['UPLOADED_PHOTOS_DEST'] = 'E://photos'
     # app.config['UPLOADED_PHOTOS_DEST'] = os.getcwd()
+    bootstrap.init_app(app)
     db.init_app(app)
     configure_uploads(app, photos)
     login_manager.init_app(app)
@@ -30,6 +31,7 @@ def create_app():
     init_blueprint(app)
     init_loginManager()
     init_route(app)
+    # init_errorhandler(app)
 
     return app
 
@@ -92,7 +94,7 @@ def init_route(app):
         form = users.Login_Form();
         if form.validate_on_submit():
             user = users.User.query.filter_by(name = form.name.data).first();
-            if (user is not None and user.password == form.pwd.data):
+            if (user is not None and user.check_password(form.pwd.data)):
                 # remember 防止用户意外被退出由于浏览器的session意外被删掉
                 # 与@fresh_login_required 连用
                 # login_user(user, remember = form.remember_me.data);
@@ -117,13 +119,13 @@ def init_route(app):
         flash(u'你已退出登录')
         return redirect(url_for('index'))
 
-    # @app.route('/uploadPhoto', methods=['POST'])
-    # def upload_photo():
-    #     file_url = ""
-    #     if request.method == 'POST' and 'photo' in request.files:
-    #         import time
-    #         file = request.files['photo']
-    #         file_name = str(current_user.id) + "_" + str(time.time()).split('.')[0] + "." + request.files['photo'].filename.split('.')[1]
-    #         filename = photos.save(file, name = file_name)
-    #         file_url = photos.url(filename)
-    #     return file_url
+
+
+def init_errorhandler(app):
+    @app.errorhandler(404)
+    def page_not_found(e):
+        return render_template('404.html'),404
+
+    @app.errorhandler(500)
+    def interal_server_error(e):
+        return render_template('500.html'),500
