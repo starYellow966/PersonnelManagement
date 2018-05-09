@@ -22,7 +22,7 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://hx:huangxin123456@120.79.147.151/gdesignV1_1?charset=utf8';
     app.config['UPLOADED_PHOTOS_DEST'] = 'E://photos'
     # app.config['UPLOADED_PHOTOS_DEST'] = os.getcwd()
-    bootstrap.init_app(app)
+    # bootstrap.init_app(app)
     db.init_app(app)
     configure_uploads(app, photos)
     login_manager.init_app(app)
@@ -91,32 +91,35 @@ def init_route(app):
 
     @app.route('/login', methods = ['GET','POST'])
     def login():
-        form = users.Login_Form();
-        if form.validate_on_submit():
-            user = users.User.query.filter_by(name = form.name.data).first();
-            if (user is not None and user.check_password(form.pwd.data)):
-                # remember 防止用户意外被退出由于浏览器的session意外被删掉
-                # 与@fresh_login_required 连用
-                # login_user(user, remember = form.remember_me.data);
-                login_user(user)
-                flash(u'登录成功');
-                next = request.args.get('next');
-                # is_safe_url should check if the url is safe for redirects.
-                if not redirectForm.is_safe_url(next):
-                    return flask.abort(400);
-                return redirectForm.redirect(url_for('index'));
-                # return redirect(url_for('index'));
+        form = users.Login_Form()
+        try:
+            if form.validate_on_submit():
+                user = users.User.query.filter_by(name = form.name.data).first()
+                if (user is not None and user.check_password(form.pwd.data)):
+                    # print u'登录成功'
+                    login_user(user)
+                    # flash(u'登录成功')
+                    next = request.args.get('next')
+                    # is_safe_url should check if the url is safe for redirects.
+                    if not redirectForm.is_safe_url(next):
+                        return flask.abort(400)
+                    return redirectForm.redirect(url_for('index'))
+                else:
+                    flash(u'密码错误')
             else:
-                flash(u'用户或密码错误');
-                return render_template('login.html', form = form);
-        return render_template('login.html', form = form);
+                flash(u'用户不存在')
+        except Exception:
+            print u'未知错误'
+            flash(u'未知错误')
+            # raise e
+        return render_template('login.html', form = form)
 
 
     @app.route('/logout')
     @login_required
     def logout():
         logout_user() #They will be logged out, and any cookies for their session will be cleaned up.
-        flash(u'你已退出登录')
+        # flash(u'你已退出登录')
         return redirect(url_for('index'))
 
 

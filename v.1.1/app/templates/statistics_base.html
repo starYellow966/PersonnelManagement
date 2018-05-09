@@ -17,23 +17,26 @@
             {{ super() }}
         {% endblock left_nav %}
         
-        <div class="container">
-            <ul class="nav nav-tabs" id="myTab">
-                <li class="active"><a href="#" data-toggle="tab" onclick="setCharts('position_id')">职名</a></li>
-                <li><a href="#" data-toggle="tab" onclick="setCharts('org_id')">组织机构</a></li>
-                <li><a href="#" data-toggle="tab" onclick="setCharts('emp_type')">用工性质</a></li>
-                <li><a href="#" data-toggle="tab" onclick="setCharts('status_id')">人员状态</a></li>
-                <li ><a href="#" data-toggle="tab" onclick="setCharts('sex')">性别</a></li>
-                <li><a href="#" data-toggle="tab" onclick="setCharts('political_status_id')">政治面貌</a></li>
-                <li><a href="#" data-toggle="tab" onclick="setCharts('degree_id')">学位</a></li>
-                <li><a href="#" data-toggle="tab" onclick="setCharts('techlevel_id')">技能等级</a></li>
-            </ul>
-            <div class="row">
-                <div id="canvasDiv_pie3d"></div>
-                <div id="canvasDiv_column3d"></div>
-            </div>
-            
-        </div>
+        {% block container %}
+            <section>
+                <div class="row col-sm-2">
+                    <ul class="nav flex-column" id="myTab">
+                        <li class="active"><a href="#" data-toggle="tab" onclick="setCharts('position_id')">职名</a></li>
+                        <li><a href="#" data-toggle="tab" onclick="setCharts('org_id')">组织机构</a></li>
+                        <li><a href="#" data-toggle="tab" onclick="setCharts('emp_type')">用工性质</a></li>
+                        <li><a href="#" data-toggle="tab" onclick="setCharts('status_id')">人员状态</a></li>
+                        <li ><a href="#" data-toggle="tab" onclick="setCharts('sex')">性别</a></li>
+                        <li><a href="#" data-toggle="tab" onclick="setCharts('political_status_id')">政治面貌</a></li>
+                        <li><a href="#" data-toggle="tab" onclick="setCharts('degree_id')">学位</a></li>
+                        <li><a href="#" data-toggle="tab" onclick="setCharts('techlevel_id')">技能等级</a></li>
+                    </ul>
+                </div>
+                <div class="col-sm-10">
+                    <div id="canvasDiv_pie3d"></div>
+                    <div id="canvasDiv_column3d"></div>
+                </div>
+            </section>
+        {% endblock container %}
         {% block base_script %}
             {{ super() }}
             <script src="../static/js/jquery.form.js"></script>

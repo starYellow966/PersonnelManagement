@@ -16,14 +16,14 @@
             {{ super() }}
         {% endblock left_nav %}
 
-        <div class="container">
+        <section >
             <div id="table_toolbar" class="btn-group">
                     <button id="btn_removeSeg" class="btn btn-default" onclick="removeEmployees()">
                         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>批量删除
                     </button>
                 </div><!-- 表格的工具栏end -->
             <table id="table"></table>
-        </div>
+        </section>
 
         {% block base_script %}
             {{ super() }}

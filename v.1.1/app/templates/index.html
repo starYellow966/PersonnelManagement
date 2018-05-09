@@ -1,25 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-	{% extends "base.html" %}
+    {% extends "base.html" %}
     {% block head %}
         {{ super() }}
-    {% endblock head %} 
+    {% endblock head %}  
 </head>
 <body>
-    {% block body %}
-        {% block top_nav %}
-            {{ super() }}
-        {% endblock top_nav %}
-
-        {% block left_nav %}
-            {{ super() }}
-        {% endblock left_nav %}
-        
-
-        {% block base_script %}
-            {{ super() }}
-        {% endblock base_script %}
+    {% block body%}
+        {{ super() }}
     {% endblock body %}
 </body>
 </html>

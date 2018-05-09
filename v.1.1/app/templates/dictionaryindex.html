@@ -11,45 +11,47 @@
         {% block top_nav %}
             {{ super() }}
         {% endblock top_nav %}
-
+        
         {% block left_nav %}
             {{ super() }}
         {% endblock left_nav %}
         
-        <div class="container">
-            <!-- 侧方标签栏 -->
-            <div class="row col-sm-2">
-                <div class="span2">
-                    <ul id="type_tab" class="nav nav-list"></ul>
-                </div>
-            </div><!-- 侧方标签栏end -->
-
-            <!-- 表格区域 -->
-            <div class="col-sm-10">
-                <!-- 表格的工具栏 -->
-                <div id="table_toolbar" class="btn-group">
-                    <button id="btn_addSeg" class="btn btn-default" onclick="initInsertModalFunc()">
-                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>新增
-                    </button>
-                    <button id="btn_removeSeg" class="btn btn-default" onclick="removeDictionarysFunc()">
-                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>删除
-                    </button>
-                    <!-- 批处理下拉按钮 -->
-                    <div class="btn-group">
-                        <button id="btn_batch" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                            <span class="glyphicon glyphicon-import" aria-hidden="true"></span>批处理
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a href="#" id="download_btn">创建格式文件</a></li>
-                            <li><a href="#unloadModal" data-toggle="modal">批量导入数据</a></li>
-                        </ul>
+        {% block container %}
+            <section>
+                <!-- 侧方标签栏 -->
+                <div class="row col-sm-2">
+                    <div class="span2">
+                        <ul id="type_tab" class="nav nav-list"></ul>
                     </div>
-                </div><!-- 表格的工具栏end -->
+                </div><!-- 侧方标签栏end -->
 
-                <table id="table"></table>
+                <!-- 表格区域 -->
+                <div class="col-sm-10">
+                    <!-- 表格的工具栏 -->
+                    <div id="table_toolbar" class="btn-group">
+                        <button id="btn_addSeg" class="btn btn-default" onclick="initInsertModalFunc()">
+                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>新增
+                        </button>
+                        <button id="btn_removeSeg" class="btn btn-default" onclick="removeDictionarysFunc()">
+                            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>删除
+                        </button>
+                        <!-- 批处理下拉按钮 -->
+                        <div class="btn-group">
+                            <button id="btn_batch" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                <span class="glyphicon glyphicon-import" aria-hidden="true"></span>批处理
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a href="#" id="download_btn">创建格式文件</a></li>
+                                <li><a href="#unloadModal" data-toggle="modal">批量导入数据</a></li>
+                            </ul>
+                        </div>
+                    </div><!-- 表格的工具栏end -->
 
-            </div><!-- 表格区域end -->
-        </div>
+                    <table id="table"></table>
+
+                </div><!-- 表格区域end -->
+            </section>            
+        {% endblock container %}
         
         <!-- 详情模态框 -->
         <div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

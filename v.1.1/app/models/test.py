@@ -1,7 +1,16 @@
 # -*- coding: utf-8 -*-
 import sys
 sys.path.append('E:\\Programming\\PersonnelManagement\\v.1.1\\app')
-from users import User
+# from users import User
 
-user = User('test', '123')
-print user.pw_hash
+
+def test():
+    try:
+        return 'hello'
+    except Exception as e:
+        raise e
+    finally:
+        return 'finally'
+
+
+print test()

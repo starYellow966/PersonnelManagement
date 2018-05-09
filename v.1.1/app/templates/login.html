@@ -2,57 +2,54 @@
 <html lang="zh">
 <head>
     {% extends "base.html" %}
-    {% import "bootstrap/wtf.html" as wtf %}
     {% block head %}
         {{ super() }}
     {% endblock head %}  
 </head>
 <body>
     {% block body %}
-        {% block top_nav %}
+        {% block top_nav%}
             {{ super() }}
         {% endblock top_nav %}
-    
-        <div class="container">
-            <!-- <form method="POST" action="/login" class="panel panel-default" style="width: 350px;display: block;">
-                {{ form.hidden_tag() }}
-                <div class="panel-heading">
-                    <h3 class="panel-title">
-                        登录
-                    </h3>
-                </div>
-                <table class="table-setting">
-                    <tbody>
-                        <tr>
-                            <td class="setting-title">
-                                {{ form.name.label }}
-                            </td>
-                            <td>
-                                {{ form.name(size=20,class='form-control') }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="setting-title">
-                                {{ form.pwd.label }}
-                            </td>
-                            <td>
-                                {{ form.pwd(size=20,class='form-control') }}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="panel-footer">
-                    {{ form.submit(value='登录',class='btn btn-primary') }}
-                </div>
-            </form> -->
-            <form method="post" action="/login" style="width: 350px;">
-                {{ wtf.quick_form(form) }}
-                <!-- {{ form.hidden_tag() }}
-                {{ form.name.label }} {{ form.name(size=20,class='form-control') }}
-                {{ form.pwd.label }} {{ form.pwd(size=20,class='form-control') }}
-                {{ form.submit(value='登录',class='btn btn-primary') }} -->
-            </form>
-        </div>
+        <form method="POST" action="/login" class="panel panel-default" style="width: 350px;display: block;">
+            {{ form.hidden_tag() }}
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                    <p><strong>{{ message }}</strong></p>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %} 
+            <div class="panel-heading">
+                <h3 class="panel-title">
+                    登录
+                </h3>
+            </div>
+            <table class="table-setting">
+                <tbody> 
+                    <tr>
+                        <td class="setting-title">
+                            {{ form.name.label }}
+                        </td>
+                        <td>
+                            {{ form.name(size=20,class='form-control') }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="setting-title">
+                            {{ form.pwd.label }}
+                        </td>
+                        <td>
+                            {{ form.pwd(size=20,class='form-control') }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="panel-footer">
+                {{ form.submit(value='登录',class='btn btn-primary') }}
+            </div>
+        </form>
 
         {% block base_script %}
             {{ super() }}

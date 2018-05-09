@@ -47,8 +47,8 @@ class Login_Form(FlaskForm):
     submit=SubmitField(u'登录')
 
     def validate_name(self, field):
-        print 'validate_name'
+        # print 'validate_name'
         name = field.data
         user = User.query.filter_by(name = name).count()
         if user == 0 :
-            raise ValidationError("此用户不存在")
+            raise ValidationError(u"此用户不存在")
