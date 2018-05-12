@@ -11,7 +11,7 @@ import json
 from models import operate_log
 
 #new a blueprint
-logBlueprint = Blueprint('logBlueprint', __name__, template_folder = '../templates', static_folder = '../static', url_prefix = '/log')
+logBlueprint = Blueprint('logBlueprint', __name__, template_folder = '../templates', static_folder = '../static')
 
 @logBlueprint.route('/')
 @fresh_login_required

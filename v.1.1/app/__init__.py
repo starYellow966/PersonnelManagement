@@ -7,8 +7,14 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager,login_user,login_required,logout_user,current_user
 import flask_excel as excel
 from extensions import db, login_manager, bootstrap, photos
+
+from modelss import User
+from forms import Login_Form
+from config import config
 from controller import organizationBlueprint,dictionaryBlueprint,logBlueprint,employeeBlueprint,statisticsBlueprint
-from models import users,redirectForm
+from models import redirectForm
+
+
 
 # bootstrap = Bootstrap()
 # db = SQLAlchemy()
@@ -22,6 +28,23 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://hx:huangxin123456@120.79.147.151/gdesignV1_1?charset=utf8';
     app.config['UPLOADED_PHOTOS_DEST'] = 'E://photos'
     # app.config['UPLOADED_PHOTOS_DEST'] = os.getcwd()
+    # bootstrap.init_app(app)
+    db.init_app(app)
+    configure_uploads(app, photos)
+    login_manager.init_app(app)
+    excel.init_excel(app)
+
+    init_blueprint(app)
+    init_loginManager()
+    init_route(app)
+    # init_errorhandler(app)
+
+    return app
+
+def create_app(config_name):
+    app = Flask(__name__)
+    app.config.from_object(config[config_name])
+    
     # bootstrap.init_app(app)
     db.init_app(app)
     configure_uploads(app, photos)
@@ -64,11 +87,11 @@ def init_loginManager():
             user_id {unicode} -- 存储在会话中的用户ID
         
         Returns:
-            [User对象] --  User对象或者None(当user_id无效时)
+            [User] --  User对象或者None(当user_id无效时)
         '''
         cur_user = None
         try:
-            cur_user = users.User.query.get(int(user_id))
+            cur_user = User.query.get(int(user_id))
         except Exception as e:
             print e
             db.session.rollback()
@@ -78,11 +101,11 @@ def init_loginManager():
 def init_blueprint(app):
     '''注册蓝图
     '''
-    app.register_blueprint(organizationBlueprint)
-    app.register_blueprint(dictionaryBlueprint)
-    app.register_blueprint(logBlueprint)
-    app.register_blueprint(employeeBlueprint)
-    app.register_blueprint(statisticsBlueprint)
+    app.register_blueprint(organizationBlueprint, url_prefix = '/org')
+    app.register_blueprint(dictionaryBlueprint, url_prefix = '/dict')
+    app.register_blueprint(logBlueprint, url_prefix = '/log')
+    app.register_blueprint(employeeBlueprint, url_prefix = '/employee')
+    app.register_blueprint(statisticsBlueprint, url_prefix = '/statistics')
 
 def init_route(app):
     @app.route('/')
@@ -91,14 +114,12 @@ def init_route(app):
 
     @app.route('/login', methods = ['GET','POST'])
     def login():
-        form = users.Login_Form()
+        form = Login_Form()
         try:
             if form.validate_on_submit():
-                user = users.User.query.filter_by(name = form.name.data).first()
+                user = User.query.filter_by(name = form.name.data).first()
                 if (user is not None and user.check_password(form.pwd.data)):
-                    # print u'登录成功'
                     login_user(user)
-                    # flash(u'登录成功')
                     next = request.args.get('next')
                     # is_safe_url should check if the url is safe for redirects.
                     if not redirectForm.is_safe_url(next):
@@ -107,11 +128,12 @@ def init_route(app):
                 else:
                     flash(u'密码错误')
             else:
-                flash(u'用户不存在')
-        except Exception:
-            print u'未知错误'
+                #因为validate_on_submit()在页面加载完成后就会返回一个false
+                if (form.name.data != None and len(form.name.data) > 0):
+                    flash(u'用户不存在')
+        except Exception as e:
             flash(u'未知错误')
-            # raise e
+            raise e
         return render_template('login.html', form = form)
 
 

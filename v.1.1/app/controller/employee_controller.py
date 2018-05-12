@@ -10,7 +10,7 @@ import flask_excel as excel #excel操作工具包
 from extensions import photos,db
 
 employeeBlueprint = Blueprint('employeeBlueprint', __name__,template_folder = '../templates', 
-    static_folder = '../static', url_prefix = '/employee')
+    static_folder = '../static')
 
 
 '''员工管理首页(url:'/org')

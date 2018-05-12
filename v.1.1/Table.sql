@@ -45,7 +45,7 @@ on update cascade
 create table if not exists User(
 id int primary key AUTO_INCREMENT,
 name varchar(64) unique,
-password varchar(64) not null
+password varchar(128) not null
 )CHARSET=utf8;
 
 create table if not exists Log(

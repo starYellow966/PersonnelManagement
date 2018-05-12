@@ -7,152 +7,123 @@ from flask import Flask,Blueprint,render_template,request,redirect,url_for
 import flask_excel as excel #excel操作工具包
 from flask_login import login_required,fresh_login_required,current_user
 import json
-
-from models import dictionary,operate_log,response_object
+from modelss import DictionaryType, Dictionary
+from models import operate_log,response_object
 from extensions import db
 
 #new a blueprint
-dictionaryBlueprint = Blueprint('dictionaryBlueprint', __name__, template_folder = '../templates', static_folder = '../static', url_prefix = '/dict');
+dictionaryBlueprint = Blueprint('dictionaryBlueprint', __name__, template_folder = '../templates', static_folder = '../static');
 
 
 @dictionaryBlueprint.route('/')
 @fresh_login_required
 def index():
-    '''数据字典管理首页(url:'/dict')
-      
-    Decorators:
-        dictionaryBlueprint.route
-        fresh_login_required
-    
-    Returns:
-        [html] -- 首页
-    '''
-    return render_template('dictionaryindex.html');
+    return render_template('dictionary_index.html');
 
 @fresh_login_required
-@dictionaryBlueprint.route('/listAll', methods = ['GET'])
+@dictionaryBlueprint.route('/types', methods = ['GET'])
 def list_all_type():
     '''返回dictionaryindex.html中侧方菜单的数据
     
     首先，获得所有字典类型数据
     然后，转成json传给前端，用于侧方菜单的数据
-    
-    Decorators:
-        dictionaryBlueprint.route
-        fresh_login_required
-    
+
     Returns:
         [json] -- 所有字典类型数据
     '''
-    data = dictionary.DictionaryType.listAll();#listAll()失败时返回None
-    if (data.data == None):
-        data.data = []
-    return json.dumps(data.data),200;
+    try:
+        data = []
+        type_list = DictionaryType.query.filter_by(isUse = 1).order_by(DictionaryType.id).all()
+        for x in type_list:
+            data.append(x.to_json())
+        return json.dumps(data)
+    except Exception as e:
+        # abort(500)
+        raise e
+    
 
 
-@dictionaryBlueprint.route('/listDictByTypeId', methods = ['GET'])
+@dictionaryBlueprint.route('/dictionarys/<int:type_id>', methods = ['GET'])
 @fresh_login_required
-def list_dictionarys_by_type_id():
+def list_dictionarys_by_type_id(type_id):
     '''根据字典类型id返回同类型的所有字典数据
-    
-    用于页面表格数据
-    
-    Decorators:
-        dictionaryBlueprint.route
-        fresh_login_required
-    
+       用于页面表格数据
+
     Returns:
         [json] -- 字段有{id, name}
     '''
-    type_id = request.args['id']
-    data = dictionary.Dictionary.listDictByTypeId(type_id)
-    if (data.data == None):
-        data.data = []
-    return json.dumps(data.data),200;
+    try:
+        response = []
+        result = Dictionary.query.filter_by(isUse = 1, type_id = type_id).order_by(Dictionary.id).all()
+        for x in result:
+            response.append(x.to_json())
+        return json.dumps(response)
+    except Exception as e:
+        raise e
 
-@dictionaryBlueprint.route('/listDictByTypeName', methods = ['GET'])
+@dictionaryBlueprint.route('/insert', methods = ['POST'])
 @fresh_login_required
-def list_dictionarys_by_type_name():
-    '''根据字典类型名字返回同类型的所有字典数据
-    
-    Decorators:
-        dictionaryBlueprint.route
-        fresh_login_required
-    '''
-    type_name = request.args['type']
-    data = dictionary.Dictionary.listDictByTypeName(type_name)
-    if (data.data == None):
-        data.data = []
-    return json.dumps(data.data),200
-
-@dictionaryBlueprint.route('/remove', methods = ['GET'])
-@fresh_login_required
-def remove():
-    '''删除字典数据
-    
-    Decorators:
-        dictionaryBlueprint.route
-        fresh_login_required
-    
-    Returns:
-        [str] -- 响应码 success，fail
-    '''
-    return dictionary.Dictionary.remove(request.args['target_string']).data
+def insert():
+    try:
+        if(Dictionary.query.filter_by(id = request.form['id']).first() == None):
+            dictionary = Dictionary(**request.form)
+            db.session.add(dictionary)
+            db.session.commit()
+            return u'success'
+        else:
+            return 'id_error'
+    except Exception as e:
+        db.session.rollback()
+        raise e
 
 @dictionaryBlueprint.route('/update', methods = ['POST'])
 @fresh_login_required
 def update():
-    '''更新字典数据
-    
-    [description]
-    
-    Decorators:
-        dictionaryBlueprint.route
-        fresh_login_required
-    
-    Returns:
-        [str] -- 响应码 success，fail
-    '''
-    return dictionary.Dictionary(request.form['id'], request.form['name'], None).update().data
+    try:
+        dictionary = Dictionary.query.filter_by(id = request.form['id']).first()
+        if(dictionary != None):
+            dictionary.name = request.form['name']
+            db.session.add(dictionary)
+            db.session.commit()
+            return u'success'
+        else:
+            return 'fail'
+    except Exception as e:
+        db.session.rollback()
+        raise e
 
-
-@dictionaryBlueprint.route('/insert', methods = ['GET'])
+@dictionaryBlueprint.route('/remove', methods = ['POST'])
 @fresh_login_required
-def insert():
-    '''插入字典数据
+def remove():
+    try:
+        target_list = request.form['target_string'].split(',')
+        for x in target_list:
+            if(x is not None and len(x) > 0):
+                d = Dictionary.query.filter_by(id = x).first()
+                db.session.delete(d)
+                db.session.commit()
+        return 'success'
+    except Exception as e:
+        raise e
 
-    Decorators:
-        dictionaryBlueprint.route
-        fresh_login_required
-    
-    Returns:
-        [str] -- 响应码 success，fail, id_error
-    '''
-    return dictionary.Dictionary(request.args['id'], request.args['name'], request.args['type_id']).insert().data
 
-
-@dictionaryBlueprint.route('/download',methods = ['GET'])
-def dictionary_download():
+@dictionaryBlueprint.route('/download/<int:type_id>',methods = ['GET'])
+def dictionary_download(type_id):
     '''创建一个excel文件，是批量导入时指定文件
-    
     内含填写数据的格式，需要按照文件中的字段填写数据
     FIXME: 提示用户需要关闭迅雷插件
-    
-    Decorators:
-        dictionaryBlueprint.route
     
     Returns:
         [excel文件] -- 模板
     '''
-    id = request.args['id'];
-    type_name = dictionary.DictionaryType.get_name_by_id(id).data;
+    type_name = DictionaryType.query.filter_by(id = type_id).first().name
     #这个sheet名很重要，必须是类名，否则上传就会报错
-    response = excel.make_response_from_array([[u'编号', u'名称']], 
-        "xls",file_name= type_name + u"信息批量导入表",sheet_name='Dictionary');
+    response = excel.make_response_from_array([[u'编号', u'名称', u'字典类型名']], 
+        "xls",file_name= u"数据字典批量导入表",sheet_name='Dictionary');
     # print response;
     return response
 
-@dictionaryBlueprint.route('/unload', methods = ['POST'])
+@dictionaryBlueprint.route('/upload', methods = ['POST'])
 @fresh_login_required
 def dictionary_unload():
     '''上传excel文件
@@ -170,18 +141,37 @@ def dictionary_unload():
         e -- 所有异常
     '''
     def dictionary_init_func(row):
-        seg = dictionary.Dictionary(row[u'编号'], row[u'名称'], int(request.form['unload_type_id']));
-        #当创建失败seg==None
-        # print seg;
-        return seg
+        dtype = DictionaryType.query.filter_by(name = row[u'字典类型名']).first()
+        if(dtype is not None):
+            d = Dictionary(row[u'编号'], row[u'名称'], dtype.id)
+            return (d if Dictionary.query.filter_by(id = d.id).first() is None else None)
+        else:
+            return None
     try:
         request.save_book_to_database(field_name='file',session=db.session,
-            tables=[dictionary.Dictionary],initializers=[dictionary_init_func]);
-        return redirect(url_for('dictionaryBlueprint.index'));
+            tables=[Dictionary],initializers=[dictionary_init_func]);
+        return u'success'
     except Exception as e:
         #FIXME：当sheet名不等于表名时，会报‘No suitable database adapter found!’
         raise e
-        return "文件上传失败，请检查excel文件，其中不能修改sheet名，编号不能重复";
+        return u'fail';
+
+
+@dictionaryBlueprint.route('/listDictByTypeName', methods = ['GET'])
+@fresh_login_required
+def list_dictionarys_by_type_name():
+    '''根据字典类型名字返回同类型的所有字典数据
+    
+    Decorators:
+        dictionaryBlueprint.route
+        fresh_login_required
+    '''
+    type_name = request.args['type']
+    data = dictionary.Dictionary.listDictByTypeName(type_name)
+    if (data.data == None):
+        data.data = []
+    return json.dumps(data.data),200
+
 
 # '''返回一个装有所有Dictionary表数据的excel文件
 

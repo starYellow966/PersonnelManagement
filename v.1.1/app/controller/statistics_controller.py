@@ -6,7 +6,7 @@ from flask_login import login_required,fresh_login_required,current_user
 import json
 
 statisticsBlueprint = Blueprint('statisticsBlueprint', __name__,template_folder = '../templates', 
-    static_folder = '../static', url_prefix = '/statistics')
+    static_folder = '../static')
 
 
 '''员工管理首页(url:'/org')

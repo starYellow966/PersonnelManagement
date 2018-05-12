@@ -15,7 +15,7 @@ from models import organization
 
 #new a blueprint
 organizationBlueprint = Blueprint('organizationBlueprint', __name__, template_folder = '../templates', 
-    static_folder = '../static', url_prefix = '/org');
+    static_folder = '../static');
 
 '''组织管理首页(url:'/org')
 

@@ -13,5 +13,5 @@ from flask_script import Manager,Server
 # manager.add_command("runserver", Server())
 
 if __name__ == "__main__":
-    create_app().run(debug = True)
+    create_app('default').run(debug = True)
     # manager.run()
