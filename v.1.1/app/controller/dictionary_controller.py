@@ -8,7 +8,6 @@ import flask_excel as excel #excel操作工具包
 from flask_login import login_required,fresh_login_required,current_user
 import json
 from modelss import DictionaryType, Dictionary
-from models import operate_log,response_object
 from extensions import db
 
 #new a blueprint
@@ -100,7 +99,8 @@ def remove():
         for x in target_list:
             if(x is not None and len(x) > 0):
                 d = Dictionary.query.filter_by(id = x).first()
-                db.session.delete(d)
+                d.isUse = 0
+                db.session.add(d)
                 db.session.commit()
         return 'success'
     except Exception as e:
@@ -108,7 +108,7 @@ def remove():
 
 
 @dictionaryBlueprint.route('/download/<int:type_id>',methods = ['GET'])
-def dictionary_download(type_id):
+def download(type_id):
     '''创建一个excel文件，是批量导入时指定文件
     内含填写数据的格式，需要按照文件中的字段填写数据
     FIXME: 提示用户需要关闭迅雷插件
@@ -125,7 +125,7 @@ def dictionary_download(type_id):
 
 @dictionaryBlueprint.route('/upload', methods = ['POST'])
 @fresh_login_required
-def dictionary_unload():
+def upload():
     '''上传excel文件
     
     TODO(hx): 自动跳过重复信息
@@ -166,11 +166,11 @@ def list_dictionarys_by_type_name():
         dictionaryBlueprint.route
         fresh_login_required
     '''
-    type_name = request.args['type']
-    data = dictionary.Dictionary.listDictByTypeName(type_name)
-    if (data.data == None):
-        data.data = []
-    return json.dumps(data.data),200
+    type_id = DictionaryType.query.filter_by(isUse = 1, name = request.args['type']).first().id
+    if type_id is not None:
+        response = Dictionary.query.filter_by(idUse = 1, type_id = type_id).first()
+        return json.dumps(response.to_json())
+    return '500'
 
 
 # '''返回一个装有所有Dictionary表数据的excel文件

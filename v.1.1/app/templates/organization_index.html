@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% extends "base.html" %}
+    {% block head %}
+        {{ super() }}
+    {% endblock head%}
+</head>
+<body>
+    {% block body %}
+        {% block top_nav %}
+            {{ super() }}
+        {% endblock top_nav %}
+
+        {% block left_nav %}
+            {{ super() }}
+        {% endblock left_nav %}
+
+        <section>
+            <nav class="breadcrumb" style="margin-bottom: 0px;">
+                <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
+                首页 
+                <span class="c-gray en">&gt;</span> 
+                数据标准管理
+                <span class="c-gray en">&gt;</span> 
+                组织机构管理
+                <a class="btn btn-success radius r" style="vertical-align: right" href="javascript:location.reload();" title="刷新">
+                    <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+                </a>
+            </nav>
+            <!-- 侧方标签栏 -->
+            <div class="row col-sm-4">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">组织机构</h3>
+                    </div>
+                    <div id="tree"></div>
+                </div>
+            </div><!-- 侧方标签栏end -->
+            <!-- 表格区域 -->
+            <div class="col-sm-8">
+                <!-- 表格的工具栏 -->
+                <div id="table_toolbar" class="btn-group">
+                    <button id="btn_addSeg" class="btn btn-default" onclick="initInsertModalFunc()">
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>新增
+                    </button>
+                    <button id="btn_removeSeg" class="btn btn-default" onclick="multi_removeFunc()">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>删除
+                    </button>
+                    <!-- 批处理下拉按钮 -->
+                    <div class="btn-group">
+                        <button id="btn_batch" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                            <span class="glyphicon glyphicon-import" aria-hidden="true"></span>批处理
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a href="/org/download" id="download_btn">下载格式文件</a></li>
+                            <li><a href="#uploadModal" data-toggle="modal">批量上传数据</a></li>
+                        </ul>
+                    </div>
+                </div><!-- 表格的工具栏end -->
+
+                <table id="table"></table>
+
+            </div><!-- 表格区域end -->
+        </section>
+
+        <!-- 详情模态框 -->
+        <div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"
+                        aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="detailModal_title"></h4>
+                    </div> <!-- modal.header -->
+                    <form class="modal-body" id="detailModal_form">
+                        <label>编号:</label>
+                        <input type="text" name="detailModal_id" id="detailModal_id" class="form-control" required>
+                        <span id="detailModal_id_tip" style="color: red"></span>
+                        <br>
+                        <label>名称:</label>
+                        <input type="text" name="detailModal_name" id="detailModal_name" class="form-control" required>
+                        <span id="detailModal_name_tip" style="color: red"></span>
+                        <br>
+                        <label>虚拟节点:</label>
+                        <select class="selectpicker form-control" id="detailModal_status">
+                            <option value="0">是</option>
+                            <option value="1">否</option>
+                        </select>
+                        <br>
+                        <label>所属上级:</label>
+                        <select class="selectpicker form-control" id="detailModal_parent" ></select>
+                        <span id="detailModal_parent_tip" style="color: red"></span>
+                        <br>
+                        <label>序号:</label>
+                        <input type="number" id="detailModal_num" class="form-control" required>
+                        <span id="detailModal_num_tip" style="color: red"></span>
+                        <div class="modal-footer">
+                            <input type="button" class="btn btn-default" data-dismiss="modal" value="取消">
+                            <input type="submit" class="btn btn-primary" name="detailModal_submit" id="detailModal_submit" value="确定">
+                        </div><!-- modal-footer -->
+                    </form>
+                </div><!-- modal-content end -->
+            </div><!-- modal-dialog end -->
+        </div><!-- 详情模态框end -->
+    
+        <!--上传文件模态框-->
+        <div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"
+                        aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" >批量导入数据</h4>
+                    </div> <!-- modal.header -->
+                    <form id="uploadModal_form" class="modal-body">
+                        <h2>上传批量导入模板，仅支持Excel文件。</h2>
+                        <p>提示：请关闭迅雷插件</p>
+                        <input type='file' class="btn btn-default" name='file'>
+                        <div class="modal-footer">
+                            <input type="button" class="btn btn-default" data-dismiss="modal" value="取消">
+                            <input type="submit" class="btn btn-primary" id="uploadModal_submit" name="submit" value="导入">
+                        </div>
+                    </form><!-- modal-body -->
+                </div><!-- /.modal.content -->
+            </div><!-- /.modal -->
+        </div><!--上传文件模态框end-->
+    
+        {% block base_script %}
+            {{ super() }}
+            <script src="../static/js/bootstrap-treeview.js"></script>
+            <script src="../static/js/bootstrap-table.js"></script>
+            <script src="../static/js/bootstrap-select.js"></script>
+            <script src="../static/js/jquery.form.js"></script>
+            <script src="../static/js/bootstrap-table-export.js"></script>
+            <script src="../static/js/tableExport.js"></script><!-- bootstrap table本身是没有实现表格的导出的，需要扩展插件tableExport，扩展的tableExport在导出csv，txt，sql，json等格式的时候能很好的支持中文 -->
+        {% endblock base_script %}
+
+        <script>
+            $(document).ready(function(){
+                treeAllRequest();
+                initTable();
+
+                $('#detailModal_form').submit(function(event) {
+                    event.preventDefault();
+                    if($('#detailModal_title').text() == '修改组织机构信息')
+                        updateRequest();
+                    else if($('#detailModal_title').text() == '新增组织机构信息')
+                        insertRequest();
+                });
+
+                $('#uploadModal_form').submit(function(event){
+                    event.preventDefault();
+                    var formData = new FormData(this);
+                    $.ajax({
+                        type: 'post',
+                        url: '/org/upload',
+                        data: formData,
+                        mimeType: 'multipart/form-data',
+                        contentType: false,
+                        cache: false,
+                        processData: false,
+                        success: function(message){
+                            if(message == 'success'){
+                                alert('上传成功，数据成功导入');
+                                $('#uploadModal').modal("hide");
+                                location.reload();
+                            }
+                            else
+                                alert('上传失败,请检查数据填写是否正确，注意sheet名不可更改');
+                        },
+                        error: function(){
+                            alert('上传失败');
+                        }
+                    });
+                });
+
+            });
+
+            /**
+             * 初始化加载treeview数据
+             * @param  {json} dataObj 数据
+             * @return {[type]}         [description]
+             */
+            function initTreeView(dataObj){
+                if(dataObj != null)
+                    $('#tree').treeview({
+                        levels: 9, //设置默认情况下树会展开的深层级别数量
+                        data: dataObj,
+                        expandIcon: "glyphicon glyphicon-chevron-right",
+                        collapseIcon: "glyphicon glyphicon-chevron-down",
+                        showTags: true,
+                        onNodeSelected: function(event, node){
+                            if('nodes' in node){
+                                reloadTableData(node.text, node.nodes);
+                            }
+                            else
+                                $('#table').bootstrapTable('load',[]);
+
+                        }
+                    });
+                else
+                    alert('没有数据');
+            }
+
+            /**
+             * 初始化Table
+             * @return {[type]} [description]
+             */
+            function initTable(){
+                $('#table').bootstrapTable({
+                    toolbar:'#table_toolbar',
+                    search: true, //是否显示 搜索框
+                    showColumns: true, //是否显示 选择显示列按钮
+                    pagination: true, //设置分页
+                    pageList: [25,50,100],
+                    pageSize: 25,
+                    idField: 'id', //重要,可设置checkbox的值为指定字段
+                    selectItemName: 'id', //设置checkbox name属性，可用于遍历获取选中值
+                    clickToSelect: true, //将在点击行时，自动选择checkbox
+                    striped: true, //是否显示 表格条纹
+                    showExport: true, //是否显示导出按钮
+                    exportDataType: 'basic',//FIXME:导出文件方式  支持: 'basic', 'all', 'selected'. basic：本页数据，all，获取服务器所有数据，selected,本页选择行数据
+                    Icon: 'glyphicon-export', //导出的图标设置
+                    exportOptions:{ //导出文件格式设置
+                        ignoreColumn: [0,5],
+                        fileName: '客运段信息表'+new Date().getFullYear() + (new Date().getMonth() + 1) + new Date().getDate()
+                    },
+                    columns: [{
+                        checkbox: true,
+                    }, {
+                        field: 'id',
+                        title: '编号',
+                        sortable: true
+                    }, {
+                        field: 'name',
+                        title: '名称',
+                        sortable: true
+                    }, {
+                        field: 'parent_name',
+                        title: '所属上级',
+                        sortable: true
+                    }, {
+                        field: 'num',
+                        title: '序号',
+                        sortable: true,
+                    }, {
+                        field: 'operation',
+                        title: '操作',
+                        align: 'center',
+                        valign: 'middle',
+                        formatter: function(value, row, index){
+                            return "<a href='#' data-toggle='modal' onclick='queryDetailRequest(\""+row.id+"\")'>修改</a> " + 
+                            " <a href='#' onclick='checkDelete(\""+row.id+"\",\"" +row.name +"\")' >删除</a>"
+                        }
+                    }],
+                });
+            }
+
+            /**
+             * 重新加载table的数据(不发送请求)
+             * 用于将选中的树节点的子节点数据加载到table中显示
+             * @param  {Array} data 待加载的数据
+             * @param  {string} parent_name 当前选中节点的名字
+             * @return {[type]}      [description]
+             */
+            function reloadTableData(parent_name, data){
+                // console.log(data);
+                rows = [];
+                for (var i = 0; i < data.length; i++) {
+                    rows.push({
+                        id: data[i].id,
+                        name: data[i].text,
+                        parent_name: parent_name,
+                        num: ''
+                    });
+                }
+                $('#table').bootstrapTable('load', rows);
+            }
+
+
+            /**
+             * 初始化新增详情模态框
+             * @return {[type]} [description]
+             */
+            function initInsertModalFunc(){
+                if(typeof($('#tree').treeview('getSelected')[0]) != 'undefined')
+                    initModalSelectFunc($('#tree').treeview('getSelected')[0].id);
+                else
+                    initModalSelectFunc(undefined);
+                $('#detailModal_id').val('');
+                $('#detailModal_name').val('');
+                $('#detailModal_num').val('');
+                $("#detailModal_title").text("新增组织机构信息");
+                $("#detailModal").modal("show");
+            }
+
+            function initEditModalFunc(data,id){
+                if(data == null)
+                {
+                    alert('查无此组织信息');
+                    return;
+                }
+                initModalSelectFunc(data['parent_id']);
+                $('#detailModal_id').val(id);
+                $('#detailModal_id').attr('readonly', true);
+                $('#detailModal_name').val(data['name']);
+                $('#detailModal_num').val(data['num']);
+                $('#detailModal_status').selectpicker('val',data['status']);
+                $("#detailModal_title").text("修改组织机构信息");
+                $("#detailModal").modal("show");
+            }
+
+            /**
+             * 初始化模态框中所属路局下拉框的数据
+             * 
+             * 第一步，发送获得所有路局信息的请求
+             * 第二步，select中加载数据
+             * 
+             * @return 模态框中所属路局下拉框
+             */
+            function initModalSelectFunc(selected_parent_id){
+                // console.log(selected_parent_id);
+                listAllRequest(selected_parent_id);
+            }
+
+            /**
+             * 删除多个项的响应函数
+             * 删除table中勾选的项,并将list转换为string
+             * @return {[type]} [description]
+             */
+            function multi_removeFunc(){
+                var id_list = $('#table').bootstrapTable('getSelections');
+                var id_string = "";
+                var tip_string = "确认删除以下组织信息：\n";
+                if(id_list != null){
+                    for (i in id_list) {
+                        tip_string += "编号:" + id_list[i].id + " , 名字:" + id_list[i].name + "\n";
+                        id_string += id_list[i].id;
+                        if(i < id_list.length - 1)
+                            id_string += ','
+                    }
+                    if(confirm(tip_string))
+                        removeRequest(id_string);
+                }
+            }
+
+            function checkDelete(id, name){
+                if(confirm("确认删除以下组织信息：\n编号：" + id + " , 名字:" + name))
+                    removeRequest(id);
+            }
+
+        </script>
+
+        <!-- 请求 -->
+        <script type="text/javascript">
+            function treeAllRequest(){
+                $.ajax({
+                    type: 'get',
+                    url: '/org/treeall',
+                    success: function(data){
+                        var text = "";
+                        // 转换为json对象
+                        var dataObj=eval("("+data+")");
+                        if(dataObj != null)
+                            initTreeView(dataObj);
+                    },
+                    error: function(){
+                        alert('树状结构的组织信息加载失败');
+                    }
+                });
+            }
+            
+            function queryDetailRequest(id){
+                $.ajax({
+                    type: 'get',
+                    url: '/org/' + id,
+                    async: false,
+                    success: function(data){
+                        if(data != '500'){
+                            data = eval("("+data+")");
+                            // console.log(data);
+                            initEditModalFunc(data, id);
+                        }else{
+                            alert('error');
+                        }
+                    },
+                    error: function(){
+                        alert('查询组织详细信息出现未知错误');
+                    }
+                });
+            }
+
+            function listAllRequest(selected_parent_id){
+                $.ajax({
+                    type: "get",
+                    url: "/org/listall",
+                    data: {type: 2},
+                    success: function(data,status){
+                        $('#detailModal_parent').html("");
+                        var text ="";
+                        // 转换为json对象
+                        var dataObj=eval("("+data+")");
+                        for(var i in dataObj){
+                            if(typeof(selected_parent_id) != "undefined" && selected_parent_id != null && selected_parent_id == dataObj[i].id)
+                                text += '<option value="' + dataObj[i].id + '"selected>' + dataObj[i].name + '</option>';
+                            else
+                                text += '<option value="' + dataObj[i].id + '">' + dataObj[i].name + '</option>';
+                            // text += '<option >' + dataObj[i].parent_name + '</option>';
+                        }
+                        $("#detailModal_parent").html(text);
+                        $("#detailModal_parent").selectpicker('refresh');
+                    }
+                });
+            }
+            /**
+             * 发送插入请求
+             * 第一步，获取值
+             * 第二步，非空判断
+             * 第三步，发送请求，根据请求值可以进行查重
+             * @return {[type]} [description]
+             */
+            var insertRequest = function(){
+                $.ajax({
+                    type: 'POST',
+                    url: '/org/insert',
+                    data:{
+                        id: $("#detailModal_id").val(),
+                        name: $("#detailModal_name").val(),
+                        parent_id: $("#detailModal_parent").val(),
+                        status: $('#detailModal_status').val(),
+                        num : $('#detailModal_num').val()
+                    },
+                    beforeSend: function(){
+                        $('#detailModal_id_tip').text('');
+                        $('#detailModal_name_tip').text('');
+                        return confirm('确认新增组织信息');
+                    },
+                    success:function(message){
+                        if(message == 'success'){
+                            alert('新增组织机构信息 ： 成功');
+                            location.reload();
+                        }
+                        else if (message == 'id_error')
+                            $('#detailModal_id_tip').text('编号已存在');
+                        else if(message == 'name_error')
+                            $('#detailModal_name_tip').text('名称已存在');
+                        else
+                            alert('新增组织机构信息： 失败');
+                    },
+                    error: function(){
+                        alert('新增组织机构信息：失败，服务器端出错');
+                    }
+                });
+
+            }
+
+            var updateRequest = function(){
+                $.ajax({
+                    type: 'POST',
+                    url: '/org/update',
+                    data:{
+                        id: $("#detailModal_id").val(),
+                        name: $("#detailModal_name").val(),
+                        parent_id: $("#detailModal_parent").val(),
+                        status: $('#detailModal_status').val(),
+                        num : $('#detailModal_num').val()
+                    },
+                    beforeSend: function(){
+                        $('#detailModal_id_tip').text('');
+                        $('#detailModal_name_tip').text('');
+                        return confirm('确认修改组织信息');
+                    },
+                    success:function(message){
+                        if(message == 'success'){
+                            alert('修改组织机构信息 ： 成功');
+                            location.reload();
+                        }
+                        else
+                            alert('修改组织机构信息： 失败');
+                    },
+                    error: function(){
+                        alert('修改组织机构信息：失败，服务器端出错');
+                    }
+                });
+            }
+
+            /**
+             * 发送删除请求
+             * @param  {string} id_string 待删除节点的id组成的字符串，格式如1,2,3
+             * @return {[type]}           [description]
+             */
+            var removeRequest = function(id_string){
+                console.log(id_string);
+                $.ajax({
+                    type: 'POST',
+                    url: '/org/remove',
+                    data: {
+                        id: id_string
+                    },
+                    success: function(data){
+                        if(data == 'success'){
+                            alert('删除组织机构信息 ： 成功');
+                            location.reload();
+                        }
+                        else
+                            alert('删除组织机构信息： 失败');
+                    },
+                    error: function(argument) {
+                        alert('删除组织机构信息：失败，服务器端出错');
+                    }
+                });
+            }
+        </script>
+    {% endblock body %}
+</body>
+</html>

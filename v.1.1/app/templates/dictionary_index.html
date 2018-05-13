@@ -28,21 +28,21 @@
                     <a class="btn btn-success radius r" style="vertical-align: right" href="javascript:location.reload();" title="刷新">
                         <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
                     </a>
-                    </nav>
+                </nav>
                 <!-- 侧方标签栏 -->
-                <div class="row col-sm-2">
+                <div class="row col-sm-3">
                     <div class="panel panel-primary">
                         <div class="panel-heading">
                             <h3 class="panel-title">数据字典类型</h3>
                         </div>
-                        <div class="panel-body">
+                        <div>
                             <ul id="type_tab" class="nav nav-list"></ul>
                         </div>
                     </div>
                 </div><!-- 侧方标签栏end -->
 
                 <!-- 表格区域 -->
-                <div class="col-sm-10">
+                <div class="col-sm-9">
                     <!-- 表格的工具栏 -->
                     <div id="table_toolbar" class="btn-group">
                         <button id="btn_addSeg" class="btn btn-default" onclick="initInsertModalFunc()">
@@ -172,7 +172,7 @@
                         valign: 'middle',
                         formatter: function(value, row, index){
                             return "<a href='#' data-toggle='modal' onclick='initEditModalFunc(\""+row.id+"\",\""+row.name+"\")'>修改</a> " + 
-                            " <a href='#' onclick='removeRequest(\""+row.id+"\")' >删除</a>"
+                            " <a href='#' onclick='checkDelete(\""+row.id+"\",\""+ row.name +"\")' >删除</a>"
                         }
                     }],
                     onLoadError: function(status){
@@ -302,6 +302,11 @@
                 
                 if(confirm(tip))
                     removeRequest(target);
+            }
+
+            function checkDelete(id, name) {
+                if(confirm("确认删除以下字典信息：\n编号：" + id + " , 名字:" + name))
+                    removeRequest(id);
             }
         </script>
 
