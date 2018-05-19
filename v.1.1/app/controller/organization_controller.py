@@ -94,6 +94,7 @@ def query(id):
         else:
             return '500'
     except Exception as e:
+        db.session.rollback()
         raise e
 
 @fresh_login_required
@@ -114,6 +115,7 @@ def update():
     except Exception as e:
         db.session.rollback()
         raise e
+
 @fresh_login_required
 @organizationBlueprint.route('/remove', methods=['POST'])
 def remove():
@@ -176,6 +178,7 @@ def upload():
         return u'success'
     except Exception as e:
         #FIXME：当sheet名不等于表名时，会报‘No suitable database adapter found!’
+        db.session.rollback()
         raise e
         return u'fail';
 

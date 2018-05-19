@@ -92,6 +92,7 @@ def list_all_practice():
             response.append(temp)
         return json.dumps(response)
     except Exception as e:
+        db.session.rollback()
         raise e
 
 
@@ -290,6 +291,7 @@ def scan_list_all():
             response.append(temp)
         return json.dumps(response)
     except Exception as e:
+        db.session.rollback()
         raise e
 
 @fresh_login_required
@@ -299,7 +301,7 @@ def show_detail():
         temp = Employee.query.filter_by(id = request.args['id']).first()
         if temp is not None:
             temp = temp.to_json()
-            temp['sex'] = u'男' if temp['sex'] == 1 else u'女'
+            temp['sex'] = u'男' if temp['sex'] == 1 else (u'女' if temp['sex'] == 0 else None)
 
             variable = Organization.query.filter_by(id = temp['org_id']).first()
             temp['org_name'] = (variable.name if variable is not None else None)
@@ -329,6 +331,7 @@ def show_detail():
         else:
             abort(404)
     except Exception as e:
+        db.session.rollback()
         raise e
 
 @employeeBlueprint.route('/query', methods = ['POST'])
@@ -349,6 +352,7 @@ def query_employee():
                 response.append(temp)
         return json.dumps(response)
     except Exception as e:
+        db.session.rollback()
         raise e
 
 
@@ -410,7 +414,7 @@ def batch_unload():
     except Exception as e:
         #FIXME：当sheet名不等于表名时，会报‘No suitable database adapter found!’
         message = 'fail,请检查excel文件，其中不能修改sheet名，工号不能重复'
-        print e
+        db.session.rollback()
         raise e
     finally:
         return message

@@ -37,6 +37,7 @@ def list_all_type():
             data.append(x.to_json())
         return json.dumps(data)
     except Exception as e:
+        db.session.rollback()
         # abort(500)
         raise e
     
@@ -58,6 +59,7 @@ def list_dictionarys_by_type_id(type_id):
             response.append(x.to_json())
         return json.dumps(response)
     except Exception as e:
+        db.session.rollback()
         raise e
 
 @dictionaryBlueprint.route('/insert', methods = ['POST'])
@@ -104,6 +106,7 @@ def remove():
                 db.session.commit()
         return 'success'
     except Exception as e:
+        db.session.rollback()
         raise e
 
 
@@ -116,12 +119,17 @@ def download(type_id):
     Returns:
         [excel文件] -- 模板
     '''
-    type_name = DictionaryType.query.filter_by(id = type_id).first().name
-    #这个sheet名很重要，必须是类名，否则上传就会报错
-    response = excel.make_response_from_array([[u'编号', u'名称', u'字典类型名']], 
-        "xls",file_name= u"数据字典批量导入表",sheet_name='Dictionary');
-    # print response;
-    return response
+    try:
+        type_name = DictionaryType.query.filter_by(id = type_id).first().name
+        #这个sheet名很重要，必须是类名，否则上传就会报错
+        response = excel.make_response_from_array([[u'编号', u'名称', u'字典类型名']], 
+            "xls",file_name= u"数据字典批量导入表",sheet_name='Dictionary');
+        # print response;
+        return response
+    except Exception as e:
+        db.session.rollback()
+        raise e
+    
 
 @dictionaryBlueprint.route('/upload', methods = ['POST'])
 @fresh_login_required
@@ -153,6 +161,7 @@ def upload():
         return u'success'
     except Exception as e:
         #FIXME：当sheet名不等于表名时，会报‘No suitable database adapter found!’
+        db.session.rollback()
         raise e
         return u'fail';
 
@@ -163,14 +172,18 @@ def list_dictionarys_by_type_name():
     '''根据字典类型名字返回同类型的所有字典数据
     
     '''
-    variable = DictionaryType.query.filter_by(isUse = 1, name = request.args['type']).first()
-    type_id = (variable.id if variable is not None else None)
-    if type_id is not None:
-        response = []
-        for x in Dictionary.query.with_entities(Dictionary.id, Dictionary.name).filter_by(isUse = 1, type_id = type_id).all():
-            response.append({"id":x[0], "name":x[1]})
-        return json.dumps(response)
-    return '500'
+    try:
+        variable = DictionaryType.query.filter_by(isUse = 1, name = request.args['type']).first()
+        type_id = (variable.id if variable is not None else None)
+        if type_id is not None:
+            response = []
+            for x in Dictionary.query.with_entities(Dictionary.id, Dictionary.name).filter_by(isUse = 1, type_id = type_id).all():
+                response.append({"id":x[0], "name":x[1]})
+            return json.dumps(response)
+        return '500'
+    except Exception as e:
+        db.session.rollback()
+        raise e
 
 
 # '''返回一个装有所有Dictionary表数据的excel文件

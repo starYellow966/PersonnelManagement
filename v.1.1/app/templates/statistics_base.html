@@ -53,8 +53,8 @@
 
                 <!-- 图表区域 -->
                 <div class="col-sm-10">
-                    <div id="canvasDiv_pie3d"></div>
                     <div id="canvasDiv_column3d"></div>
+                    <div id="canvasDiv_pie3d"></div>
                 </div><!-- 图表区域end -->
             </section>            
         {% endblock container %}
@@ -190,18 +190,18 @@
                     height : 400,
                     radius:150
                 });
-                //利用自定义组件构造右侧说明文本
-                // chart.plugin(new iChart.Custom({
-                //         drawFn:function(){
-                //             //在右侧的位置，渲染说明文字
-                //             chart.target.textAlign('start')
-                //             .textBaseline('top')
-                //             .textFont('600 20px Verdana')
-                //             .fillText('Market Fragmentation:\nTop Mobile\nOperating Systems',120,80,false,'#be5985',false,24)
-                //             .textFont('600 12px Verdana')
-                //             .fillText('Source:ComScore,2012',120,160,false,'#999999');
-                //         }
-                // }));
+                // 利用自定义组件构造右侧说明文本
+                chart.plugin(new iChart.Custom({
+                        drawFn:function(){
+                            //在右侧的位置，渲染说明文字
+                            chart.target.textAlign('start')
+                            .textBaseline('top')
+                            .textFont('600 20px Verdana')
+                            .fillText('客运段劳动人事管理系统\n用3D饼图显示\n成都客运段员工结构',120,80,false,'#be5985',false,24)
+                            .textFont('600 12px Verdana')
+                            .fillText('Source:stargooood,2018',120,160,false,'#999999');
+                        }
+                }));
                 
                 chart.draw();
             }
@@ -260,8 +260,8 @@
                     // async: false,
                     // data: {type : type},
                     success: function(data){
-                        var dataObj=eval("("+data+")");
-                        initColumnChart(dataObj, title);
+                        console.log(data);
+                        initColumnChart(eval(data), title);
                     },
                     error: function(){
                         alert('柱状图数据请求异常');
@@ -276,9 +276,8 @@
                     // async: false,
                     // data: {type : type},
                     success: function(data){
-                        var dataObj=eval("("+data+")");
-                        console.log(dataObj);
-                        initPieChart(dataObj, title);
+                        console.log(data);
+                        initPieChart(eval(data), title);
                     },
                     error: function(){
                         alert('饼图数据请求异常');

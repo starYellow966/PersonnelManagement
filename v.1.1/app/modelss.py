@@ -10,10 +10,6 @@ from flask_login import UserMixin
 
 class User(UserMixin,db.Model):
     '''系统登录用户
-    
-    Extends:
-        UserMixin
-        db.Model
     '''
 
     __tablename__ = 'User'
@@ -25,9 +21,13 @@ class User(UserMixin,db.Model):
 
     pw_hash = db.Column(db.String(100), nullable = False)
 
-    def __init__(self, name, password):
+    level = db.Column(db.Integer(), default = 1) # 1--普通，0---系统
+
+    def __init__(self, name, password, **kw):
         self.name = name;
         self.set_password(password)
+        if 'level' in kw:
+            self.level = kw['level']
 
 
     def __repr__(self):
@@ -531,47 +531,6 @@ class Employee(db.Model):
             return result
 
 
-    # @classmethod
-    # def create_employee_cn(cls, **row):
-    #     '''专门针对批量新增功能，创建一个employee对象
-        
-    #     因为row中的key是字段名用中文表达，所以需要进行字段名转换
-        
-    #     Arguments:
-    #         **row {dict} -- excel文件的一行数据
-    #     '''
-    #     # 直接映射表，这些字段可以直接转换
-    #     direct_references = {u'工号': 'id', u'姓名': 'name', u'曾用名': 'old_name',u'籍贯': 'origin', 
-    #         u'身份证号': 'id_num', u'联系电话': 'phone1',u'家庭住址': 'address', u'出生日期': 'birthdate', 
-    #         u'电子邮箱':'email',u'入职日期': 'work_date', u'备注': 'others'}
-    #     # Dictionary类映射表，与字典数据有关的字段
-    #     dictionary_references = {u'用工性质': 'emp_type', u'职名': 'position_id', 
-    #         u'人员状态': 'status_id',u'民族': 'nation_id', u'技能等级': 'techlevel_id', 
-    #         u'学历': 'degree_id',u'政治面貌': 'political_status_id'}
-    #     data = {}
-    #     for x in row:
-    #         if x in direct_references:
-    #             data[direct_references[x]] = row[x]
-    #         elif x in dictionary_references:
-    #             d = Dictionary.get_id_by_name(row[x]).data
-    #             if d == '':
-    #                 d = None
-    #             data[dictionary_references[x]] = d
-    #         elif x == u'所属部门':
-    #             o = Organization.get_id_by_name(row[x]).data
-    #             if o == '':
-    #                 o = None
-    #             data['org_id'] = o
-    #         elif x == u'性别':
-    #             data['sex'] = (1 if row[x] == u'男' else 0)
-    #         # elif x == u'是否实习':
-    #         #     data['is_Practice'] = (1 if row[x] == u'是' else 0)
-    #     print data
-    #     e = Employee(**data)
-    #     print e
-    #     return e
-
-
 class Change_Log(db.Model):
     '''变动信息日志
     
@@ -613,5 +572,50 @@ class Change_Log(db.Model):
             "change_date": self.change_date,
             "executor": self.executor,
             "others": self.others
+            }
+        return json_object
+
+class General_Log(db.Model):
+    '''登录注销日志表
+    
+    Variables:
+        __tablename__ {str} -- 表名
+        id {int} -- 日志编号，自增
+        user_name {string} -- 操作者名字
+        ip_address {string} -- 操作的ip地址
+        info {string} -- 事件详情
+        date_time {int} -- 操作时间戳
+    '''
+
+    __tablename__ = 'Log'
+
+    __table_args__ = {"extend_existing": True}
+
+    id = db.Column(db.Integer(),primary_key = True)
+
+    user_name = db.Column(db.String(50), nullable = True)
+
+    ip_address = db.Column(db.String(20), nullable = False)
+
+    info = db.Column(db.String(100), nullable = True)
+
+    date_time = db.Column(db.Integer, nullable = True)
+
+    result = db.Column(db.Integer(), default = 1)
+
+    def __init__(self, info, user_name, ip_address):
+        self.info = info
+        self.user_name = user_name
+        self.ip_address = ip_address
+        import time
+        self.date_time = int(time.time())
+
+    def to_json(self):
+        json_object = {
+            'id': self.id,
+            'user_name': self.user_name,
+            'ip_address': self.ip_address,
+            'info': self.info,
+            'date_time': self.date_time
             }
         return json_object

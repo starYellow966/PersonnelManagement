@@ -8,7 +8,7 @@ from flask_login import LoginManager,login_user,login_required,logout_user,curre
 import flask_excel as excel
 from extensions import db, login_manager, bootstrap, photos
 
-from modelss import User
+from modelss import User,General_Log
 from forms import Login_Form
 from config import config
 from controller import organizationBlueprint,dictionaryBlueprint,logBlueprint,employeeBlueprint,statisticsBlueprint
@@ -92,11 +92,12 @@ def init_loginManager():
         cur_user = None
         try:
             cur_user = User.query.get(int(user_id))
-        except Exception as e:
-            print e
-            db.session.rollback()
-        finally:
             return cur_user
+        except Exception as e:
+            db.session.rollback()
+            raise e
+
+            
 
 def init_blueprint(app):
     '''注册蓝图
@@ -120,6 +121,10 @@ def init_route(app):
                 user = User.query.filter_by(name = form.name.data).first()
                 if (user is not None and user.check_password(form.pwd.data)):
                     login_user(user)
+                    # 日志记录
+                    log = General_Log('用户'+ current_user.name + "登录系统",current_user.name,request.remote_addr)
+                    db.session.add(log)
+                    db.session.commit()
                     next = request.args.get('next')
                     # is_safe_url should check if the url is safe for redirects.
                     if not redirectForm.is_safe_url(next):
@@ -133,6 +138,7 @@ def init_route(app):
                     flash(u'用户不存在')
         except Exception as e:
             flash(u'未知错误')
+            db.session.rollback()
             raise e
         return render_template('login.html', form = form)
 
@@ -140,10 +146,17 @@ def init_route(app):
     @app.route('/logout')
     @login_required
     def logout():
-        logout_user() #They will be logged out, and any cookies for their session will be cleaned up.
-        # flash(u'你已退出登录')
-        return redirect(url_for('index'))
-
+        
+        try:
+            # 日志记录
+            log = General_Log('用户'+ current_user.name + "退出系统",current_user.name,request.remote_addr)
+            db.session.add(log)
+            db.session.commit()
+            logout_user() #They will be logged out, and any cookies for their session will be cleaned up.
+            return redirect(url_for('index'))
+        except Exception as e:
+            db.session.rollback()
+            raise e
 
 
 def init_errorhandler(app):

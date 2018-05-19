@@ -38,7 +38,9 @@ def statistics_column(column_name):
 def statistics_pie(column_name):
     try:
         response = get_column_data(column_name)
-        total_count = db.session.execute('select count(1) from Employee where isUse=1').fetchall()[0][0]
+        total_count = 0
+        for x in response:
+            total_count += x['value']
         for x in response:
             x['value'] = round(x['value']* 100.0 / total_count, 1)
         return json.dumps(response)
@@ -48,16 +50,27 @@ def statistics_pie(column_name):
 @fresh_login_required
 @statisticsBlueprint.route('/change/list', methods = ['GET'])
 def statistics_changelog():
+    '''统计相同月份时，8种变动的次数
+    '''
     try:
-        result = Change_Log.query.with_entities(Change_Log.change_date, Change_Log.change_type).all()
-        response = []
-        for x in result:
-            
-
-        sql = 'select change_type, count(*) from gdesignV1_1.Change_Log group by change_type'
+        type_list = ['I', 'IC', 'F', 'R1', 'R2', 'R3', 'R4', 'R5']
+        sql = 'select DATE_FORMAT(change_date,\'%Y-%m\') as months'
+        for x in type_list:
+            sql += ',sum(if(change_type=\'{0}\',1,0)) as {0}'.format(x)
+        sql += ' from gdesignV1_1.Change_Log group by months order by months;'
         result = db.session.execute(sql).fetchall()
-        return json.dumps([dict(result)])
+        response =[]
+        for x in result:
+            temp = {'months': x[0]}
+            index = 1
+            for t in type_list:
+                temp[t] = str(x[index])
+                index = index + 1
+            response.append(temp)
+
+        return json.dumps(response)
     except Exception as e:
+        db.session.rollback()
         raise e
 
 def get_column_data(column_name):
@@ -74,7 +87,7 @@ def get_column_data(column_name):
             temp = {'name':'', 'value':'', 'color':color[index]}
             index = (index + 1) % len(color) #循环区颜色
             if column_name == 'sex':
-                temp['name'] = u'男' if x[0] == 1 else u'女'
+                temp['name'] = u'男' if x[0] == 1 else (u'女' if x[0] == 0 else None)
             else:
                 variable = None
                 if column_name == 'org_id':
@@ -89,4 +102,5 @@ def get_column_data(column_name):
             response.append(temp)
         return response
     except Exception as e:
+        db.session.rollback()
         raise e

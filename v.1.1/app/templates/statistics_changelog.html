@@ -82,7 +82,7 @@
                         fileName: '员工变动统计表'+new Date().getFullYear() + (new Date().getMonth() + 1) + new Date().getDate()
                     },
                     columns: [{
-                        field: 'date',
+                        field: 'months',
                         title: '日期',
                         sortable: true
                     }, {
@@ -90,92 +90,106 @@
                         title: '新进',
                         sortable: true,
                         formatter: function(value, row, index){
-                            if (typeof(value) == 'undefined') {
+                            if (typeof(value) == 'undefined' || parseInt(value) == 0) {
                                 return '0';
                             }
                             else
-                                return '<a href="#" onclick="setDetailTableData(\'I\')">' + value + "</a>";
+                                return '<a href="#" onclick="setDetailTableData(\'I\',\''+ row.months +'\')">' + value + "</a>";
                         }
                     }, {
                         field: 'R1',
                         title: '退休',
                         sortable: true,
                         formatter: function(value, row, index){
-                            if (typeof(value) == 'undefined') {
+                            if (typeof(value) == 'undefined' || parseInt(value) == 0) {
                                 return '0';
                             }
                             else
-                                return '<a href="#" onclick="setDetailTableData(\'R1\')">' + value + "</a>";
+                                return '<a href="#" onclick="setDetailTableData(\'R1\',\''+ row.months +'\')">' + value + "</a>";
                         }
                     }, {
                         field: 'R2',
                         title: '死亡',
                         sortable: true,
                         formatter: function(value, row, index){
-                            if (typeof(value) == 'undefined') {
+                            if (typeof(value) == 'undefined' || parseInt(value) == 0) {
                                 return '0';
                             }
                             else
-                                return '<a href="#" onclick="setDetailTableData(\'R2\')">' + value + "</a>";
+                                return '<a href="#" onclick="setDetailTableData(\'R2\',\''+ row.months +'\')">' + value + "</a>";
                         }
                     }, {
                         field: 'R3',
                         title: '调离',
                         sortable: true,
                         formatter: function(value, row, index){
-                            if (typeof(value) == 'undefined') {
+                            if (typeof(value) == 'undefined' || parseInt(value) == 0) {
                                 return '0';
                             }
                             else
-                                return '<a href="#" onclick="setDetailTableData(\'R3\')">' + value + "</a>";
+                                return '<a href="#" onclick="setDetailTableData(\'R3\',\''+ row.months +'\')">' + value + "</a>";
                         }
                     }, {
                         field: 'R4',
                         title: '辞职',
                         sortable: true,
                         formatter: function(value, row, index){
-                            if (typeof(value) == 'undefined') {
+                            if (typeof(value) == 'undefined' || parseInt(value) == 0) {
                                 return '0';
                             }
                             else
-                                return '<a href="#" onclick="setDetailTableData(\'R4\')">' + value + "</a>";
+                                return '<a href="#" onclick="setDetailTableData(\'R4\',\''+ row.months +'\')">' + value + "</a>";
                         }
                     }, {
                         field: 'R5',
                         title: '解除',
                         sortable: true,
                         formatter: function(value, row, index){
-                            if (typeof(value) == 'undefined') {
+                            if (typeof(value) == 'undefined' || parseInt(value) == 0) {
                                 return '0';
                             }
                             else
-                                return '<a href="#" onclick="setDetailTableData(\'R5\')">' + value + "</a>";
+                                return '<a href="#" onclick="setDetailTableData(\'R5\',\''+ row.months +'\')">' + value + "</a>";
                         }
                     }, {
                         field: 'IC',
                         title: '内部变动',
                         sortable: true,
                         formatter: function(value, row, index){
-                            if (typeof(value) == 'undefined') {
+                            if (typeof(value) == 'undefined' || parseInt(value) == 0) {
                                 return '0';
                             }
                             else
-                                return '<a href="#" onclick="setDetailTableData(\'IC\')">' + value + "</a>";
+                                return '<a href="#" onclick="setDetailTableData(\'IC\',\''+ row.months +'\')">' + value + "</a>";
                         }
                     }, {
                         field: 'F',
                         title: '定职',
                         sortable: true,
                         formatter: function(value, row, index){
-                            if (typeof(value) == 'undefined') {
+                            if (typeof(value) == 'undefined' || parseInt(value) == 0) {
                                 return '0';
                             }
                             else
-                                return '<a onclick="setDetailTableData(\'F\')">' + value + "</a>";
+                                return '<a href="#" onclick="setDetailTableData(\'F\',\''+ row.months +'\')">' + value + "</a>";
                         }
                     }],
                     onLoadError: function(status){
                         alert('员工变动统计数据加载失败');
+                    },
+                    onLoadSuccess:function(data){
+                        var array={'months': '合计','I':0,'IC':0,'F':0,'R1':0,'R2':0,'R3':0,'R4':0,'R5':0};
+                        for (var i = data.length - 1; i >= 0; i--) {
+                            array['I'] += parseInt(data[i]['I']);
+                            array['IC'] += parseInt(data[i]['IC']);
+                            array['F'] += parseInt(data[i]['F']);
+                            array['R1'] += parseInt(data[i]['R1']);
+                            array['R2'] += parseInt(data[i]['R2']);
+                            array['R3'] += parseInt(data[i]['R3']);
+                            array['R4'] += parseInt(data[i]['R4']);
+                            array['R5'] += parseInt(data[i]['R5']);
+                        }
+                        $('#statistics-table').bootstrapTable('append', array);
                     }
                 });
             }
@@ -198,16 +212,12 @@
                         fileName: '员工变动日志表'+new Date().getFullYear() + (new Date().getMonth() + 1) + new Date().getDate()
                     },
                     columns: [{
-                        field: 'id',
-                        title: '编号',
+                        field: 'change_date',
+                        title: '变动日期',
                         sortable: true
                     }, {
                         field: 'change_type',
                         title: '变动类型',
-                        sortable: true
-                    }, {
-                        field: 'change_date',
-                        title: '变动日期',
                         sortable: true
                     }, {
                         field: 'executor',
@@ -246,7 +256,6 @@
                         sortable: true
                     }],
                     onLoadError: function(status){
-                        // alert(status);
                         alert('员工变动日志数据加载失败');
                     }
                 });
@@ -256,8 +265,28 @@
              * 重新加载变动日志数据
              * @param {str} type 变动类型
              */
-            function setDetailTableData(type){
-                console.log(type);
+            function setDetailTableData(type,months){
+                if(months == '合计')
+                    return;
+                $.ajax({
+                    url: '/log/change/query',
+                    type: 'post',
+                    data:{
+                        type: type,
+                        months: months
+                    },
+                    beforeSend: function(){
+                        $('#detail-table').bootstrapTable('removeAll');
+                        $('#detail-table').bootstrapTable('showLoading');
+                    },
+                    success: function(array){
+                        $('#detail-table').bootstrapTable('hideLoading');
+                        $('#detail-table').bootstrapTable('load', eval(array));
+                    },
+                    error: function(){
+                        alert('查询详情变动日志请求异常');
+                    }
+                });
             }
         </script>
 

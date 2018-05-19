@@ -18,40 +18,20 @@
         {% endblock left_nav%}
     
     <section>
+        <nav class="breadcrumb" style="margin-bottom: 0px;">
+            <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
+            首页 
+            <span class="c-gray en">&gt;</span> 
+            系统信息管理
+            <span class="c-gray en">&gt;</span> 
+            系统登录日志
+            <a class="btn btn-success radius r" style="vertical-align: right" href="javascript:location.reload();" title="刷新">
+                <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+            </a>
+        </nav>
         <table id="table"></table>
     </section>
 
-    <!-- 详情模态框 -->
-    <div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal"
-                    aria-hidden="true">&times;</button>
-                    <h4 class="modal-title" >日志详情</h4>
-                </div> <!-- modal.header -->
-                <div class="modal-body">
-                    <label>编号:</label>
-                    <input type="text" id="detailModal_id" class="form-control" readonly="true">
-                    <br>
-                    <label>操作者:</label>
-                    <input type="text" id="detailModal_name" class="form-control" readonly="true">
-                    <label>ip地址:</label>
-                    <input type="text" id="detailModal_ip" class="form-control" readonly="true">
-                    <label>操作类型:</label>
-                    <input type="text" id="detailModal_type" class="form-control" readonly="true">
-                    <label>操作时间:</label>
-                    <input type="text" id="detailModal_time" class="form-control" readonly="true">
-                    <label>操作详情:</label>
-                    <input type="text" id="detailModal_detail" class="form-control" readonly="true">
-                </div>
-                <div class="modal-footer">
-                    <input type="button" class="btn btn-default" data-dismiss="modal" value="关闭">
-                </div>
-            </div><!-- modal-content end -->
-        </div><!-- modal-dialog end -->
-        
-    </div><!-- 详情模态框end -->
     {% block base_script %}
         {{ super() }}
         <script src="../static/js/bootstrap-table.js"></script>
@@ -88,10 +68,6 @@
                     title: 'ip地址',
                     sortable: true
                 }, {
-                    field: 'event_type',
-                    title: '操作类型',
-                    sortable: true
-                }, {
                     field: 'date_time',
                     title: '操作时间',
                     sortable: true,
@@ -106,22 +82,12 @@
                     }
                 }, {
                     field: 'info',
-                    title: '操作详情',
-                    sortable: true
-                }, {
-                    field: 'result',
-                    title: '操作结果',
+                    title: '描述',
                     sortable: true,
-                    formatter: function(value, row, index){
-                        return value == 1 ? 'success':'fail';
-                    }
-                }, {
-                    field: 'operate',
-                    title: '详情',
-                    formatter: function(value, row, index){
-                        return "<a href='#' data-toggle='modal' onclick='initModalFunc(\""+row.id+"\")'>详情</a>" ;
-                    }
                 }],
+                onLoadError: function(){
+                    alert('表数据加载异常');
+                }
             });
 
         });
@@ -158,18 +124,18 @@
          * 第3步，显示模态框 
          * @return 显示修改段信息模态框
          */
-         function initModalFunc(index){
-            // console.log(index);
-            row = $('#table').bootstrapTable('getRowByUniqueId', index);
-            console.log(row);
-            $('#detailModal_id').val(row['id']);
-            $('#detailModal_name').val(row['user_name']);
-            $('#detailModal_ip').val(row['ip_address']);
-            $('#detailModal_type').val(row['event_type']);
-            $('#detailModal_time').val(new Date(row['date_time'] * 1000).format("YYYY-MM-dd h:m:s"));
-            $('#detailModal_detail').val(row['info']);
-            $('#detailModal').modal('show');
-        }
+        //  function initModalFunc(index){
+        //     // console.log(index);
+        //     row = $('#table').bootstrapTable('getRowByUniqueId', index);
+        //     console.log(row);
+        //     $('#detailModal_id').val(row['id']);
+        //     $('#detailModal_name').val(row['user_name']);
+        //     $('#detailModal_ip').val(row['ip_address']);
+        //     $('#detailModal_type').val(row['event_type']);
+        //     $('#detailModal_time').val(new Date(row['date_time'] * 1000).format("YYYY-MM-dd h:m:s"));
+        //     $('#detailModal_detail').val(row['info']);
+        //     $('#detailModal').modal('show');
+        // }
 
         
     </script>
