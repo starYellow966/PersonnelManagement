@@ -162,14 +162,14 @@ def upload():
 def list_dictionarys_by_type_name():
     '''根据字典类型名字返回同类型的所有字典数据
     
-    Decorators:
-        dictionaryBlueprint.route
-        fresh_login_required
     '''
-    type_id = DictionaryType.query.filter_by(isUse = 1, name = request.args['type']).first().id
+    variable = DictionaryType.query.filter_by(isUse = 1, name = request.args['type']).first()
+    type_id = (variable.id if variable is not None else None)
     if type_id is not None:
-        response = Dictionary.query.filter_by(idUse = 1, type_id = type_id).first()
-        return json.dumps(response.to_json())
+        response = []
+        for x in Dictionary.query.with_entities(Dictionary.id, Dictionary.name).filter_by(isUse = 1, type_id = type_id).all():
+            response.append({"id":x[0], "name":x[1]})
+        return json.dumps(response)
     return '500'
 
 

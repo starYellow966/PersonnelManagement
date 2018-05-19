@@ -12,11 +12,7 @@ from operate_log import Log
 
 class Employee(db.Model):
     '''员工信息表
-    
-    
-    Extends:
-        db.Model
-    
+       
     Variables:
         __tablename__ {str} -- 表名
         __table_args__ {dict} -- 选项

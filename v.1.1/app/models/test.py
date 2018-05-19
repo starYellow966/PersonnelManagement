@@ -12,5 +12,3 @@ def test():
     finally:
         return 'finally'
 
-
-print test()

@@ -16,14 +16,14 @@
             {{ super() }}
         {% endblock left_nav %}
 
-        <section >
+        <section>
             <nav class="breadcrumb" style="margin-bottom: 0px;">
                 <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
                 首页 
                 <span class="c-gray en">&gt;</span> 
                 员工变动管理
                 <span class="c-gray en">&gt;</span> 
-                员工定职管理
+                内部变动管理
                 <a class="btn btn-success radius r" style="vertical-align: right" href="javascript:location.reload();" title="刷新">
                     <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
                 </a>
@@ -31,7 +31,7 @@
             <!-- 待选人员面板 -->
             <div class="panel panel-info">
                 <div class="panel-heading">
-                    <h3 class="panel-title">待定职的实习生</h3>
+                    <h3 class="panel-title">待选定的员工</h3>
                 </div>
                 <div class="panel-body">
                     <table id="table"></table>
@@ -40,38 +40,33 @@
 
             <div class="panel panel-primary">
                 <div class="panel-heading">
-                    <h3 class="panel-title">员工定职信息</h3>
+                    <h3 class="panel-title">内部变动信息</h3>
                 </div>
-                <form id="formal-form" class="panel-body">
-                    <div class="col-xs-6">
-                        <label style="margin: 20px;">定职日期</label>
-                        <input type="date" id="change_date" class="form-control" style="width: 70%;display: inline;" required>
+                <form id="inside-form" >
+                    <div class="col-xs-5">
+                        <label style="margin: 20px;">新部门&nbsp;&nbsp;</label>
+                        <select class="selectpicker" id="org_select" style="margin: 10%;" required></select>
+                        <br>
+                        <label style="margin: 20px;">新职名&nbsp;&nbsp;</label>
+                        <select class="selectpicker" id="position_select" required></select>
                         <br>
                         <label style="margin: 20px;">报到日期</label>
-                        <input type="date" id="report_date" class="form-control" style="width: 70%;display: inline;" required>
-                        <br>
-                        <label style="margin: 20px;">执行人&nbsp;&nbsp;</label>
-                        <input type="text" class="form-control" style="width: 72%;display: inline;" value="{% if current_user.is_authenticated -%}{{ current_user.name }}{%- endif %}" id="exectuor" required>
-                        <br>
-                        <label style="margin: 20px;">备注&nbsp;&nbsp;&nbsp;</label>
-                        <textarea class="form-control" rows="3" cols="15" style="width: 74%;display: inline;" id="others"></textarea>
+                        <input type="date" id="report_date" class="form-control" style="width: 35%;display: inline;" required>
+                        
                     </div>
-                    <div class="col-xs-4 panel panel-default">
-                        <div class="panel-heading">
-                            <input  type="checkbox" style="margin: 15px;" id="is_Change" onchange="isChange()" >是否进行内部变动
-                        </div>
-                        <label style="margin: 20px;" >新部门&nbsp;</label>
-                        <select class="selectpicker" id="org_select" style="margin: 10%;" ></select>
+                    <div class="col-xs-4">
+                        <label style="margin: 20px;">变动日期</label>
+                        <input type="date" id="change_date" class="form-control" style="width: 50%;display: inline;" required>
                         <br>
-                        <label style="margin: 20px;">新职名</label>
-                        <select class="selectpicker" id="position_select" ></select>
+                        <label style="margin: 20px;">执行人&nbsp;&nbsp;&nbsp;</label>
+                        <input type="text" name="" class="form-control" style="width: 50%;display: inline;" value="{% if current_user.is_authenticated -%}{{ current_user.name }}{%- endif %}" id="executor" required>
                         <br>
-                        <br>
+                        <label style="margin: 20px;">备注&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                        <textarea class="form-control" rows="1" cols="15" style="width: 50%;display: inline;" id="others"></textarea>
                     </div>
-                    
-                    <input type="submit" class="col-xs-2 btn btn-primary" style="margin: 5px;" value="定职">
-                    
-                    
+                    <div class="col-xs-1">
+                        <input type="submit" class="btn btn-primary" style="margin: 20px;" value="确&nbsp;&nbsp;&nbsp;认"> 
+                    </div>
                 </form>
             </div>
         </section> 
@@ -88,8 +83,6 @@
             <!-- 初始化功能 -->
             <script type="text/javascript">
                 $(document).ready(function() {
-                    $('#org_select').prop('disabled','disabled');
-                    $('#position_select').prop('disabled','disabled');
                     initEmplpoyeeTable();
                     queryRequest($('#org_select'), '所属部门', false);
                     queryRequest($('#position_select'), '职名');
@@ -98,17 +91,20 @@
 
                 function initEmplpoyeeTable(){
                     $('#table').bootstrapTable({
-                        url: '/employee/formal/list/practice',
+                        url: '/employee/scan/list_all',
                         search: true, //是否显示 搜索框
                         showColumns: true, //是否显示 选择显示列按钮
                         pagination: true, //设置分页
-                        pageSize: 7,
                         pageList: [7],
-                        pagination: true, //设置分页
+                        pageSize: 7,
                         idField: 'id', //重要,可设置checkbox的值为指定字段
                         selectItemName: 'id', //设置checkbox name属性，可用于遍历获取选中值
                         clickToSelect: true, //将在点击行时，自动选择checkbox
                         striped: true, //是否显示 表格条纹
+                        onDblClickRow: function(row, $element, field){
+                            $('#table').bootstrapTable('remove', {field: 'id', values: new Array(row.id)});
+                            $('#right-table').bootstrapTable('append', row);
+                        },
                         columns: [{
                             checkbox: true
                         }, {
@@ -126,6 +122,10 @@
                         }, {
                             field: 'org_name',
                             title: '所属部门',
+                            sortable: true
+                        }, {
+                            field: 'position',
+                            title: '职名',
                             sortable: true
                         }, {
                             field: 'position',
@@ -151,14 +151,6 @@
                             formatter: function(value,row,index){
                                 return value == 1 ? '是':'否';
                             }
-                        }, {
-                            field: 'operation',
-                            title: '操作',
-                            align: 'center',
-                            valign: 'middle',
-                            formatter: function(value, row, index){
-                                return "<a href='/employee/detail?id=" + row.id + "' target='_blank'>详情</a>" ;
-                            }
                         }],
                         onLoadError: function(status){
                             alert('数据加载失败，请联系系统管理员');
@@ -171,31 +163,10 @@
                 }
 
                 function initSubmit(){
-                    $('#formal-form').submit(function(event){
+                    $('#inside-form').submit(function(event){
                         event.preventDefault();
-                        formalRequest();
+                        insideRequest();
                     });
-                }
-            </script>
-
-            <!-- 业务逻辑 -->
-            <script type="text/javascript">
-                function isChange(){
-                    // console.log($("#is_Change").is(':checked'));
-                    if ($("#is_Change").is(':checked')) {
-                        // console.log('true');
-                        $('#org_select').prop('disabled', false);
-                        $('#position_select').prop('disabled',false);
-                        $('#org_select').selectpicker('refresh');
-                        $('#position_select').selectpicker('refresh');
-                    }
-                    else{
-                        // console.log('false');
-                        $('#org_select').prop('disabled','disabled');
-                        $('#position_select').prop('disabled','disabled');
-                        $('#org_select').selectpicker('refresh');
-                        $('#position_select').selectpicker('refresh');
-                    }
                 }
             </script>
 
@@ -217,6 +188,7 @@
                         success: function(data){
                             // 转换为json对象
                             var dataObj=eval("("+data+")");
+                            // console.log(dataObj);
                             var text = '';
                             for(var i in dataObj){
                                 if(typeof(selected_data) != "undefined" && selected_data == dataObj[i].id)
@@ -227,56 +199,55 @@
                             obj.html(text);
                             obj.selectpicker('refresh');
                         },
-                        error: function(status){
-                            alert('selectpicker数据加载失败');
-                        }
-                    });
-                }
-                function formalRequest(){
-                    table_data = $('#table').bootstrapTable('getAllSelections');
-                    if(table_data.length == 0){
-                        alert('请先选择定职操作的实习生');
-                        return false;
-                    }
-                    tips = "再次确认\n对如下员工进行定职管理:\n";
-                    id_string = "";
-                    for (var i = table_data.length - 1; i >= 0; i--) {
-                        tips += "工号: " + table_data[i].id + " , 名字 :" + table_data[i].name + "\n";
-                        id_string +=table_data[i].id;
-                        if(i > 0)
-                            id_string += ",";
-                    }
-                     var array = {
-                        'id':id_string,
-                        'change_date':$('#change_date').val(),
-                        'exectuor':$('#exectuor').val(),
-                        'report_date':$('#report_date').val(),
-                        'others': $('#others').val()};
-                    if($("#is_Change").is(':checked')){
-                        array['org_id'] = $('#org_select').val();
-                        array['position_id'] = $('#position_select').val();
-                    }
-                    $.ajax({
-                        url: '/employee/formal/update',
-                        type: 'post',
-                        data: array,
-                        async: false,
-                        beforeSend: function(){
-                            return confirm(tips);
-                        },
-                        success: function(message){
-                            if(message == 'success'){
-                                alert('定职管理 ： 成功');
-                                $('#table').bootstrapTable('refresh', {url: '/employee/formal/list/practice'});
-                            }
-                            
-                        },
-                        error: function(message){
-                            alert('提交定职信息失败');
+                        error: function(argument) {
+                            alert('加载下拉框数据失败');
                         }
                     });
                 }
 
+                function insideRequest(){
+                    var array = $('#table').bootstrapTable('getAllSelections');
+                    var id_string = '';
+                    var tips = "再次确认对如下员工\n";
+                    for (var i = array.length - 1; i >= 0; i--) {
+                        id_string += array[i].id;
+                        tips += "工号 ： " + array[i].id + " , 名字 : " + array[i].name + "\n";
+                        if(array.length > 0)
+                            id_string += ',';
+                    }
+                    tips += "进行内部变动";
+                    $.ajax({
+                        url: '/employee/change/inside',
+                        type: 'post',
+                        data:{
+                            org_id: $('#org_select').val(),
+                            position_id: $('#position_select').val(),
+                            id: id_string,
+                            change_date: $('#change_date').val(),
+                            report_date: $('#report_date').val(),
+                            executor: $('#executor').val(),
+                            others: $('#others').val()
+                        },
+                        beforeSend: function(){
+                            if(array.length <= 0)
+                            {
+                                alert('请先选择员工');
+                                return false;
+                            }
+                            return confirm(tips);
+                        },
+                        success: function(message){
+                            if(message == 'success'){
+                                alert('内部变动：成功');
+                                $('#table').bootstrapTable('refresh', {url: '/employee/scan/list_all'});
+                            }
+                            
+                        },
+                        error: function(message){
+                            alert('提交变动信息失败');
+                        }
+                    });
+                }
             </script>
     {% endblock body %}
 </body>

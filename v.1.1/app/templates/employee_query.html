@@ -17,9 +17,18 @@
         {% endblock left_nav %}
 
         <section>
+            <nav class="breadcrumb" style="margin-bottom: 0px;">
+                <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
+                首页 
+                <span class="c-gray en">&gt;</span> 
+                员工信息浏览
+                <a class="btn btn-success radius r" style="vertical-align: right" href="javascript:location.reload();" title="刷新">
+                    <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+                </a>
+            </nav>
             <!-- 高级查询栏 -->
             <div class="panel-group" id="query-panel">
-                <div class="panel panel-default">
+                <div class="panel panel-info">
                     <div class="panel-heading" data-toggle="collapse" data-parent='query-panel' href='#query-panel-body'>高级查询条件</div>
                     <div id="query-panel-body">
                         <div class="panel-body">
@@ -33,11 +42,16 @@
                                 <div class="col-sm-3" >
                                     <select class="selectpicker " id="proprity" onchange="proprityChange(this)">
                                         <option value="id" selected>工号</option>
-                                        <option value="name">名称</option>
-                                        <option value="type">类型</option>
-                                        <option value="dep_name">部门名称</option>
-                                        <option value="seg_date">成立时间</option>
-                                        <option value="railway">所属路局</option>
+                                        <option value="name">名字</option>
+                                        <option value="emp_type_name">用工性质</option>
+                                        <option value="org_name">所属部门</option>
+                                        <option value="position">职位</option>
+                                        <option value="degree">学位</option>
+                                        <option value="status">人员状态</option>
+                                        <option value="political_status">政治面貌</option>
+                                        <option value="nation">民族</option>
+
+
                                     </select>
                                 </div>
                                 <div class="col-sm-3">
@@ -63,8 +77,8 @@
                             </div>
                         </div>
                         <div class="panel panel-footer" align="right">
-                          <input type="button" class="btn btn-primary" name="insert" value="添加" onclick="insertSqlQuery()">
-                          <input type="submit" class="btn btn-success" name="submit" value="查询" onclick="queryRequest()">
+                          <input type="button" class="btn btn-primary" name="insert" value="添加条件" onclick="insertSqlQuery()">
+                          <input type="submit" class="btn btn-success" name="submit" value="查询" onclick="alert('未开发高级搜索');">
                         </div>
                     </div>
                 </div>
@@ -107,8 +121,6 @@
                             fileName: '人员信息表'+new Date().getFullYear() + (new Date().getMonth() + 1) + new Date().getDate()
                         },
                         columns: [{
-                            checkbox: true
-                        }, {
                             field: 'id',
                             title: '工号',
                             sortable: true
@@ -119,6 +131,7 @@
                         }, {
                             field: 'sex',
                             title: '性别',
+                            sortable: true,
                             formatter: function(value, row, index){
                                 if(value == 1)
                                     return '男';
@@ -152,12 +165,33 @@
                         }, {
                             field: 'is_Practice',
                             title: '是否实习',
+                            sortable: true,
                             formatter: function(value, row, index){
                                 if(value == 1)
                                     return '是';
                                 else
                                     return '否';
                             }
+                        }, {
+                            field: 'nation',
+                            title: '民族',
+                            sortable: true,
+                            visible: false
+                        }, {
+                            field: 'birthdate',
+                            title: '出生日期',
+                            sortable: true,
+                            visible: false
+                        }, {
+                            field: 'work_date',
+                            title: '工作日期',
+                            sortable: true,
+                            visible: false
+                        }, {
+                            field: 'origin',
+                            title: '籍贯',
+                            sortable: true,
+                            visible: false
                         }, {
                             field: 'operation',
                             title: '操作',

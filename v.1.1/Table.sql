@@ -127,6 +127,15 @@ on update cascade
 on delete cascade
 )charset=utf8;
 
+-- 退休R1,死亡R2，调出R3,辞职R4解除R5
+use gdesignV1_1;
+create table if not exists Change_Log(
+id int primary key AUTO_INCREMENT,
+type varchar(3), 
+employee_id varchar(20),
+change_date varchar(11),
+executor varchar(20)
+)charset=utf8;
 
 -- create table if not exists Person(
 -- id varchar(20) primary key,

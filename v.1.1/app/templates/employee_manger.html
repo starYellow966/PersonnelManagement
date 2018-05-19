@@ -17,15 +17,29 @@
         {% endblock left_nav %}
 
         <section >
+            <nav class="breadcrumb" style="margin-bottom: 0px;">
+                <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
+                首页 
+                <span class="c-gray en">&gt;</span> 
+                员工信息管理
+                <a class="btn btn-success radius r" style="vertical-align: right" href="javascript:location.reload();" title="刷新">
+                    <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+                </a>
+            </nav>
             <!-- 树状目录结构 -->
             <div class="col-sm-4">
-                <form class="form-inline" role="form">
-                    <div class="form-group">
-                        <input type="input" class="form-control" id="input-search" placeholder="Type to search..." value="" onkeypress="searchTreeview()">
-                        <button type="button" class="btn btn-success" id="btn-search" onclick="searchTreeview()">Search</button>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">员工信息树状结构图</h3>
                     </div>
-                </form>
-                <div id="tree"></div>
+                    <form class="form-inline" role="form">
+                        <div class="form-group">
+                            <input type="input" class="form-control" id="input-search" placeholder="Type to search..." value="" onkeypress="searchTreeview()" style="display: inline;width: auto;">
+                            <button type="button" class="btn btn-success" id="btn-search" onclick="searchTreeview()">搜索</button>
+                        </div>
+                    </form>
+                    <div id="tree"></div>
+                </div>
             </div>
             <!-- 树状结构end -->
 
@@ -287,7 +301,7 @@
                          * 选中某一项时，先判断选中是否一个员工
                          * 如果是员工，请求员工的数据
                          */
-                        console.log(node)
+                        // console.log(node)
                         //选中一个员工，则打开员工信息详细页面
                         if(node.icon == "glyphicon glyphicon-user"){
                             window.open('/employee/detail?id=' + node.id);
@@ -371,6 +385,9 @@
                             // +" <a href='#' onclick='removeEmployeesRequest(\""+row.id+"\")' >删除</a>"
                         }
                     }],
+                    onLoadError: function(status){
+                        alert('数据加载失败，请联系系统管理员');
+                    }
                 });
             }
 
@@ -408,7 +425,7 @@
             function initEditModel(array){
                 array['title'] = '修改员工信息';
                 setDetailModelData(array);
-                console.log(array);
+                // console.log(array);
                 $('#detailModal-id').attr('readonly',true);
                 $('#detailModal-worktype').attr('disabled',true);
                 $('#detailModal-position').attr('disabled',true);
@@ -569,37 +586,7 @@
              * @param {Boolean} query_type    查询方式，分为字典数据(true)和组织数据(false)
              */
             function setSelectData(obj, selected_data, type_name, query_type=true){
-                $.ajax({
-                    type: 'get',
-                    url: query_type ? '/dict/listDictByTypeName' : '/org/listall',
-                    data:{
-                        type: query_type ? type_name : 2
-                    },
-                    success: function(data){
-                        // 转换为json对象
-                        var dataObj=eval("("+data+")");
-                        // console.log(dataObj);
-                        var text = '';
-                        if(query_type){
-                            for(var i in dataObj){
-                                if(typeof(selected_data) != "undefined" && selected_data == dataObj[i].id)
-                                    text += '<option value="' + dataObj[i].id + '"selected>' + dataObj[i].name + '</option>';
-                                else
-                                    text += '<option value="' + dataObj[i].id + '">' + dataObj[i].name + '</option>';
-                            }
-                        }
-                        else{
-                            for(var i in dataObj){
-                                if(typeof(selected_data) != "undefined" && selected_data == dataObj[i][0])
-                                    text += '<option value="' + dataObj[i][0] + '"selected>' + dataObj[i][1] + '</option>';
-                                else
-                                    text += '<option value="' + dataObj[i][0] + '">' + dataObj[i][1] + '</option>';
-                            }
-                        }
-                        obj.html(text);
-                        obj.selectpicker('refresh');
-                    }
-                });
+                querySelectDataRequest(obj, selected_data, type_name, query_type);
             }
 
 
@@ -683,6 +670,50 @@
 
         <!-- 发送响应代码 -->
         <script>
+    
+            function querySelectDataRequest(obj, selected_data, type_name, query_type=true){
+                $.ajax({
+                    type: 'get',
+                    url: query_type ? '/dict/listDictByTypeName' : '/org/listall',
+                    data:{
+                        type: query_type ? type_name : 2
+                    },
+                    success: function(data){
+                        // 转换为json对象
+                        var dataObj=eval("("+data+")");
+                        // console.log(dataObj);
+                        var text = '';
+                        for(var i in dataObj){
+                            if(typeof(selected_data) != "undefined" && selected_data == dataObj[i].id)
+                                text += '<option value="' + dataObj[i].id + '"selected>' + dataObj[i].name + '</option>';
+                            else
+                                text += '<option value="' + dataObj[i].id + '">' + dataObj[i].name + '</option>';
+                        }
+                        // if(query_type){
+                        //     for(var i in dataObj){
+                        //         if(typeof(selected_data) != "undefined" && selected_data == dataObj[i].id)
+                        //             text += '<option value="' + dataObj[i].id + '"selected>' + dataObj[i].name + '</option>';
+                        //         else
+                        //             text += '<option value="' + dataObj[i].id + '">' + dataObj[i].name + '</option>';
+                        //     }
+                        // }
+                        // else{
+                        //     for(var i in dataObj){
+                        //         if(typeof(selected_data) != "undefined" && selected_data == dataObj[i][0])
+                        //             text += '<option value="' + dataObj[i][0] + '"selected>' + dataObj[i][1] + '</option>';
+                        //         else
+                        //             text += '<option value="' + dataObj[i][0] + '">' + dataObj[i][1] + '</option>';
+                        //     }
+                        // }
+                        obj.html(text);
+                        obj.selectpicker('refresh');
+                    },
+                    error: function(){
+                        alert('下拉框数据加载异常');
+                    }
+                });
+            }
+
             /**
              * 发送请求所有员工数据
              * 数据格式是treeview的数据结构
@@ -697,6 +728,9 @@
                         var text = "";
                         var dataObj=eval("("+data+")");// 转换为json对象
                         initTreeview(dataObj);
+                    },
+                    error: function(){
+                        alert('treeview数据加载异常');
                     }
                 });
             };
@@ -718,14 +752,17 @@
                         },
                         success: function(data) {
                             dataObj = eval("("+data+")");// 转换为json对象
-                            console.log(dataObj[0]);
-                            console.log(async == false);
+                            // console.log(dataObj[0]);
+                            // console.log(async == false);
                             if (async == true)//异步
                                 $('#employeelist-table').bootstrapTable('load',dataObj);
                             else{//同步，代表此操作是修改操作之前读取员工详细信息
-                                console.log('hello');
+                                // console.log('hello');
                                 initEditModel(dataObj[0]);
                             }
+                        },
+                        error: function(){
+                            alert('table数据请求异常');
                         }
                     });
             };
@@ -735,38 +772,50 @@
              * FIXME(hx):还没能正确接受到响应
              * @return {[type]} [description]
              */
-            var insertEmployeeRequest = function(){
-                var array = getModelData();
-                // console.log(array);
-                if(array != null){
-                    $.ajax({
-                        url: '/employee/insertEmployee',
-                        type: 'post',
-                        data: array,
-                        success: function(data){
-                            // console.log(data);
-                            alert('新增员工：' + data);
-                            // location.reload();
-                            $('#detailModal-id').val('');
-                            $('#detailModal-name').val('');
-                        }
-                    });
-                }
-            };
+            // var insertEmployeeRequest = function(){
+            //     var array = getModelData();
+            //     // console.log(array);
+            //     if(array != null){
+            //         $.ajax({
+            //             url: '/employee/insertEmployee',
+            //             type: 'post',
+            //             data: array,
+            //             success: function(data){
+            //                 if(data == 'success'){
+            //                     alert('新增员工： 成功');
+            //                     $('#detailModal-id').val('');
+            //                     $('#detailModal-name').val('');
+            //                 }
+            //                 else if(data == 'id_error'){
+            //                     alert('工号已存在，请重新输入');
+            //                     $('#detailModal-id').val('');
+            //                 }
+            //                 else
+            //                     alert('新增员工失败');
+            //             },
+            //             error: function(){
+            //                 alert('新增员工：请求异常');
+            //             }
+            //         });
+            //     }
+            // };
 
-            var removeEmployeesRequest = function(request_str){
-                // console.log(request_str);
-                $.ajax({
-                    url: '/employee/removeEmployee',
-                    type: 'post',
-                    data:{id : request_str},
-                    success: function(data){
-                        // console.log(data);
-                        alert('删除员工 ：' + data);
-                        location.reload();
-                    },
-                });
-            };
+            // var removeEmployeesRequest = function(request_str){
+            //     // console.log(request_str);
+            //     $.ajax({
+            //         url: '/employee/removeEmployee',
+            //         type: 'post',
+            //         data:{id : request_str},
+            //         success: function(data){
+            //             // console.log(data);
+            //             alert('删除员工 ：' + data);
+            //             location.reload();
+            //         },
+            //         error: function(){
+            //             alert('删除员工：请求异常');
+            //         }
+            //     });
+            // };
 
             var updateEmployeeRequest = function(){
                 var array = getModelData();
@@ -776,8 +825,15 @@
                     type: 'post',
                     data: array,
                     success: function(message){
-                        alert('更新员工信息：' + message);
-                        location.reload();
+                        if(message == 'success'){
+                            alert('更新员工信息： 成功');
+                            location.reload();
+                        }
+                        else
+                            alert('更新员工信息： 失败');
+                    },
+                    error: function(){
+                        alert('更新员工：请求异常');
                     }
                 });
             }

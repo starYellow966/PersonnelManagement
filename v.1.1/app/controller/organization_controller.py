@@ -60,7 +60,7 @@ def list_all():
                 response.append(x.to_json)
             return json.dumps([response])
         else:
-            result = Organization.query.with_entities(Organization.id, Organization.name).filter_by(isUse = 1).order_by(Organization.level, Organization.num).all()
+            result = Organization.query.with_entities(Organization.id, Organization.name).filter_by(isUse = 1, status = 1).order_by(Organization.level, Organization.num).all()
             for x in result:
                 response.append({"id": x[0], "name": x[1]})
             return json.dumps(response)

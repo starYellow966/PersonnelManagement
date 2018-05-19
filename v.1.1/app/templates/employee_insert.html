@@ -17,6 +17,17 @@
         {% endblock left_nav %}
         
         <section id="tableview" >
+            <nav class="breadcrumb" style="margin-bottom: 0px;">
+                <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
+                首页 
+                <span class="c-gray en">&gt;</span> 
+                员工变动管理
+                <span class="c-gray en">&gt;</span> 
+                新进员工
+                <a class="btn btn-success radius r" style="vertical-align: right" href="javascript:location.reload();" title="刷新">
+                    <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+                </a>
+            </nav>
             <table id="employee-detail-table" class="table-setting">
                 <tbody>
                     <tr>
@@ -43,7 +54,7 @@
                                 职名
                             </td>
                             <td>
-                                <select class="selectpicker" id="detailModal-position" ></select>
+                                <select class="selectpicker" id="detailModal-position" required></select>
                             </td>
                         </tr>
                         <tr>
@@ -57,7 +68,7 @@
                                 用工性质
                             </td>
                             <td>
-                                <select class="selectpicker" id="detailModal-worktype"></select>
+                                <select class="selectpicker" id="detailModal-worktype" required></select>
                             </td>
                         </tr>
                         <tr>
@@ -72,7 +83,7 @@
                                 所属部门
                             </td>
                             <td>
-                                <select class="selectpicker" id="detailModal-org"></select>
+                                <select class="selectpicker" id="detailModal-org" required></select>
                             </td>
                         </tr>
                         <tr>
@@ -80,7 +91,7 @@
                                 性别
                             </td>
                             <td>
-                                <select class="selectpicker" id="detailModal-sex">
+                                <select class="selectpicker" id="detailModal-sex" >
                                     <option value='1'>男</option>
                                     <option value=0>女</option>
                                 </select>
@@ -89,7 +100,7 @@
                                 人员状态
                             </td>
                             <td>
-                                <select class="selectpicker" id="detailModal-status"></select>
+                                <select class="selectpicker" id="detailModal-status" required></select>
                             </td>
 
                         </tr>
@@ -98,7 +109,7 @@
                                 民族
                             </td>
                             <td>
-                                <select class="selectpicker" id="detailModal-nation"></select>
+                                <select class="selectpicker" id="detailModal-nation" required></select>
                             </td>
                             <td class="setting-title">
                                 是否实习
@@ -115,14 +126,14 @@
                                 籍贯
                             </td>
                             <td>
-                                <input type="text" class="form-control" id="detailModal-origin">
+                                <input type="text" class="form-control" id="detailModal-origin" required>
                             </td>
                             
                             <td class="setting-title">
                                 技能档次
                             </td>
                             <td>
-                                <select class="selectpicker" id="detailModal-techlevel"></select>
+                                <select class="selectpicker" id="detailModal-techlevel" required></select>
                             </td>
 
                             
@@ -139,7 +150,7 @@
                                 学历
                             </td>
                             <td>
-                                <select class="selectpicker" id="detailModal-degree"></select>
+                                <select class="selectpicker" id="detailModal-degree" required></select>
                             </td>
                             
                         </tr>
@@ -155,7 +166,7 @@
                                 政治面貌
                             </td>
                             <td>
-                                <select class="selectpicker" id="detailModal-political"></select>
+                                <select class="selectpicker" id="detailModal-political" required></select>
                             </td>
                             
                         </tr>
@@ -202,9 +213,11 @@
                         <tr></tr>
                         <tr>
                             <td colspan="3"></td>
-                            <td align="right">
-                                <input type="button" class="btn btn-default" value="取消">
-                                <input type="submit" class="btn btn-primary" id="detailModal-submit" name="submit" value="确认">
+                            <td>
+                                <div align="right">
+                                    <input type="button" class="btn btn-default" value="取消">
+                                    <input type="submit" class="btn btn-primary" id="detailModal-submit" name="submit" value="确认">
+                                </div>
                             </td>
                         </tr>
                     </form>
@@ -272,31 +285,7 @@
              * @param {Boolean} query_type    查询方式，分为字典数据(true)和组织数据(false)
              */
             function setSelectData(obj, selected_data, type_name, query_type=true){
-                $.ajax({
-                    type: 'get',
-                    url: query_type ? '/dict/listDictByTypeName' : '/org/listall',
-                    data:{
-                        type: query_type ? type_name : 2
-                    },
-                    success: function(data){
-                        // 转换为json对象
-                        var dataObj=eval("("+data+")");
-                        // console.log(dataObj);
-                        var text = '';
-                        if(query_type){
-                            for(var i in dataObj){
-                                text += '<option value="' + dataObj[i].id + '">' + dataObj[i].name + '</option>';
-                            }
-                        }
-                        else{
-                            for(var i in dataObj){
-                                text += '<option value="' + dataObj[i][0] + '">' + dataObj[i][1] + '</option>';
-                            }
-                        }
-                        obj.html(text);
-                        obj.selectpicker('refresh');
-                    }
-                });
+                queryRequest(obj, selected_data, type_name, query_type);
             }
 
 
@@ -352,23 +341,48 @@
             }
         </script>
         <script type="text/javascript">
+
+            function queryRequest(obj, selected_data, type_name, query_type){
+                $.ajax({
+                    type: 'get',
+                    url: query_type ? '/dict/listDictByTypeName' : '/org/listall',
+                    data:{
+                        type: query_type ? type_name : 2
+                    },
+                    success: function(data){
+                        // 转换为json对象
+                        var dataObj=eval("("+data+")");
+                        // console.log(dataObj);
+                        var text = '';
+                        for(var i in dataObj){
+                                text += '<option value="' + dataObj[i].id + '">' + dataObj[i].name + '</option>';
+                            }
+                        obj.html(text);
+                        obj.selectpicker('refresh');
+                    },
+                    error: function(){
+                        alert('下拉框数据加载失败');
+                    }
+                });
+            }
+
             function uploadPhotoRequest(formData){
                 $.ajax({
-                        type: 'post',
-                        url: '/employee/uploadPhoto',
-                        mimeType: 'multipart/form-data',
-                        data: formData,
-                        contentType: false,
-                        cache: false,
-                        processData: false,
-                        success: function(photourl){
-                            // alert(photourl);
-                            $('#detailModal-photo').attr('src',photourl);
-                        },
-                        error: function(){
-                            alert('上传失败');
-                        }
-                    });
+                    type: 'post',
+                    url: '/employee/uploadPhoto',
+                    mimeType: 'multipart/form-data',
+                    data: formData,
+                    contentType: false,
+                    cache: false,
+                    processData: false,
+                    success: function(photourl){
+                        // alert(photourl);
+                        $('#detailModal-photo').attr('src',photourl);
+                    },
+                    error: function(){
+                        alert('上传失败');
+                    }
+                });
             }
 
             function insertEmployeeRequest(array){
@@ -377,11 +391,19 @@
                         url: '/employee/insertEmployee',
                         type: 'post',
                         data: array,
+                        beforeSend: function(){
+                            return confirm('再次确认新进员工');
+                        },
                         success: function(data){
-                            alert('新增员工：' + data);
-                            $('#detailModal-id').val('');
-                            $('#detailModal-name').val('');
-                            $('#detailModal-photo').attr('src','');
+                            if(data == 'success'){
+                                alert('新增员工：成功');
+                                $('#detailModal-id').val('');
+                                $('#detailModal-name').val('');
+                                $('#detailModal-photo').attr('src','');
+                            }
+                        },
+                        error: function(message){
+                            alert('新进员工失败');
                         }
                     });
                 }

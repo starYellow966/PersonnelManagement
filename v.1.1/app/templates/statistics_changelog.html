@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    {% extends "base.html" %}
+    {% block head %}
+        {{ super() }}
+    {% endblock head %} 
+</head>
+<body>
+    {% block body %}
+        {% block top_nav %}
+            {{ super() }}
+        {% endblock top_nav %}
+        
+        {% block left_nav %}
+            {{ super() }}
+        {% endblock left_nav %}
+        
+        {% block container %}
+            <section>
+                <nav class="breadcrumb" style="margin-bottom: 0px;">
+                    <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
+                    首页 
+                    <span class="c-gray en">&gt;</span> 
+                    员工统计管理
+                    <span class="c-gray en">&gt;</span> 
+                    员工变动统计
+                    <a class="btn btn-success radius r" style="vertical-align: right" href="javascript:location.reload();" title="刷新">
+                        <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+                    </a>
+                </nav>
+
+                <!-- 表格区域 -->
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">员工变动统计表</h3>
+                    </div>
+                    <table id="statistics-table"></table>
+                </div><!-- 表格区域end -->
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">员工变动日志表</h3>
+                    </div>
+                    <table id="detail-table"></table>
+                </div>
+            </section>            
+        {% endblock container %}
+          
+
+        {% block base_script %}
+            {{ super() }}
+            <script src="../static/js/bootstrap-table.js"></script>
+            <script src="../static/js/jquery.form.js"></script>
+            <script src="../static/js/bootstrap-table-export.js"></script>
+            <script src="../static/js/tableExport.js"></script><!-- bootstrap table本身是没有实现表格的导出的，需要扩展插件tableExport，扩展的tableExport在导出csv，txt，sql，json等格式的时候能很好的支持中文 -->
+        {% endblock base_script %}
+
+        <!-- 初始化函数 -->
+        <script>
+            $(document).ready(function(){
+                initStatisticsTable();
+                initDetailTable();
+            });
+
+
+            function initStatisticsTable(){
+                $('#statistics-table').bootstrapTable({
+                    url:'/statistics/change/list',
+                    search: true, //是否显示 搜索框
+                    showColumns: true, //是否显示 选择显示列按钮
+                    pagination: true, //设置分页
+                    pageList: [7],
+                    pageSize: 7,
+                    idField: 'id', //重要,可设置checkbox的值为指定字段
+                    selectItemName: 'id', //设置checkbox name属性，可用于遍历获取选中值
+                    clickToSelect: true, //将在点击行时，自动选择checkbox
+                    striped: true, //是否显示 表格条纹
+                    showExport: true, //是否显示导出按钮
+                    exportDataType: 'all',//FIXME:导出文件方式  支持: 'basic', 'all', 'selected'. basic：本页数据，all，获取服务器所有数据，selected,本页选择行数据
+                    Icon: 'glyphicon-export', //导出的图标设置
+                    exportOptions:{ //导出文件格式设置
+                        fileName: '员工变动统计表'+new Date().getFullYear() + (new Date().getMonth() + 1) + new Date().getDate()
+                    },
+                    columns: [{
+                        field: 'date',
+                        title: '日期',
+                        sortable: true
+                    }, {
+                        field: 'I',
+                        title: '新进',
+                        sortable: true,
+                        formatter: function(value, row, index){
+                            if (typeof(value) == 'undefined') {
+                                return '0';
+                            }
+                            else
+                                return '<a href="#" onclick="setDetailTableData(\'I\')">' + value + "</a>";
+                        }
+                    }, {
+                        field: 'R1',
+                        title: '退休',
+                        sortable: true,
+                        formatter: function(value, row, index){
+                            if (typeof(value) == 'undefined') {
+                                return '0';
+                            }
+                            else
+                                return '<a href="#" onclick="setDetailTableData(\'R1\')">' + value + "</a>";
+                        }
+                    }, {
+                        field: 'R2',
+                        title: '死亡',
+                        sortable: true,
+                        formatter: function(value, row, index){
+                            if (typeof(value) == 'undefined') {
+                                return '0';
+                            }
+                            else
+                                return '<a href="#" onclick="setDetailTableData(\'R2\')">' + value + "</a>";
+                        }
+                    }, {
+                        field: 'R3',
+                        title: '调离',
+                        sortable: true,
+                        formatter: function(value, row, index){
+                            if (typeof(value) == 'undefined') {
+                                return '0';
+                            }
+                            else
+                                return '<a href="#" onclick="setDetailTableData(\'R3\')">' + value + "</a>";
+                        }
+                    }, {
+                        field: 'R4',
+                        title: '辞职',
+                        sortable: true,
+                        formatter: function(value, row, index){
+                            if (typeof(value) == 'undefined') {
+                                return '0';
+                            }
+                            else
+                                return '<a href="#" onclick="setDetailTableData(\'R4\')">' + value + "</a>";
+                        }
+                    }, {
+                        field: 'R5',
+                        title: '解除',
+                        sortable: true,
+                        formatter: function(value, row, index){
+                            if (typeof(value) == 'undefined') {
+                                return '0';
+                            }
+                            else
+                                return '<a href="#" onclick="setDetailTableData(\'R5\')">' + value + "</a>";
+                        }
+                    }, {
+                        field: 'IC',
+                        title: '内部变动',
+                        sortable: true,
+                        formatter: function(value, row, index){
+                            if (typeof(value) == 'undefined') {
+                                return '0';
+                            }
+                            else
+                                return '<a href="#" onclick="setDetailTableData(\'IC\')">' + value + "</a>";
+                        }
+                    }, {
+                        field: 'F',
+                        title: '定职',
+                        sortable: true,
+                        formatter: function(value, row, index){
+                            if (typeof(value) == 'undefined') {
+                                return '0';
+                            }
+                            else
+                                return '<a onclick="setDetailTableData(\'F\')">' + value + "</a>";
+                        }
+                    }],
+                    onLoadError: function(status){
+                        alert('员工变动统计数据加载失败');
+                    }
+                });
+            }
+
+            function initDetailTable(){
+                $('#detail-table').bootstrapTable({
+                    search: true, //是否显示 搜索框
+                    showColumns: true, //是否显示 选择显示列按钮
+                    pagination: true, //设置分页
+                    pageList: [7],
+                    pageSize: 7,
+                    idField: 'id', //重要,可设置checkbox的值为指定字段
+                    selectItemName: 'id', //设置checkbox name属性，可用于遍历获取选中值
+                    clickToSelect: true, //将在点击行时，自动选择checkbox
+                    striped: true, //是否显示 表格条纹
+                    showExport: true, //是否显示导出按钮
+                    exportDataType: 'all',//FIXME:导出文件方式  支持: 'basic', 'all', 'selected'. basic：本页数据，all，获取服务器所有数据，selected,本页选择行数据
+                    Icon: 'glyphicon-export', //导出的图标设置
+                    exportOptions:{ //导出文件格式设置
+                        fileName: '员工变动日志表'+new Date().getFullYear() + (new Date().getMonth() + 1) + new Date().getDate()
+                    },
+                    columns: [{
+                        field: 'id',
+                        title: '编号',
+                        sortable: true
+                    }, {
+                        field: 'change_type',
+                        title: '变动类型',
+                        sortable: true
+                    }, {
+                        field: 'change_date',
+                        title: '变动日期',
+                        sortable: true
+                    }, {
+                        field: 'executor',
+                        title: '执行人',
+                        sortable: true
+                    }, {
+                        field: 'employee_id',
+                        title: '变动员工工号',
+                        sortable: true
+                    }, {
+                        field: 'name',
+                        title: '变动员工姓名',
+                        sortable: true
+                    }, {
+                        field: 'emp_type_name',
+                        title: '变动员工用工性质',
+                        sortable: true
+                    }, {
+                        field: 'position',
+                        title: '变动员工职位',
+                        sortable: true
+                    }, {
+                        field: 'org',
+                        title: '变动员工部门',
+                        sortable: true
+                    }, {
+                        field: 'is_Practice',
+                        title: '是否实习',
+                        sortable: true,
+                        formatter: function(value, row, index){
+                            return (value == 1 ? '是':'否');
+                        }
+                    }, {
+                        field: 'others',
+                        title: '备注',
+                        sortable: true
+                    }],
+                    onLoadError: function(status){
+                        // alert(status);
+                        alert('员工变动日志数据加载失败');
+                    }
+                });
+            }
+
+            /**
+             * 重新加载变动日志数据
+             * @param {str} type 变动类型
+             */
+            function setDetailTableData(type){
+                console.log(type);
+            }
+        </script>
+
+    {% endblock body %}
+    
+</body>
+</html>

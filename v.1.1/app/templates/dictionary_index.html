@@ -361,6 +361,9 @@
                         else
                             alert('新增数据字典 ： 失败');
                     },
+                    error: function(){
+                        alert('新增数据字典异常');
+                    },
                     complete: function(){
                         $("#detailModal_submit").removeAttr("disabled");
                     }
@@ -389,7 +392,10 @@
                             $('#table').bootstrapTable('refresh',{url:'/dict/dictionarys/' + window.type_id});
                         }
                         else
-                            alert('新增数据字典 ： 失败');
+                            alert('修改数据字典 ： 失败');
+                    },
+                    error: function(){
+                        alert('新增数据字典异常');
                     },
                     complete: function(){
                         $("#detailModal_submit").removeAttr("disabled");
@@ -416,6 +422,9 @@
                         }
                         else
                             alert('删除字典信息 ： 失败');   
+                    },
+                    error: function(){
+                        alert('新增数据字典异常');
                     }
                 });
             }

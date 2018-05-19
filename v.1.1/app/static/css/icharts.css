@@ -1,11 +1,4 @@
 @CHARSET "utf-8";
-body {
-	padding:0px;
-	margin:0px;
-	margin-top:10px;
-	text-align: left;
-	font-family:'微软雅黑',Trebuchet MS,Verdana,Helvetica,Arial,sans-serif;
-}
 .ichartjs_btn{
 	padding:2px 5px;
 	line-height:25px;
@@ -72,3 +65,10 @@ body {
 	-khtml-border-radius:10px;
 	border-radius:10px
 }
+/*body {
+	padding:0px;
+	margin:0px;
+	margin-top:10px;
+	text-align: left;
+	font-family:'微软雅黑',Trebuchet MS,Verdana,Helvetica,Arial,sans-serif;
+}*/
