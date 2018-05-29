@@ -72,14 +72,19 @@ def to_chart_json(all_data):
             temp = {}
             temp.update(x.to_json())
             employee = Employee.query.filter_by(id = temp['employee_id']).first()
-            # print employee
-            temp['is_Practice'] = employee.is_Practice
-            temp['name'] = (employee.name if employee is not None else None)
-            temp['emp_type_name'] = (Dictionary.query.filter_by(id = employee.emp_type).first().name if employee is not None else None)
-            temp['position'] = (Dictionary.query.filter_by(id = employee.position_id).first().name if employee is not None else None)
-            temp['org'] = (Organization.query.filter_by(id = employee.org_id).first().name if employee is not None else None)
-            temp['change_type'] = Change_Log.type_dictionary[temp['change_type']]
-            response.append(temp)
+            if(employee is not None):
+                temp['is_Practice'] = employee.is_Practice
+                variable = employee.name
+                temp['name'] = variable
+                variable = Dictionary.query.filter_by(id = employee.emp_type).first()
+                temp['emp_type_name'] = (variable.name if variable is not None else None)
+                variable = Dictionary.query.filter_by(id = employee.position_id).first()
+                temp['position'] = (variable.name if variable is not None else None)
+                variable = Organization.query.filter_by(id = employee.org_id).first()
+                temp['org'] = (variable.name if variable is not None else None)
+                temp['change_type'] = Change_Log.type_dictionary[temp['change_type']]
+                response.append(temp)
         return response
     except Exception as e:
+        db.session.rollback()
         raise e

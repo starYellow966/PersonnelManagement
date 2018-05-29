@@ -149,7 +149,7 @@ class Organization(db.Model):
 
     def __repr__(self):
         return u'<Organization {} {} status:{} level:{} parent:{} >' .format(
-            self.id, self.name, self.status, self.level, Organization.getNameById(self.parent_id))
+            self.id, self.name, self.status, self.level, self.parent_id)
 
     def to_json(self):
         json_object = {

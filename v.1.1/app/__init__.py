@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-from flask import Flask,render_template,Blueprint,request,flash,redirect,url_for
+from flask import Flask,render_template,Blueprint,request,flash,redirect,url_for,abort
 from flask_uploads import UploadSet, configure_uploads, IMAGES
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
@@ -9,10 +9,9 @@ import flask_excel as excel
 from extensions import db, login_manager, bootstrap, photos
 
 from modelss import User,General_Log
-from forms import Login_Form
+from forms import Login_Form,is_safe_url
 from config import config
 from controller import organizationBlueprint,dictionaryBlueprint,logBlueprint,employeeBlueprint,statisticsBlueprint
-from models import redirectForm
 
 
 
@@ -21,25 +20,25 @@ from models import redirectForm
 # photos = UploadSet('photos', IMAGES)
 # login_manager = LoginManager()
 
-def create_app():
-    app = Flask(__name__)
+# def create_app():
+#     app = Flask(__name__)
     
-    app.config['SECRET_KEY'] = 'i do not know how to use this one'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://hx:huangxin123456@120.79.147.151/gdesignV1_1?charset=utf8';
-    app.config['UPLOADED_PHOTOS_DEST'] = 'E://photos'
-    # app.config['UPLOADED_PHOTOS_DEST'] = os.getcwd()
-    # bootstrap.init_app(app)
-    db.init_app(app)
-    configure_uploads(app, photos)
-    login_manager.init_app(app)
-    excel.init_excel(app)
+#     app.config['SECRET_KEY'] = 'i do not know how to use this one'
+#     app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://hx:huangxin123456@120.79.147.151/gdesignV1_1?charset=utf8';
+#     app.config['UPLOADED_PHOTOS_DEST'] = 'E://photos'
+#     # app.config['UPLOADED_PHOTOS_DEST'] = os.getcwd()
+#     # bootstrap.init_app(app)
+#     db.init_app(app)
+#     configure_uploads(app, photos)
+#     login_manager.init_app(app)
+#     excel.init_excel(app)
 
-    init_blueprint(app)
-    init_loginManager()
-    init_route(app)
-    # init_errorhandler(app)
+#     init_blueprint(app)
+#     init_loginManager()
+#     init_route(app)
+#     # init_errorhandler(app)
 
-    return app
+#     return app
 
 def create_app(config_name):
     app = Flask(__name__)
@@ -127,9 +126,9 @@ def init_route(app):
                     db.session.commit()
                     next = request.args.get('next')
                     # is_safe_url should check if the url is safe for redirects.
-                    if not redirectForm.is_safe_url(next):
-                        return flask.abort(400)
-                    return redirectForm.redirect(url_for('index'))
+                    if not is_safe_url(next):
+                        return abort(400)
+                    return redirect(url_for('index'))
                 else:
                     flash(u'密码错误')
             else:

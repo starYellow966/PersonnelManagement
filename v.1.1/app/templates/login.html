@@ -4,24 +4,21 @@
     {% extends "base.html" %}
     {% block head %}
         {{ super() }}
+        <link rel="stylesheet" type="text/css" href="../static/css/login-style.css">
     {% endblock head %}  
 </head>
 <body>
     {% block body %}
-        {% block top_nav%}
-            {{ super() }}
-        {% endblock top_nav %}
-        
+    <section class="container">
         {% for message in get_flashed_messages() %}
         <div class="alert alert-warning">
             <button type="button" class="close" data-dismiss="alert">&times;</button>
             {{ message }}
             </div>
         {% endfor %}
-        <div class="page-header">
-            <h1>欢迎使用客运段人事管理系统，请进行身份验证</h1>
-        </div>
+        
         <form method="POST" action="/login">
+            <legend>客运段人事管理系统</legend>
             {{ form.hidden_tag() }}
             {{ form.name.label }}
             {{ form.name(class='form-control',required='required') }}
@@ -29,12 +26,15 @@
             {{ form.pwd.label }}
             {{ form.pwd(class='form-control',required='required') }}
             <br>
-            {{ form.submit(class='btn btn-primary')}}
+            <div align="right">
+                {{ form.submit(class='btn btn-primary')}}
+            </div>
         </form>
-
-        {% block base_script %}
-            {{ super() }}
-        {% endblock base_script %}
+    </section>
+        
+    {% block base_script %}
+        {{ super() }}
+    {% endblock base_script %}
     {% endblock body %}
 </body>
 </html>

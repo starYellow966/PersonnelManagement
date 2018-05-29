@@ -54,15 +54,16 @@ def list_all():
     try:
         query_type = request.args['type']
         response = []
-        if(query_type == 1):
+        if(query_type == '1'):
+            print '1'
             result = Organization.query.filter_by(isUse = 1).order_by(Organization.level, Organization.num).all()
             for x in result:
-                response.append(x.to_json)
-            return json.dumps([response])
+                response.append(x.to_json())
+            return json.dumps(response)
         else:
-            result = Organization.query.with_entities(Organization.id, Organization.name).filter_by(isUse = 1, status = 1).order_by(Organization.level, Organization.num).all()
+            result = Organization.query.with_entities(Organization.id, Organization.name, Organization.num).filter_by(isUse = 1, status = 1).order_by(Organization.level, Organization.num).all()
             for x in result:
-                response.append({"id": x[0], "name": x[1]})
+                response.append({"id": x[0], "name": x[1], 'num': x[2]})
             return json.dumps(response)
     except Exception as e:
         db.session.rollback()
@@ -181,14 +182,3 @@ def upload():
         db.session.rollback()
         raise e
         return u'fail';
-
-
-# @fresh_login_required
-# @organizationBlueprint.route('/listChildsByName')
-# def listChildsByParentName():
-#     '''根据节点名称返回它所有孩子节点
-    
-#     Decorators:
-#         organizationBlueprint.route
-#     '''
-#     request.args['name']

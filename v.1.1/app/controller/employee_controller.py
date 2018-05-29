@@ -255,6 +255,7 @@ def upload_photo():
             file_url = photos.url(filename)
         return file_url
     except Exception as e:
+        db.session.rollback()
         raise e
     
 
@@ -345,10 +346,14 @@ def query_employee():
             if x is not None and len(x) > 0:
                 '''FIXME：非空判断'''
                 temp = Employee.query.filter_by(id = x).first().to_json()
-                temp['org_name'] = Organization.query.filter_by(id = temp['org_id']).first().name
-                temp['status'] = Dictionary.query.filter_by(id = temp['status_id']).first().name
-                temp['emp_type_name'] = Dictionary.query.filter_by(id = temp['emp_type']).first().name
-                temp['position'] = Dictionary.query.filter_by(id = temp['position_id']).first().name
+                variable = Organization.query.filter_by(id = temp['org_id']).first()
+                temp['org_name'] = (variable.name if variable is not None else None)
+                variable = Dictionary.query.filter_by(id = temp['status_id']).first()
+                temp['status'] = (variable.name if variable is not None else None)
+                variable = Dictionary.query.filter_by(id = temp['emp_type']).first()
+                temp['emp_type_name'] = (variable.name if variable is not None else None)
+                variable = Dictionary.query.filter_by(id = temp['position_id']).first()
+                temp['position'] = (variable.name if variable is not None else None)
                 response.append(temp)
         return json.dumps(response)
     except Exception as e:

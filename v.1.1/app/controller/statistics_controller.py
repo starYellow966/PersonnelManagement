@@ -45,6 +45,7 @@ def statistics_pie(column_name):
             x['value'] = round(x['value']* 100.0 / total_count, 1)
         return json.dumps(response)
     except Exception as e:
+        db.session.rollback()
         raise e
 
 @fresh_login_required

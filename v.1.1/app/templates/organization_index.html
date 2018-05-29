@@ -272,7 +272,7 @@
                         id: data[i].id,
                         name: data[i].text,
                         parent_name: parent_name,
-                        num: ''
+                        num: data[i].num
                     });
                 }
                 $('#table').bootstrapTable('load', rows);
@@ -289,6 +289,7 @@
                 else
                     initModalSelectFunc(undefined);
                 $('#detailModal_id').val('');
+                $('#detailModal_id').attr('readonly', false);
                 $('#detailModal_name').val('');
                 $('#detailModal_num').val('');
                 $("#detailModal_title").text("新增组织机构信息");
@@ -361,7 +362,7 @@
                     success: function(data){
                         var text = "";
                         // 转换为json对象
-                        var dataObj=eval("("+data+")");
+                        var dataObj=eval(data);
                         if(dataObj != null)
                             initTreeView(dataObj);
                     },
@@ -379,7 +380,7 @@
                     success: function(data){
                         if(data != '500'){
                             data = eval("("+data+")");
-                            // console.log(data);
+                            console.log(data);
                             initEditModalFunc(data, id);
                         }else{
                             alert('error');
@@ -395,7 +396,7 @@
                 $.ajax({
                     type: "get",
                     url: "/org/listall",
-                    data: {type: 2},
+                    data: {type: 1},
                     success: function(data,status){
                         $('#detailModal_parent').html("");
                         var text ="";
