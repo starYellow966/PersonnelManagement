@@ -337,25 +337,31 @@ def show_detail():
 
 @employeeBlueprint.route('/query', methods = ['POST'])
 def query_employee():
-    '''负责根据id查询员工信息    
-    特点：根据一个或多个id进行查询
+    '''查询员工信息
+    当'id' in request.form 时，代表按照一个或多个员工工号查询
+    当'query_str' in request.form 时，代表传入一个查询条件，即高级查询
     '''
     try:
         response = []
-        for x in request.form['id'].split(','):
-            if x is not None and len(x) > 0:
-                '''FIXME：非空判断'''
-                temp = Employee.query.filter_by(id = x).first().to_json()
-                variable = Organization.query.filter_by(id = temp['org_id']).first()
-                temp['org_name'] = (variable.name if variable is not None else None)
-                variable = Dictionary.query.filter_by(id = temp['status_id']).first()
-                temp['status'] = (variable.name if variable is not None else None)
-                variable = Dictionary.query.filter_by(id = temp['emp_type']).first()
-                temp['emp_type_name'] = (variable.name if variable is not None else None)
-                variable = Dictionary.query.filter_by(id = temp['position_id']).first()
-                temp['position'] = (variable.name if variable is not None else None)
-                response.append(temp)
-        return json.dumps(response)
+        if('id' in request.form):
+            for x in request.form['id'].split(','):
+                if x is not None and len(x) > 0:
+                    '''FIXME：非空判断'''
+                    temp = Employee.query.filter_by(id = x).first().to_json()
+                    variable = Organization.query.filter_by(id = temp['org_id']).first()
+                    temp['org_name'] = (variable.name if variable is not None else None)
+                    variable = Dictionary.query.filter_by(id = temp['status_id']).first()
+                    temp['status'] = (variable.name if variable is not None else None)
+                    variable = Dictionary.query.filter_by(id = temp['emp_type']).first()
+                    temp['emp_type_name'] = (variable.name if variable is not None else None)
+                    variable = Dictionary.query.filter_by(id = temp['position_id']).first()
+                    temp['position'] = (variable.name if variable is not None else None)
+                    response.append(temp)
+            return json.dumps(response)
+        elif('query_str' in request.form):
+            query_str = request.form['query_str']
+            print query_str
+            return json.dumps([])
     except Exception as e:
         db.session.rollback()
         raise e

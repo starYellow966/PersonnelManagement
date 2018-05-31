@@ -21,18 +21,30 @@
                 <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
                 首页 
                 <span class="c-gray en">&gt;</span> 
-                员工信息查阅
+                员工信息查询
                 <a class="btn btn-success radius r" style="vertical-align: right" href="javascript:location.reload();" title="刷新">
                     <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
                 </a>
             </nav>
-            <!-- 高级查询栏 -->
-            <div class="panel-group" id="query-panel">
-                <div class="panel panel-info">
-                    <div class="panel-heading" data-toggle="collapse" data-parent='query-panel' href='#query-panel-body'>高级查询条件</div>
-                    <div id="query-panel-body">
-                        <div class="panel-body">
-                            <div id="formSearch" class="form-horizontal">
+            
+            <div id="table_toolbar" class="btn-group">
+                <button id="btn_addSeg" class="btn btn-default" onclick="$('#detailModal').modal('show');">
+                    <span class="glyphicon glyphicon-search" aria-hidden="true"></span>高级检索
+                </button>
+            </div><!-- 表格的工具栏end -->
+            <table id="table"></table>
+
+            <!-- 详情模态框 -->
+            <div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"
+                            aria-hidden="true">&times;</button>
+                            <h4 class="modal-title" >输入查询条件</h4>
+                        </div> <!-- modal.header -->
+                        <div class="modal-body" id="detailModal_form">
+                            <div id="formSearch" class="form-horizontal" >
                                 <label class="control-label col-sm-3" style="text-align: center;">属性</label>
                                 <label class="control-label col-sm-3" style="text-align: center;">运算符</label>
                                 <label class="control-label col-sm-3" style="text-align: center;">值</label>
@@ -40,75 +52,79 @@
                                 <br>
                                 <br>
                                 <div class="col-sm-3" >
-                                    <select class="selectpicker " id="proprity" onchange="proprityChange(this)">
-                                        <option value="id" selected>工号</option>
+                                    <select class="form-control" id="proprity" onchange="proprityChange(this)">
+                                        <option selected>工号</option>
+                                        <option >名字</option>
+                                        <option >用工性质</option>
+                                        <option >所属部门</option>
+                                        <option >职位</option>
+                                        <option >学位</option>
+                                        <option >人员状态</option>
+                                        <option >出生日期</option>
+                                        <!-- <option value="id" selected>工号</option>
                                         <option value="name">名字</option>
                                         <option value="emp_type_name">用工性质</option>
                                         <option value="org_name">所属部门</option>
                                         <option value="position">职位</option>
                                         <option value="degree">学位</option>
                                         <option value="status">人员状态</option>
-                                        <option value="political_status">政治面貌</option>
-                                        <option value="nation">民族</option>
-
-
+                                        <option value="birthdate">出生日期</option> -->
                                     </select>
                                 </div>
                                 <div class="col-sm-3">
-                                    <select class="selectpicker " id="operator">
+                                    <select class="form-control " id="operator">
                                         <option value="like" selected>like</option>
-                                        <option value="<"><</option>
-                                        <option value=">">></option>
                                         <option value="=">=</option>
                                     </select>
                                 </div>                  
                                 <div class="col-sm-3">
-                                    <input type="text" class="form-control" id="value">
+                                    <input type="text" class="form-control" id="value" style="width: 100%;">
                                 </div>
-                                <div class="col-sm-3">
-                                    <select class="selectpicker" id="joinOperator">
+                                <div class="col-sm-3" >
+                                    <select class="form-control" id="joinOperator">
                                         <option value="and" selected>and</option>
                                         <option value="or">or</option>
                                     </select>
                                 </div>
                                 <br>
                                 <br>
-                                <textarea id="search_sqltext" class="form-control col-sm-12" rows="5" style="overflow-x: hidden;overflow-y: auto;resize: none;"></textarea>
+                                <table id="detail_table"></table>
                             </div>
                         </div>
-                        <div class="panel panel-footer" align="right">
-                          <input type="button" class="btn btn-primary" name="insert" value="添加条件" onclick="insertSqlQuery()">
-                          <input type="submit" class="btn btn-success" name="submit" value="查询" onclick="alert('未开发高级搜索');">
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- 高级查询栏end -->
-
-            <table id="table"></table>
+                        <div class="modal-footer">
+                            <input type="button" class="btn btn-default" value="添加条件" onclick="insertSqlQuery()">
+                            <input type="button" class="btn btn-primary" name="detailModal_submit" id="detailModal_submit" value="查询" onclick="queryRequest()">
+                        </div><!-- modal-footer -->
+                    </div><!-- modal-content end -->
+                </div><!-- modal-dialog end -->
+            </div><!-- 详情模态框end -->
         </section>
 
         {% block base_script %}
             {{ super() }}
             <script src="../static/js/bootstrap-treeview.js"></script>
             <script src="../static/js/bootstrap-table.js"></script>
-            <script src="../static/js/bootstrap-select.js"></script>
             <script src="../static/js/jquery.form.js"></script>
             <script src="../static/js/bootstrap-table-export.js"></script>
             <script src="../static/js/tableExport.js"></script><!-- bootstrap table本身是没有实现表格的导出的，需要扩展插件tableExport，扩展的tableExport在导出csv，txt，sql，json等格式的时候能很好的支持中文 -->
             <script type="text/javascript">
                 $(document).ready(function() {
                     initEmplpoyeeTable();
+                    initDetailTable();
+                    $('#detail_table').bootstrapTable('append',[{
+                        'id':0,'proprity':'职位','value':'行政人员','operator':'=','joinOperator':'or'
+                    },{'id':1,'proprity':'职位','value':'列车员','operator':'=','joinOperator':'or'}])
                 });
 
                 function initEmplpoyeeTable(){
                     $('#table').bootstrapTable({
+                        toolbar:'#table_toolbar',
                         url: '/employee/scan/list_all',
                         search: true, //是否显示 搜索框
                         showColumns: true, //是否显示 选择显示列按钮
                         pagination: true, //设置分页
-                        pageList: [25,50,100],
-                        pageSize: 25,
+                        pageList: [20],
+                        pageSize: 20,
                         idField: 'id', //重要,可设置checkbox的值为指定字段
                         selectItemName: 'id', //设置checkbox name属性，可用于遍历获取选中值
                         clickToSelect: true, //将在点击行时，自动选择checkbox
@@ -204,9 +220,153 @@
                     });
                 }
 
+                function initDetailTable(){
+                    $('#detail_table').bootstrapTable({
+                        idField: 'id', //重要,可设置checkbox的值为指定字段
+                        uniqueId: 'id', //设置checkbox name属性，可用于遍历获取选中值
+                        pagination: true, //设置分页
+                        pageList: [7],
+                        pageSize: 7,
+                        columns: [{
+                            field: 'id',
+                            title: '编号',
+                            visible: true,
+                        }, {
+                            field: 'proprity',
+                            title: '属性',
+                            sortable: true
+                        }, {
+                            field: 'operator',
+                            title: '操作符',
+                            sortable: true
+                        }, {
+                            field: 'value',
+                            title: '值',
+                            sortable: true
+                        }, {
+                            field: 'joinOperator',
+                            title: '连接符',
+                            sortable: true
+                        }, {
+                            field: 'operation',
+                            title: '操作',
+                            align: 'center',
+                            valign: 'middle',
+                            formatter: function(value, row, index){
+                                return "<a href='javascript:void(0);' onclick='removeCondition("+ row.id +")'>删除</a>" ;
+                            }
+                        }],
+                    });
+                }
+
                 function initDetailModalFunc(id){
                     window.open('/employee/detail?id=' + id);
                 }
+
+
+                /**
+                 * 查询中属性下拉框值改变事件
+                 * @param  {HTMLElement} obj [当前的控件]
+                 * 第一步，获取选中值
+                 * 第二步，根据选中值更新运算符下拉框的值
+                 */
+                function proprityChange(obj){
+                    var selectedValue = obj.selectedOptions[0].value;//获取选中value值,因为它被泛化了，不能用bootstrap-select方法
+                    switch (selectedValue) {
+                        case 'id':
+                            setOperatorOptions(['like','=']);
+                            break;
+                        case 'name':
+                            setOperatorOptions(['like','=']);
+                            break;
+                        case 'emp_type_name':
+                            setOperatorOptions(['like','=']);
+                            break;
+                        case 'org_name':
+                            setOperatorOptions(['like','=']);
+                            break;
+                        case 'position':
+                            setOperatorOptions(['like','=']);
+                            break;
+                        case 'degree':
+                            setOperatorOptions(['like','=']);
+                            break;
+                        case 'status':
+                            setOperatorOptions(['like','=']);
+                            break;
+                        case 'birthdate':
+                            setOperatorOptions(['like','<', '>', '=']);
+                            break;
+                        default:
+                            // statements_def
+                            break;
+                    }
+                }
+
+                /**
+                 * 设置运算符下拉框的选项
+                 * @param {数组} array 包含所有选项的数组
+                 */
+                function setOperatorOptions(array){
+                    $("#operator").html("");
+                    var text = "";
+                    for (var i  = 0; i < array.length; i++) {
+                        text += '<option value="' + array[i] + '">' + array[i] + '</option>';
+                    }
+                    $("#operator").html(text);
+                    // $("#operator").selectpicker('refresh');
+                }
+
+                /**
+                 * 添加sql查询语句
+                 *
+                 * 第一步，读取查询条件中控件的值
+                 * 第二步，输出到textarea中
+                 * @return {[type]} [description]
+                 */
+                function insertSqlQuery(){
+                    var value = $("#value").val();//值
+                    if(value.length == 0){
+                        alert('请填写值');
+                        return;
+                    }
+                    var proprity = $("#proprity").val();//选中的属性值
+                    var operator = $("#operator").val();//选中的运算符值
+                    var joinOperator = $("#joinOperator").val();//选中的连接符
+                    $('#detail_table').bootstrapTable('append',[{
+                        'id':$('#detail_table').bootstrapTable('getData').length,
+                        'proprity':proprity,
+                        'operator':operator,
+                        'value':value, 
+                        'joinOperator':joinOperator}]);
+                }
+
+                /**
+                 * 删除条件select的一项
+                 * @param  {[type]} index [description]
+                 * @return {[type]}    [description]
+                 */
+                function removeCondition(index){
+                    $("#detail_table").bootstrapTable('remove', {field: 'id', values: [index]});
+                    // $('#detail_table').bootstrapTable('remove',{field: 'id', values: array});
+                }
+                /**
+                 * F查询
+                 * @return {[type]} [description]
+                 */
+                function queryRequest(){
+                    var data = $("#table").bootstrapTable('getData');
+                    var condition = $("#detail_table").bootstrapTable('getData');
+                    var answer = new Array()
+                    for (var i = data.length - 1; i >= 0; i--) {
+                        console.log(data[i]['position']);
+                        if(data[i]['position'] == '行政人员' || data[i]['position'] == '列车员')
+                            answer.push(data[i]);
+                    }
+                    console.log(answer);
+                    $("#table").bootstrapTable('load',answer);
+                }
+
             </script>
         {% endblock base_script %}
     {% endblock body %}
